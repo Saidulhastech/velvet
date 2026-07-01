@@ -80,7 +80,7 @@ const {
 
     <!-- Global Client side scripts for animation triggers, scroll listening, etc. -->
     <script>
-      import { addToCart, toggleWishlist, persistedWishItems } from '../../stores/cart';
+      import { addToCart, toggleWishlist, persistedWishItems, toggleCompare, persistedCompareItems } from '../../stores/cart';
 
       // Scroll listener for sticky header shading
       const header = document.getElementById('siteHeader');
@@ -189,6 +189,31 @@ const {
             });
           }
         }
+
+        // Global Compare Toggle click listener
+        const compareBtn = target.closest('[data-compare-add]');
+        if (compareBtn) {
+          e.preventDefault();
+          const card = compareBtn.closest('.pc') as HTMLElement | null;
+          if (card) {
+            const dataset = card.dataset;
+            const priceNum = parseFloat((dataset.price || '').replace(/[^0-9.]/g, '')) || 0;
+            const resolvedImg = dataset.img || '';
+            toggleCompare({
+              id: dataset.id || '',
+              handle: dataset.handle || '',
+              name: dataset.name || '',
+              price: priceNum,
+              formattedPrice: dataset.price || '',
+              image: resolvedImg.startsWith('/src/assets/') ? resolvedImg.split('/').pop() || '' : resolvedImg,
+              category: dataset.cat || '',
+              rating: parseFloat(dataset.rating || '') || undefined,
+              material: (dataset.material || '').split(' ')[0] || undefined,
+              sizes: dataset.size || undefined,
+              stock: dataset.stock || undefined,
+            });
+          }
+        }
       });
 
       // Sync wishlist buttons aria-pressed
@@ -201,6 +226,16 @@ const {
             const id = card.dataset.id || '';
             btn.setAttribute('aria-pressed', String(savedIds.has(id)));
           }
+        });
+      });
+
+      // Sync compare buttons aria-pressed
+      persistedCompareItems.subscribe((items) => {
+        const ids = new Set(items.map(i => i.id));
+        document.querySelectorAll('[data-compare-add]').forEach((btnEl) => {
+          const btn = btnEl as HTMLElement;
+          const card = btn.closest('.pc') as HTMLElement | null;
+          if (card) btn.setAttribute('aria-pressed', String(ids.has(card.dataset.id || '')));
         });
       });
     </script>

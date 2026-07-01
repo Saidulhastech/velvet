@@ -1,0 +1,155 @@
+---
+// Compare — side-by-side comparison of saved products (persistedCompareItems).
+// Client-hydrated; items are added via the compare icon on any product card.
+import BaseLayout from '../components/layout/BaseLayout.astro';
+---
+
+<BaseLayout title="Compare" description="Compare Maison Arden pieces side by side — price, rating, materials and availability.">
+  <section class="shop-hero">
+    <div class="shop-hero__inner">
+      <div class="shop-hero__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Compare</span></div>
+      <h1 class="shop-hero__title">Compare <em>Pieces</em></h1>
+      <p class="shop-hero__sub">Line up your considered pieces side by side. Add up to four from any product card.</p>
+    </div>
+  </section>
+
+  <section class="cmp" aria-label="Product comparison">
+    <div class="cmp__inner">
+      <div class="cmp__bar">
+        <span class="cmp__count" data-cmp-count>0 of 4</span>
+        <button class="cmp__clear" data-cmp-clear hidden>Clear all</button>
+      </div>
+
+      <div class="cmp__scroll">
+        <div class="cmp__grid" id="cmpGrid"><!-- hydrated via JS --></div>
+      </div>
+
+      <div class="cmp-empty" id="cmpEmpty">
+        <svg width="52" height="52" viewBox="0 0 20 20" fill="none"><path d="M4 7h9m0 0l-3-3m3 3l-3 3M16 13H7m0 0l3-3m-3 3l3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="cmp-empty__title">Nothing to compare yet.</p>
+        <p class="cmp-empty__desc">Tap the compare icon on any product to line it up here.</p>
+        <a href="/shop" class="btn-dark">Browse the Collection
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { persistedCompareItems, removeFromCompare, clearCompare, addToCart, isCartOpen } from '../stores/cart';
+
+  const grid = document.getElementById('cmpGrid');
+  const empty = document.getElementById('cmpEmpty');
+  const countEl = document.querySelector('[data-cmp-count]');
+  const clearBtn = document.querySelector('[data-cmp-clear]') as HTMLButtonElement | null;
+
+  const imgSrc = (image: string) => {
+    if (!image || typeof image !== 'string') return '';
+    if (/^https?:\/\//.test(image) || image.startsWith('/src/')) return image;
+    if (image.startsWith('Images/')) return `/src/assets/images/${image.split('/').pop()}`;
+    return `/src/assets/images/${image}`;
+  };
+  const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '—');
+
+  function render(items: any[]) {
+    if (!grid || !empty) return;
+    if (countEl) countEl.textContent = `${items.length} of 4`;
+    if (clearBtn) clearBtn.hidden = items.length === 0;
+
+    if (items.length === 0) {
+      grid.innerHTML = '';
+      empty.classList.add('is-shown');
+      return;
+    }
+    empty.classList.remove('is-shown');
+
+    grid.style.setProperty('--cmp-cols', String(items.length));
+    grid.innerHTML = items.map((item) => `
+      <div class="cmp-col" data-id="${item.id}">
+        <button class="cmp-col__remove" data-cmp-remove aria-label="Remove">
+          <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M3 3l12 12M15 3L3 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+        <a href="/products/${item.handle || item.id}" class="cmp-col__media">
+          <img src="${imgSrc(item.image)}" alt="${item.name}" loading="lazy">
+        </a>
+        <span class="cmp-col__cat">${item.category || 'Maison Arden'}</span>
+        <h3 class="cmp-col__name"><a href="/products/${item.handle || item.id}">${item.name}</a></h3>
+
+        <dl class="cmp-col__specs">
+          <div class="cmp-row"><dt>Price</dt><dd>${item.formattedPrice || ('$' + (item.price ?? 0))}</dd></div>
+          <div class="cmp-row"><dt>Rating</dt><dd>${item.rating ? '★ ' + item.rating : '—'}</dd></div>
+          <div class="cmp-row"><dt>Material</dt><dd>${cap(item.material)}</dd></div>
+          <div class="cmp-row"><dt>Sizes</dt><dd>${item.sizes ? String(item.sizes).toUpperCase().replace(/ /g, ', ') : '—'}</dd></div>
+          <div class="cmp-row"><dt>Availability</dt><dd>${item.stock === 'in' ? 'In stock' : item.stock === 'pre' ? 'Pre-order' : '—'}</dd></div>
+        </dl>
+
+        <button class="cmp-col__add" data-cmp-add>Add to Bag</button>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.cmp-col').forEach((el) => {
+      const col = el as HTMLElement;
+      const id = col.dataset.id || '';
+      const item = items.find((i) => i.id === id);
+      col.querySelector('[data-cmp-remove]')?.addEventListener('click', () => removeFromCompare(id));
+      col.querySelector('[data-cmp-add]')?.addEventListener('click', () => {
+        if (!item) return;
+        addToCart({
+          id: item.id, name: item.name, price: item.price, image: item.image,
+          category: item.category, description: item.handle,
+        }, 1);
+        isCartOpen.set(true);
+      });
+    });
+  }
+
+  clearBtn?.addEventListener('click', () => clearCompare());
+  persistedCompareItems.subscribe(render);
+</script>
+
+<style>
+  .shop-hero { background: var(--lux-light-surface); border-bottom: 1px solid var(--lux-light-border); }
+  .shop-hero__inner { max-width: var(--maxw); margin: 0 auto; padding: clamp(40px,5vw,72px) var(--gutter) clamp(34px,4vw,56px); text-align: center; }
+  .shop-hero__crumb { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--lux-on-light-soft); margin-bottom: 16px; }
+  .shop-hero__crumb a { color: var(--lux-on-light-soft); transition: color .2s var(--ease); }
+  .shop-hero__crumb a:hover { color: var(--lux-on-light); }
+  .shop-hero__crumb span { color: var(--lux-secondary-olive); }
+  .shop-hero__title { font-family: var(--font-display); font-size: clamp(40px,5vw,72px); font-weight: 500; line-height: 1; letter-spacing: -1.5px; color: var(--lux-on-light); }
+  .shop-hero__title em { font-style: italic; color: var(--lux-secondary-olive); }
+  .shop-hero__sub { font-size: clamp(14px,1.05vw,16px); line-height: 1.7; color: var(--lux-on-light-soft); max-width: 56ch; margin: 16px auto 0; }
+
+  .cmp__inner { max-width: var(--maxw); margin: 0 auto; padding: clamp(32px,4vw,56px) var(--gutter) clamp(64px,8vw,110px); }
+  .cmp__bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+  .cmp__count { font-size: 12px; letter-spacing: .6px; text-transform: uppercase; color: var(--lux-on-light-soft); }
+  .cmp__clear { background: none; border: none; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--lux-on-light); cursor: pointer; border-bottom: 1px solid var(--lux-secondary-olive); padding-bottom: 2px; }
+
+  .cmp__scroll { overflow-x: auto; }
+  .cmp__grid { display: grid; grid-template-columns: repeat(var(--cmp-cols,1), minmax(220px, 1fr)); gap: clamp(14px,1.6vw,26px); }
+  .cmp__grid:empty { display: none; }
+
+  .cmp-col { position: relative; border: 1px solid var(--lux-light-border); padding: 16px; display: flex; flex-direction: column; }
+  .cmp-col__remove { position: absolute; top: 10px; right: 10px; z-index: 2; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: rgba(252,252,248,.92); color: var(--lux-on-light); cursor: pointer; box-shadow: 0 4px 14px -6px rgba(48,56,44,.4); }
+  .cmp-col__remove:hover { background: var(--lux-primary-dark); color: var(--lux-accent-lime); }
+  .cmp-col__media { display: block; aspect-ratio: 3/4; overflow: hidden; background: var(--lux-light-surface); }
+  .cmp-col__media img { width: 100%; height: 100%; object-fit: cover; }
+  .cmp-col__cat { font-size: 11px; font-weight: 500; letter-spacing: .6px; text-transform: uppercase; color: var(--lux-on-light-soft); margin-top: 14px; }
+  .cmp-col__name { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--lux-on-light); margin: 6px 0 14px; }
+  .cmp-col__name a { color: inherit; text-decoration: none; }
+  .cmp-col__name a:hover { color: var(--lux-secondary-olive); }
+
+  .cmp-col__specs { margin: 0 0 16px; }
+  .cmp-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--lux-light-border); font-size: 13px; }
+  .cmp-row dt { color: var(--lux-on-light-soft); text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
+  .cmp-row dd { margin: 0; color: var(--lux-on-light); font-weight: 500; text-align: right; }
+
+  .cmp-col__add { margin-top: auto; padding: 12px; background: var(--lux-primary-dark); color: var(--lux-text-primary); border: none; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; transition: background .25s var(--ease), color .25s var(--ease); }
+  .cmp-col__add:hover { background: var(--lux-accent-lime); color: var(--lux-bg-dark); }
+
+  .cmp-empty { display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: clamp(48px,8vw,110px) 0; color: var(--lux-on-light-soft); }
+  .cmp-empty.is-shown { display: flex; }
+  .cmp-empty svg { color: var(--lux-secondary-olive); margin-bottom: 6px; }
+  .cmp-empty__title { font-family: var(--font-display); font-size: 22px; color: var(--lux-on-light); }
+  .cmp-empty__desc { font-size: 14px; max-width: 42ch; }
+  .cmp-empty .btn-dark { margin-top: 14px; }
+</style>

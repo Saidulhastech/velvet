@@ -254,9 +254,11 @@ export async function initCart() {
       updateCartTotals();
     }
     updateWishTotals();
+    updateCompareTotals();
   } catch {
     updateCartTotals();
     updateWishTotals();
+    updateCompareTotals();
   }
 }
 
@@ -372,6 +374,65 @@ export function removeFromWishlist(id: string) {
   const currentItems = persistedWishItems.get().filter(item => item.id !== id);
   persistedWishItems.set(currentItems);
   updateWishTotals();
+}
+
+// ── Compare ────────────────────────────────────────────────
+export interface CompareItem {
+  id: string;
+  handle: string;
+  name: string;
+  price: number;
+  formattedPrice: string;
+  image: string;
+  category?: string;
+  rating?: number;
+  material?: string;
+  sizes?: string;
+  stock?: string;
+}
+
+export const COMPARE_MAX = 4;
+export const persistedCompareItems = persistentAtom<CompareItem[]>('ma_compare_items', [], {
+  encode: JSON.stringify,
+  decode: JSON.parse,
+});
+export const compareCount = atom<number>(0);
+
+export function updateCompareTotals() {
+  compareCount.set(persistedCompareItems.get().length);
+}
+
+/** Add/remove a product from compare. Returns false if the list is full (max 4). */
+export function toggleCompare(item: CompareItem): boolean {
+  const current = [...persistedCompareItems.get()];
+  const idx = current.findIndex((c) => c.id === item.id);
+  if (idx > -1) {
+    persistedCompareItems.set(current.filter((c) => c.id !== item.id));
+    updateCompareTotals();
+    return true;
+  }
+  if (current.length >= COMPARE_MAX) {
+    cartError.set(`You can compare up to ${COMPARE_MAX} items.`);
+    return false;
+  }
+  current.push(item);
+  persistedCompareItems.set(current);
+  updateCompareTotals();
+  return true;
+}
+
+export function removeFromCompare(id: string) {
+  persistedCompareItems.set(persistedCompareItems.get().filter((c) => c.id !== id));
+  updateCompareTotals();
+}
+
+export function clearCompare() {
+  persistedCompareItems.set([]);
+  updateCompareTotals();
+}
+
+export function isInCompare(id: string): boolean {
+  return persistedCompareItems.get().some((c) => c.id === id);
 }
 
 export async function saveForLater(id: string, color?: string, size?: string) {

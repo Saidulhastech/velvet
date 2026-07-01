@@ -183,6 +183,7 @@ export const shopifyConfig = {
 // ============================================================
 import { products as mockProducts, type Product as LegacyProduct } from '../mockData';
 import { getProducts as getShopifyProductsNew, getProduct as getShopifyProductNew, getProductRecommendations as getShopifyRecommendations } from './services/products';
+import { getCollection as getCollectionNew, getCollectionsWithCounts as getCollectionsWithCountsNew } from './services/collections';
 import type { Market } from '../market';
 
 const HEX_MAP: Record<string, string> = {
@@ -428,5 +429,55 @@ export async function getShopifyRelatedProducts(
   } catch (error) {
     console.error(`Failed to fetch recommendations for "${productId}":`, error);
     return [];
+  }
+}
+
+export interface LegacyCollection {
+  handle: string;
+  title: string;
+  description: string;
+  image: string | null;
+  count: number;
+}
+
+/** All collections (title/handle/image/count) for the /collections index. */
+export async function getShopifyCollections(): Promise<LegacyCollection[]> {
+  if (!isShopifyConnected()) return [];
+  try {
+    const cols = await getCollectionsWithCountsNew(50, 250);
+    return cols.map((c: any) => ({
+      handle: c.handle,
+      title: c.title,
+      description: c.description ?? '',
+      image: c.image?.url ?? null,
+      count: typeof c.productCount === 'number' ? c.productCount : 0,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch collections:', error);
+    return [];
+  }
+}
+
+/** A single collection + its products (legacy-shaped) for /collections/[handle]. */
+export async function getShopifyCollection(
+  handle: string,
+  market?: Market,
+): Promise<{ title: string; description: string; image: string | null; products: LegacyProduct[] } | null> {
+  if (!isShopifyConnected()) {
+    // Mock fallback: surface the full mock catalogue under the requested handle.
+    return { title: handle.replace(/-/g, ' '), description: '', image: null, products: mockProducts };
+  }
+  try {
+    const col = await getCollectionNew({ handle, pageSize: 48 }, market);
+    if (!col) return null;
+    return {
+      title: col.title,
+      description: col.description ?? '',
+      image: (col as any).image?.url ?? null,
+      products: (col.products?.items ?? []).map((p: any) => mapToLegacyProduct(p)),
+    };
+  } catch (error) {
+    console.error(`Failed to fetch collection "${handle}":`, error);
+    return null;
   }
 }

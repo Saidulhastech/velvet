@@ -1,0 +1,156 @@
+---
+// Wishlist — full-page view of saved items (persistedWishItems store).
+// Hydrated client-side from localStorage so it mirrors the header/drawer.
+import BaseLayout from '../components/layout/BaseLayout.astro';
+---
+
+<BaseLayout title="Wishlist" description="Your saved Maison Arden pieces — kept for when you're ready.">
+  <!-- HERO -->
+  <section class="shop-hero">
+    <div class="shop-hero__inner">
+      <div class="shop-hero__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Wishlist</span></div>
+      <h1 class="shop-hero__title">Your <em>Wishlist</em></h1>
+      <p class="shop-hero__sub">Pieces you've saved to consider. Move them to your bag whenever you're ready.</p>
+    </div>
+  </section>
+
+  <!-- WISHLIST GRID -->
+  <section class="wl" aria-label="Saved items">
+    <div class="wl__inner">
+      <div class="wl__bar">
+        <span class="wl__count" data-wl-count>0 items</span>
+        <button class="wl__clear" data-wl-clear hidden>Clear all</button>
+      </div>
+
+      <div class="shop-grid" id="wlGrid"><!-- hydrated via JS --></div>
+
+      <div class="wl-empty" id="wlEmpty">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
+          <path d="M12 20S3 14.5 3 8.6C3 5.9 5.2 4 7.8 4c1.6 0 3.1.8 4.2 2.1C13.1 4.8 14.6 4 16.2 4 18.8 4 21 5.9 21 8.6 21 14.5 12 20 12 20z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+        </svg>
+        <p class="wl-empty__title">Your wishlist is empty.</p>
+        <p class="wl-empty__desc">Tap the heart on any product to save it here for later.</p>
+        <a href="/shop" class="btn-dark">
+          Browse the Collection
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { persistedWishItems, removeFromWishlist, addToCart, isCartOpen } from '../stores/cart';
+
+  const grid = document.getElementById('wlGrid');
+  const empty = document.getElementById('wlEmpty');
+  const countEl = document.querySelector('[data-wl-count]');
+  const clearBtn = document.querySelector('[data-wl-clear]') as HTMLButtonElement | null;
+
+  const imgSrc = (image: string) => {
+    if (!image || typeof image !== 'string') return '';
+    if (/^https?:\/\//.test(image) || image.startsWith('/src/')) return image;
+    if (image.startsWith('Images/')) return `/src/assets/images/${image.split('/').pop()}`;
+    return `/src/assets/images/${image}`;
+  };
+
+  function render(items: any[]) {
+    if (!grid || !empty) return;
+    if (countEl) countEl.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+    if (clearBtn) clearBtn.hidden = items.length === 0;
+
+    if (items.length === 0) {
+      grid.innerHTML = '';
+      empty.classList.add('is-shown');
+      return;
+    }
+    empty.classList.remove('is-shown');
+
+    grid.innerHTML = items.map((item) => `
+      <article class="pc" data-id="${item.id}">
+        <div class="pc__media">
+          <div class="pc__actions">
+            <button class="pc__act pc__act--wish" data-wl-remove aria-label="Remove from wishlist" aria-pressed="true">
+              <svg width="16" height="16" viewBox="0 0 22 22" fill="currentColor"><path d="M11 19S3 14 3 8.3C3 5.5 5.2 3.5 8 3.5c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.8 0 5 2 5 4.8C21 14 13 19 11 19z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <a href="/products/${item.description || item.id}" class="pc__link" aria-label="${item.name}">
+            <img src="${imgSrc(item.image)}" alt="${item.name}" width="340" height="450" loading="lazy" style="object-fit:cover;width:100%;height:100%;">
+          </a>
+          <button class="pc__add" data-wl-add>Add to Bag</button>
+        </div>
+        <div class="pc__body">
+          <span class="pc__cat">${item.category || 'Maison Arden'}</span>
+          <h3 class="pc__name"><a href="/products/${item.description || item.id}">${item.name}</a></h3>
+          <div class="pc__meta">
+            <span class="pc__price">${item.formattedPrice || ('$' + (item.price ?? 0))}</span>
+            ${item.color ? `<span class="pc__rating">${item.color}</span>` : ''}
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    grid.querySelectorAll('.pc').forEach((el) => {
+      const card = el as HTMLElement;
+      const id = card.dataset.id || '';
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+      card.querySelector('[data-wl-remove]')?.addEventListener('click', () => {
+        card.style.transition = 'opacity .25s, transform .25s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(8px)';
+        setTimeout(() => removeFromWishlist(id), 250);
+      });
+      card.querySelector('[data-wl-add]')?.addEventListener('click', () => {
+        addToCart({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          color: item.color,
+          size: item.size,
+          category: item.category,
+          description: item.description,
+        }, 1);
+        isCartOpen.set(true);
+      });
+    });
+  }
+
+  clearBtn?.addEventListener('click', () => {
+    [...persistedWishItems.get()].forEach((i) => removeFromWishlist(i.id));
+  });
+
+  persistedWishItems.subscribe(render);
+</script>
+
+<style>
+  .shop-hero { background: var(--lux-light-surface); border-bottom: 1px solid var(--lux-light-border); }
+  .shop-hero__inner { max-width: var(--maxw); margin: 0 auto; padding: clamp(40px,5vw,72px) var(--gutter) clamp(34px,4vw,56px); text-align: center; }
+  .shop-hero__crumb { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--lux-on-light-soft); margin-bottom: 16px; }
+  .shop-hero__crumb a { color: var(--lux-on-light-soft); transition: color .2s var(--ease); }
+  .shop-hero__crumb a:hover { color: var(--lux-on-light); }
+  .shop-hero__crumb span { color: var(--lux-secondary-olive); }
+  .shop-hero__title { font-family: var(--font-display); font-size: clamp(40px,5vw,72px); font-weight: 500; line-height: 1; letter-spacing: -1.5px; color: var(--lux-on-light); }
+  .shop-hero__title em { font-style: italic; color: var(--lux-secondary-olive); }
+  .shop-hero__sub { font-size: clamp(14px,1.05vw,16px); line-height: 1.7; color: var(--lux-on-light-soft); max-width: 56ch; margin: 16px auto 0; }
+
+  .wl__inner { max-width: var(--maxw); margin: 0 auto; padding: clamp(32px,4vw,56px) var(--gutter) clamp(64px,8vw,110px); }
+  .wl__bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+  .wl__count { font-size: 12px; letter-spacing: .6px; text-transform: uppercase; color: var(--lux-on-light-soft); }
+  .wl__clear { background: none; border: none; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--lux-on-light); cursor: pointer; border-bottom: 1px solid var(--lux-secondary-olive); padding-bottom: 2px; }
+
+  .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px,1.8vw,30px); }
+  @media (max-width: 900px) { .shop-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+
+  .wl-empty { display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: clamp(48px,8vw,110px) 0; color: var(--lux-on-light-soft); }
+  .wl-empty.is-shown { display: flex; }
+  .wl-empty svg { color: var(--lux-secondary-olive); margin-bottom: 6px; }
+  .wl-empty__title { font-family: var(--font-display); font-size: 22px; color: var(--lux-on-light); }
+  .wl-empty__desc { font-size: 14px; max-width: 42ch; }
+  .wl-empty .btn-dark { margin-top: 14px; }
+
+  /* When the grid holds items, hide the empty block (grid + empty share the section) */
+  #wlGrid:empty { display: none; }
+</style>
