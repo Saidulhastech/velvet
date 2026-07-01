@@ -549,10 +549,10 @@ const extrasData = JSON.stringify({
     itemsBox.innerHTML = items.map((item) => {
       // Resolve path
       const imgUrl = (item.image && typeof item.image === 'string')
-        ? (item.image.startsWith('Images/') 
-          ? `/src/assets/images/${item.image.split('/').pop()}` 
-          : item.image.startsWith('/src/') 
-            ? item.image 
+        ? (/^https?:\/\//.test(item.image) || item.image.startsWith('/src/')
+          ? item.image
+          : item.image.startsWith('Images/')
+            ? `/src/assets/images/${item.image.split('/').pop()}`
             : `/src/assets/images/${item.image}`)
         : '';
 
@@ -642,10 +642,10 @@ const extrasData = JSON.stringify({
 
     savedBox.innerHTML = savedItems.map((item) => {
       const imgUrl = (item.image && typeof item.image === 'string')
-        ? (item.image.startsWith('Images/') 
-          ? `/src/assets/images/${item.image.split('/').pop()}` 
-          : item.image.startsWith('/src/') 
-            ? item.image 
+        ? (/^https?:\/\//.test(item.image) || item.image.startsWith('/src/')
+          ? item.image
+          : item.image.startsWith('Images/')
+            ? `/src/assets/images/${item.image.split('/').pop()}`
             : `/src/assets/images/${item.image}`)
         : '';
 
