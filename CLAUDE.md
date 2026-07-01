@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**Maison Arden** (internal codename "Omnix") — a luxury-fashion storefront. Astro SSR frontend, Shopify Storefront API backend, deployed to Cloudflare Workers. The `.astro` templates are a pre-built design ("Maison Arden local templates" / legacy format); the Shopify integration was layered on top, so a legacy compatibility bridge maps live Shopify data into the template's original data shape.
+**Maison Arden** (internal codename "Velvet") — a luxury-fashion storefront. Astro SSR frontend, Shopify Storefront API backend, deployed to Cloudflare Workers. The `.astro` templates are a pre-built design ("Maison Arden local templates" / legacy format); the Shopify integration was layered on top, so a legacy compatibility bridge maps live Shopify data into the template's original data shape.
 
 ## Commands
 
@@ -37,7 +37,7 @@ Required: `SHOPIFY_SHOP_DOMAIN`, `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`. Optional: `
 All Shopify traffic is server-side only (private token never reaches the browser). Flow:
 
 1. [src/middleware.ts](src/middleware.ts) resolves the active **Market** (country+language) once per request → `Astro.locals.market`.
-2. Market resolution priority ([src/lib/market.ts](src/lib/market.ts)): `fl_market` cookie → Cloudflare `cf-ipcountry` geo header → shop default (`US`/`EN`, from [src/config/omnix.ts](src/config/omnix.ts)).
+2. Market resolution priority ([src/lib/market.ts](src/lib/market.ts)): `fl_market` cookie → Cloudflare `cf-ipcountry` geo header → shop default (`US`/`EN`, from [src/config/velvet.ts](src/config/velvet.ts)).
 3. Pages/services thread `market` into queries. [src/lib/shopify/client.ts](src/lib/shopify/client.ts) `shopifyFetch()` merges it as `@inContext(country:, language:)` variables so prices + translations localize; it also drives cart `buyerIdentity.countryCode` so checkout currency matches the cards.
 4. `applyMarketCache()` sets edge-cache headers: default market gets shared CDN cache, any other market is `private, no-store`. If you enable multi-market HTML edge caching, add `fl_market` to the CDN cache key.
 
@@ -66,7 +66,7 @@ The bottom of [src/lib/shopify/index.ts](src/lib/shopify/index.ts) contains `map
 
 ## Brand config
 
-Brand-level constants (name, tagline, free-shipping threshold, socials, cart extras like gift-wrap/order-notes/protection) live in [src/config/omnix.ts](src/config/omnix.ts). Default market codes also live here.
+Brand-level constants (name, tagline, free-shipping threshold, socials, cart extras like gift-wrap/order-notes/protection) live in [src/config/velvet.ts](src/config/velvet.ts). Default market codes also live here.
 
 ## Note
 

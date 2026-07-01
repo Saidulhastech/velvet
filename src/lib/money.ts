@@ -12,7 +12,7 @@ export function formatMoney(money?: Money | null): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency,
-      // Drop cents for whole amounts to match the OMNIX "$289" style.
+      // Drop cents for whole amounts to match the VELVET "$289" style.
       minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
     }).format(amount);
   } catch {

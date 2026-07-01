@@ -265,6 +265,30 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
 
   const badge = tags.includes('new') ? 'New' : tags.includes('atelier') ? 'Atelier' : undefined;
 
+  // Preserve the full variant matrix (same shape the PDP uses) so grids and the
+  // Quick View can resolve a specific size×colour variant instead of dropping size.
+  const variantMatrix = rawVariants.map((v: any) => ({
+    id: v.id,
+    opts: Object.fromEntries((v.selectedOptions ?? []).map((o: any) => [o.name, o.value])),
+    price: Number(v.price?.amount ?? 0),
+    compareAt: v.compareAtPrice ? Number(v.compareAtPrice.amount) : null,
+    available: v.availableForSale ?? false,
+    qty: typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null,
+    img: v.image?.url ?? null,
+  }));
+  const optionList = (p.options ?? []).map((o: any) => ({
+    name: o.name,
+    values: (o.optionValues ?? o.values ?? []).map((ov: any) => ({
+      name: ov.name ?? ov.value ?? String(ov),
+      color: ov.swatch?.color ?? null,
+    })),
+  }));
+  // Drop the implicit single "Title / Default Title" option when counting.
+  const realOptions = optionList.filter(
+    (o: any) => !(o.values.length === 1 && /^title$/i.test(o.name) && /^default title$/i.test(o.values[0]?.name || '')),
+  );
+  const needsPicker = variantMatrix.length > 1 && realOptions.length >= 2;
+
   return {
     id: p.variants?.[0]?.id || p.id,
     handle: p.handle,
@@ -290,6 +314,9 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
     isFeatured: tags.includes('featured'),
     isNew: tags.includes('new'),
     isBestSeller: tags.includes('bestseller'),
+    variants: variantMatrix,
+    options: optionList,
+    needsPicker,
   };
 }
 

@@ -95,6 +95,11 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
       col.querySelector('[data-cmp-remove]')?.addEventListener('click', () => removeFromCompare(id));
       col.querySelector('[data-cmp-add]')?.addEventListener('click', () => {
         if (!item) return;
+        // Multi-option product → pick a size on the PDP rather than guessing.
+        if (item.needsPicker) {
+          window.location.href = `/products/${item.handle || item.id}`;
+          return;
+        }
         addToCart({
           id: item.id, name: item.name, price: item.price, image: item.image,
           category: item.category, description: item.handle,

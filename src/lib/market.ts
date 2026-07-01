@@ -6,7 +6,7 @@
 //  buyerIdentity.countryCode so prices + checkout currency match.
 // ============================================================
 import type { AstroCookies } from 'astro';
-import { DEFAULT_COUNTRY, DEFAULT_LANGUAGE } from '~/config/omnix';
+import { DEFAULT_COUNTRY, DEFAULT_LANGUAGE } from '~/config/velvet';
 
 /** The active localized experience for a request. ISO codes, uppercase. */
 export interface Market {

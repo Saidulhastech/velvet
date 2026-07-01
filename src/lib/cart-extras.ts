@@ -1,6 +1,6 @@
 // ============================================================
 //  Cart extras resolver — turns the handle-based CART_EXTRAS config
-//  (src/config/omnix.ts) into render-ready data by looking the gift-wrap
+//  (src/config/velvet.ts) into render-ready data by looking the gift-wrap
 //  and protection products up in Shopify BY HANDLE at request time.
 //
 //  Why handle, not gid: a template ships to many stores, each with
@@ -14,7 +14,7 @@
 import { getProduct } from '~/lib/shopify';
 import type { Money } from '~/lib/shopify/types';
 import type { Market } from '~/lib/market';
-import { CART_EXTRAS } from '~/config/omnix';
+import { CART_EXTRAS } from '~/config/velvet';
 
 export interface GiftWrapExtra {
   show: boolean;

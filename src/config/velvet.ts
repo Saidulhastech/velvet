@@ -1,5 +1,5 @@
 // ============================================================
-//  Maison Arden / Omnix brand config constants
+//  Maison Arden / Velvet brand config constants
 // ============================================================
 
 export const DEFAULT_COUNTRY = "US";

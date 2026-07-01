@@ -148,7 +148,7 @@ const featureImgPath = isFeaturedArticle
               <a href={`/blog/${post.id}`} class="bcard__media">
                 <span class="bcard__tag">{post.data.category}</span>
                 {images[imagePath] && (
-                  <Image src={images[imagePath]()} alt={post.data.title} loading="lazy" />
+                  <Image src={images[imagePath].default} alt={post.data.title} loading="lazy" />
                 )}
               </a>
               <div class="bcard__body">

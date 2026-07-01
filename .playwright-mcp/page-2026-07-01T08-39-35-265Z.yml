@@ -1,0 +1,1043 @@
+- generic [active] [ref=f8e1]:
+  - paragraph [ref=f8e5]: Complimentary shipping & returns worldwide — Resort 2026 has arrived
+  - generic [ref=f8e8]:
+    - generic [ref=f8e9]:
+      - generic [ref=f8e10]:
+        - img [ref=f8e11]
+        - text: Secure Payments
+      - link "Find a Boutique" [ref=f8e15] [cursor=pointer]:
+        - /url: /contact#boutiques
+      - link "Lifetime Repairs" [ref=f8e17] [cursor=pointer]:
+        - /url: /about#repairs
+    - generic [ref=f8e19] [cursor=pointer]:
+      - generic:
+        - img
+        - generic: EN / USD
+        - img
+      - combobox "Country and currency" [ref=f8e20]:
+        - option "United Arab Emirates (USD)"
+        - option "Austria (USD)"
+        - option "Australia (USD)"
+        - option "Belgium (USD)"
+        - option "Canada (USD)"
+        - option "Switzerland (USD)"
+        - option "Czechia (USD)"
+        - option "Germany (USD)"
+        - option "Denmark (USD)"
+        - option "Spain (USD)"
+        - option "Finland (USD)"
+        - option "France (USD)"
+        - option "United Kingdom (USD)"
+        - option "Hong Kong SAR (USD)"
+        - option "Ireland (USD)"
+        - option "Israel (USD)"
+        - option "Italy (USD)"
+        - option "Japan (USD)"
+        - option "South Korea (USD)"
+        - option "Malaysia (USD)"
+        - option "Netherlands (USD)"
+        - option "Norway (USD)"
+        - option "New Zealand (USD)"
+        - option "Poland (USD)"
+        - option "Portugal (USD)"
+        - option "Sweden (USD)"
+        - option "Singapore (USD)"
+        - option "United States (USD)" [selected]
+  - banner [ref=f8e21]:
+    - generic [ref=f8e22]:
+      - navigation "Primary" [ref=f8e23]:
+        - list [ref=f8e24]:
+          - listitem [ref=f8e25]:
+            - link "Women" [ref=f8e26] [cursor=pointer]:
+              - /url: /shop?gender=women
+              - text: Women
+              - img
+          - listitem [ref=f8e28]:
+            - link "Men" [ref=f8e29] [cursor=pointer]:
+              - /url: /shop?gender=men
+              - text: Men
+              - img
+          - listitem [ref=f8e31]:
+            - link "Bags" [ref=f8e32] [cursor=pointer]:
+              - /url: /shop?category=bags
+              - text: Bags
+              - img
+          - listitem [ref=f8e34]:
+            - link "Accessories" [ref=f8e35] [cursor=pointer]:
+              - /url: /shop?category=accessories
+          - listitem [ref=f8e36]:
+            - link "Journal N" [ref=f8e37] [cursor=pointer]:
+              - /url: /blog
+              - text: Journal
+              - generic [ref=f8e38]: "N"
+      - link "Maison Arden — Home" [ref=f8e39] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f8e40]: VELVET
+        - generic [ref=f8e42]: EST. MMXIV · PARIS
+      - generic [ref=f8e43]:
+        - generic [ref=f8e44]:
+          - searchbox "Search"
+          - button "Search" [ref=f8e45] [cursor=pointer]:
+            - img [ref=f8e46]
+        - link "Account" [ref=f8e50] [cursor=pointer]:
+          - /url: /account
+          - img [ref=f8e51]
+        - button "Wishlist" [ref=f8e54] [cursor=pointer]:
+          - img [ref=f8e55]
+          - generic [ref=f8e57]: "0"
+        - button "Cart" [ref=f8e58] [cursor=pointer]:
+          - img [ref=f8e59]
+          - generic [ref=f8e62]: "0"
+  - main [ref=f8e63]:
+    - region "Featured collections" [ref=f8e64]:
+      - generic [ref=f8e65]:
+        - img "Women's collection" [ref=f8e67]
+        - generic [ref=f8e70]:
+          - generic [ref=f8e71]: Women's Collection
+          - heading "The Quiet Collection" [level=1] [ref=f8e72]:
+            - text: The Quiet
+            - text: Collection
+          - paragraph [ref=f8e73]: Refined silhouettes and considered materials for the woman who moves with intention.
+          - link "Shop Women" [ref=f8e74] [cursor=pointer]:
+            - /url: /shop?gender=women
+            - text: Shop Women
+            - img [ref=f8e75]
+      - generic [ref=f8e77]:
+        - img "Men's collection" [ref=f8e79]
+        - generic [ref=f8e82]:
+          - generic [ref=f8e83]: Men's Collection
+          - heading "Structured Ease" [level=2] [ref=f8e84]:
+            - text: Structured
+            - text: Ease
+          - paragraph [ref=f8e85]: Tailored pieces with an unhurried elegance — built for daily life and lasting well beyond it.
+          - link "Shop Men" [ref=f8e86] [cursor=pointer]:
+            - /url: /shop?gender=men
+            - text: Shop Men
+            - img [ref=f8e87]
+      - generic [ref=f8e90]: Scroll
+    - generic "Our promise" [ref=f8e92]:
+      - generic [ref=f8e94]:
+        - generic [ref=f8e95]:
+          - img [ref=f8e96]
+          - text: Free Worldwide Shipping
+        - generic [ref=f8e100]:
+          - img [ref=f8e101]
+          - text: Lifetime Repairs
+        - generic [ref=f8e106]:
+          - img [ref=f8e107]
+          - text: Ethically Sourced Fibres
+        - generic [ref=f8e111]:
+          - img [ref=f8e112]
+          - text: Small-Batch Atelier
+        - generic [ref=f8e117]:
+          - img [ref=f8e118]
+          - text: Hand-Finished in Europe
+        - generic [ref=f8e122]:
+          - img [ref=f8e123]
+          - text: Carbon-Neutral Delivery
+        - generic [ref=f8e127]:
+          - img [ref=f8e128]
+          - text: Free Worldwide Shipping
+        - generic [ref=f8e132]:
+          - img [ref=f8e133]
+          - text: Lifetime Repairs
+        - generic [ref=f8e138]:
+          - img [ref=f8e139]
+          - text: Ethically Sourced Fibres
+        - generic [ref=f8e143]:
+          - img [ref=f8e144]
+          - text: Small-Batch Atelier
+    - region "Promotions" [ref=f8e149]:
+      - generic [ref=f8e150]:
+        - link "The Tailoring Edit New Season The Tailoring Edit Softly constructed suiting in natural fibres. Shop the Edit" [ref=f8e151] [cursor=pointer]:
+          - /url: /shop?category=tailoring
+          - img "The Tailoring Edit" [ref=f8e152]
+          - generic [ref=f8e154]:
+            - generic [ref=f8e155]: New Season
+            - heading "The Tailoring Edit" [level=3] [ref=f8e156]
+            - paragraph [ref=f8e157]: Softly constructed suiting in natural fibres.
+            - generic [ref=f8e158]:
+              - text: Shop the Edit
+              - img [ref=f8e159]
+        - link "Cashmere & Wool knitwear Limited Atelier Run Cashmere & Wool Hand-finished knitwear, made in small batches. Discover Knitwear" [ref=f8e161] [cursor=pointer]:
+          - /url: /shop?category=knitwear
+          - img "Cashmere & Wool knitwear" [ref=f8e162]
+          - generic [ref=f8e164]:
+            - generic [ref=f8e165]: Limited Atelier Run
+            - heading "Cashmere & Wool" [level=3] [ref=f8e166]
+            - paragraph [ref=f8e167]: Hand-finished knitwear, made in small batches.
+            - generic [ref=f8e168]:
+              - text: Discover Knitwear
+              - img [ref=f8e169]
+    - region "Shop by category" [ref=f8e171]:
+      - generic [ref=f8e172]:
+        - generic [ref=f8e173]:
+          - generic [ref=f8e174]: Explore the Maison
+          - heading "Shop by Category" [level=2] [ref=f8e175]:
+            - text: Shop by
+            - emphasis [ref=f8e176]: Category
+        - generic [ref=f8e177]:
+          - link "Tailoring 42 View Products" [ref=f8e178] [cursor=pointer]:
+            - /url: /shop?category=tailoring
+            - generic [ref=f8e179]:
+              - text: Tailoring
+              - superscript [ref=f8e180]: "42"
+            - generic:
+              - text: View Products
+              - img
+          - link "Outerwear 28 View Products" [ref=f8e181] [cursor=pointer]:
+            - /url: /shop?category=outerwear
+            - generic [ref=f8e182]:
+              - text: Outerwear
+              - superscript [ref=f8e183]: "28"
+            - generic:
+              - text: View Products
+              - img
+          - link "Knitwear 35 View Products" [ref=f8e184] [cursor=pointer]:
+            - /url: /shop?category=knitwear
+            - generic [ref=f8e186]:
+              - text: Knitwear
+              - superscript [ref=f8e187]: "35"
+            - generic [ref=f8e188]:
+              - text: View Products
+              - img [ref=f8e189]
+          - link "Denim 19 View Products" [ref=f8e191] [cursor=pointer]:
+            - /url: /shop?category=denim
+            - generic [ref=f8e192]:
+              - text: Denim
+              - superscript [ref=f8e193]: "19"
+            - generic:
+              - text: View Products
+              - img
+          - link "Accessories 54 View Products" [ref=f8e194] [cursor=pointer]:
+            - /url: /shop?category=accessories
+            - generic [ref=f8e195]:
+              - text: Accessories
+              - superscript [ref=f8e196]: "54"
+            - generic:
+              - text: View Products
+              - img
+    - region "New arrivals" [ref=f8e197]:
+      - generic [ref=f8e198]:
+        - generic [ref=f8e199]:
+          - generic [ref=f8e200]:
+            - generic [ref=f8e201]: Just Arrived
+            - heading "New Arrivals" [level=2] [ref=f8e202]:
+              - text: New
+              - emphasis [ref=f8e203]: Arrivals
+          - tablist [ref=f8e204]:
+            - tab "All" [ref=f8e205] [cursor=pointer]
+            - tab "Women" [ref=f8e206] [cursor=pointer]
+            - tab "Men" [ref=f8e207] [cursor=pointer]
+            - tab "Accessories" [ref=f8e208] [cursor=pointer]
+        - generic [ref=f8e209]:
+          - article [ref=f8e210]:
+            - generic [ref=f8e211]:
+              - generic [ref=f8e212]:
+                - button "Add to wishlist" [ref=f8e213] [cursor=pointer]:
+                  - img [ref=f8e214]
+                - button "Add to compare" [ref=f8e216] [cursor=pointer]:
+                  - img [ref=f8e217]
+                - button "Quick view" [ref=f8e219] [cursor=pointer]:
+                  - img [ref=f8e220]
+              - link "Classic Black Denim Jacket" [ref=f8e223] [cursor=pointer]:
+                - /url: /products/striped-skirt-and-top
+                - img "Classic Black Denim Jacket" [ref=f8e224]
+              - button "Add to Bag" [ref=f8e225] [cursor=pointer]
+            - generic [ref=f8e226]:
+              - generic [ref=f8e227]:
+                - generic "black" [ref=f8e228] [cursor=pointer]
+                - generic "blue" [ref=f8e229] [cursor=pointer]
+                - generic "bronze orange" [ref=f8e230] [cursor=pointer]
+              - generic [ref=f8e231]: Women · Essentials
+              - heading "Classic Black Denim Jacket" [level=3] [ref=f8e232]:
+                - link "Classic Black Denim Jacket" [ref=f8e233] [cursor=pointer]:
+                  - /url: /products/striped-skirt-and-top
+              - generic [ref=f8e234]:
+                - generic [ref=f8e235]: $1
+                - generic [ref=f8e236]: ★ 4.8
+          - article [ref=f8e237]:
+            - generic [ref=f8e238]:
+              - generic [ref=f8e239]:
+                - button "Add to wishlist" [ref=f8e240] [cursor=pointer]:
+                  - img [ref=f8e241]
+                - button "Add to compare" [ref=f8e243] [cursor=pointer]:
+                  - img [ref=f8e244]
+                - button "Quick view" [ref=f8e246] [cursor=pointer]:
+                  - img [ref=f8e247]
+              - link "Cozy Knit Oversized Sweater" [ref=f8e250] [cursor=pointer]:
+                - /url: /products/white-cotton-shirt
+                - img "Cozy Knit Oversized Sweater" [ref=f8e251]
+              - button "Add to Bag" [ref=f8e252] [cursor=pointer]
+            - generic [ref=f8e253]:
+              - generic [ref=f8e254]: Women · Essentials
+              - heading "Cozy Knit Oversized Sweater" [level=3] [ref=f8e255]:
+                - link "Cozy Knit Oversized Sweater" [ref=f8e256] [cursor=pointer]:
+                  - /url: /products/white-cotton-shirt
+              - generic [ref=f8e257]:
+                - generic [ref=f8e258]: $1
+                - generic [ref=f8e259]: ★ 4.8
+          - article [ref=f8e260]:
+            - generic [ref=f8e261]:
+              - generic [ref=f8e262]:
+                - button "Add to wishlist" [ref=f8e263] [cursor=pointer]:
+                  - img [ref=f8e264]
+                - button "Add to compare" [ref=f8e266] [cursor=pointer]:
+                  - img [ref=f8e267]
+                - button "Quick view" [ref=f8e269] [cursor=pointer]:
+                  - img [ref=f8e270]
+              - link "Classic Striped Button-Up Shirt" [ref=f8e273] [cursor=pointer]:
+                - /url: /products/olive-green-jacket
+                - img "Classic Striped Button-Up Shirt" [ref=f8e274]
+              - button "Add to Bag" [ref=f8e275] [cursor=pointer]
+            - generic [ref=f8e276]:
+              - generic [ref=f8e277]:
+                - generic "red" [ref=f8e278] [cursor=pointer]
+                - generic "yellow" [ref=f8e279] [cursor=pointer]
+                - generic "white" [ref=f8e280] [cursor=pointer]
+                - generic "black" [ref=f8e281] [cursor=pointer]
+              - generic [ref=f8e282]: Women · Essentials
+              - heading "Classic Striped Button-Up Shirt" [level=3] [ref=f8e283]:
+                - link "Classic Striped Button-Up Shirt" [ref=f8e284] [cursor=pointer]:
+                  - /url: /products/olive-green-jacket
+              - generic [ref=f8e285]:
+                - generic [ref=f8e286]: $1
+                - generic [ref=f8e287]: ★ 4.8
+          - article [ref=f8e288]:
+            - generic [ref=f8e289]:
+              - generic [ref=f8e290]:
+                - button "Add to wishlist" [ref=f8e291] [cursor=pointer]:
+                  - img [ref=f8e292]
+                - button "Add to compare" [ref=f8e294] [cursor=pointer]:
+                  - img [ref=f8e295]
+                - button "Quick view" [ref=f8e297] [cursor=pointer]:
+                  - img [ref=f8e298]
+              - link "Trendy Denim Jacket with Patches" [ref=f8e301] [cursor=pointer]:
+                - /url: /products/silk-summer-top
+                - img "Trendy Denim Jacket with Patches" [ref=f8e302]
+              - button "Add to Bag" [ref=f8e303] [cursor=pointer]
+            - generic [ref=f8e304]:
+              - generic [ref=f8e305]: Women · Essentials
+              - heading "Trendy Denim Jacket with Patches" [level=3] [ref=f8e306]:
+                - link "Trendy Denim Jacket with Patches" [ref=f8e307] [cursor=pointer]:
+                  - /url: /products/silk-summer-top
+              - generic [ref=f8e308]:
+                - generic [ref=f8e309]: $1
+                - generic [ref=f8e310]: ★ 4.8
+          - article [ref=f8e311]:
+            - generic [ref=f8e312]:
+              - generic [ref=f8e313]:
+                - button "Add to wishlist" [ref=f8e314] [cursor=pointer]:
+                  - img [ref=f8e315]
+                - button "Add to compare" [ref=f8e317] [cursor=pointer]:
+                  - img [ref=f8e318]
+                - button "Quick view" [ref=f8e320] [cursor=pointer]:
+                  - img [ref=f8e321]
+              - link "Trendy Toddler Denim Jacket" [ref=f8e324] [cursor=pointer]:
+                - /url: /products/zipped-jacket
+                - img "Trendy Toddler Denim Jacket" [ref=f8e325]
+              - button "Add to Bag" [ref=f8e326] [cursor=pointer]
+            - generic [ref=f8e327]:
+              - generic [ref=f8e328]: Men · Essentials
+              - heading "Trendy Toddler Denim Jacket" [level=3] [ref=f8e329]:
+                - link "Trendy Toddler Denim Jacket" [ref=f8e330] [cursor=pointer]:
+                  - /url: /products/zipped-jacket
+              - generic [ref=f8e331]:
+                - generic [ref=f8e332]: $1
+                - generic [ref=f8e333]: ★ 4.8
+          - article [ref=f8e334]:
+            - generic [ref=f8e335]:
+              - generic [ref=f8e336]:
+                - button "Add to wishlist" [ref=f8e337] [cursor=pointer]:
+                  - img [ref=f8e338]
+                - button "Add to compare" [ref=f8e340] [cursor=pointer]:
+                  - img [ref=f8e341]
+                - button "Quick view" [ref=f8e343] [cursor=pointer]:
+                  - img [ref=f8e344]
+              - link "Classic Button-Down Shirt" [ref=f8e347] [cursor=pointer]:
+                - /url: /products/dark-winter-jacket
+                - img "Classic Button-Down Shirt" [ref=f8e348]
+              - button "Add to Bag" [ref=f8e349] [cursor=pointer]
+            - generic [ref=f8e350]:
+              - generic [ref=f8e351]:
+                - generic "black" [ref=f8e352] [cursor=pointer]
+                - generic "white" [ref=f8e353] [cursor=pointer]
+                - generic "blue" [ref=f8e354] [cursor=pointer]
+              - generic [ref=f8e355]: Women · Essentials
+              - heading "Classic Button-Down Shirt" [level=3] [ref=f8e356]:
+                - link "Classic Button-Down Shirt" [ref=f8e357] [cursor=pointer]:
+                  - /url: /products/dark-winter-jacket
+              - generic [ref=f8e358]:
+                - generic [ref=f8e359]: $1
+                - generic [ref=f8e360]: ★ 4.8
+          - article [ref=f8e361]:
+            - generic [ref=f8e362]:
+              - generic [ref=f8e363]:
+                - button "Add to wishlist" [ref=f8e364] [cursor=pointer]:
+                  - img [ref=f8e365]
+                - button "Add to compare" [ref=f8e367] [cursor=pointer]:
+                  - img [ref=f8e368]
+                - button "Quick view" [ref=f8e370] [cursor=pointer]:
+                  - img [ref=f8e371]
+              - link "Vintage-Inspired Floral Midi Dress" [ref=f8e374] [cursor=pointer]:
+                - /url: /products/navy-sport-jacket
+                - img "Vintage-Inspired Floral Midi Dress" [ref=f8e375]
+              - button "Add to Bag" [ref=f8e376] [cursor=pointer]
+            - generic [ref=f8e377]:
+              - generic [ref=f8e378]:
+                - generic "black" [ref=f8e379] [cursor=pointer]
+                - generic "blue" [ref=f8e380] [cursor=pointer]
+                - generic "yellow" [ref=f8e381] [cursor=pointer]
+                - generic "red" [ref=f8e382] [cursor=pointer]
+              - generic [ref=f8e383]: Men · Essentials
+              - heading "Vintage-Inspired Floral Midi Dress" [level=3] [ref=f8e384]:
+                - link "Vintage-Inspired Floral Midi Dress" [ref=f8e385] [cursor=pointer]:
+                  - /url: /products/navy-sport-jacket
+              - generic [ref=f8e386]:
+                - generic [ref=f8e387]: $1
+                - generic [ref=f8e388]: ★ 4.8
+          - article [ref=f8e389]:
+            - generic [ref=f8e390]:
+              - generic [ref=f8e391]:
+                - button "Add to wishlist" [ref=f8e392] [cursor=pointer]:
+                  - img [ref=f8e393]
+                - button "Add to compare" [ref=f8e395] [cursor=pointer]:
+                  - img [ref=f8e396]
+                - button "Quick view" [ref=f8e398] [cursor=pointer]:
+                  - img [ref=f8e399]
+              - link "Floral Print Sundress for Stylish Girls" [ref=f8e402] [cursor=pointer]:
+                - /url: /products/striped-silk-blouse
+                - img "Floral Print Sundress for Stylish Girls" [ref=f8e403]
+              - button "Add to Bag" [ref=f8e404] [cursor=pointer]
+            - generic [ref=f8e405]:
+              - generic [ref=f8e406]:
+                - generic "blue" [ref=f8e407] [cursor=pointer]
+                - generic "white" [ref=f8e408] [cursor=pointer]
+                - generic "yellow" [ref=f8e409] [cursor=pointer]
+              - generic [ref=f8e410]: Women · Essentials
+              - heading "Floral Print Sundress for Stylish Girls" [level=3] [ref=f8e411]:
+                - link "Floral Print Sundress for Stylish Girls" [ref=f8e412] [cursor=pointer]:
+                  - /url: /products/striped-silk-blouse
+              - generic [ref=f8e413]:
+                - generic [ref=f8e414]: $1
+                - generic [ref=f8e415]: ★ 4.8
+        - link "View All New Arrivals" [ref=f8e417] [cursor=pointer]:
+          - /url: /shop
+          - text: View All New Arrivals
+          - img [ref=f8e418]
+    - region "Shop the look" [ref=f8e420]:
+      - generic [ref=f8e421]:
+        - generic [ref=f8e422]:
+          - img "The Riviera Set" [ref=f8e423]
+          - button "Sand Linen Blazer" [ref=f8e424] [cursor=pointer]
+          - generic:
+            - img "Sand Linen Blazer"
+            - generic:
+              - generic: Sand Linen Blazer
+              - generic: €520
+          - button "Pleated Wide Trouser" [ref=f8e425] [cursor=pointer]
+          - generic:
+            - img "Pleated Wide Trouser"
+            - generic:
+              - generic: Pleated Wide Trouser
+              - generic: €280
+          - button "Wide-Leg Linen Trouser" [ref=f8e426] [cursor=pointer]
+          - generic:
+            - img "Wide-Leg Linen Trouser"
+            - generic:
+              - generic: Wide-Leg Linen Trouser
+              - generic: €220
+        - generic [ref=f8e427]:
+          - generic [ref=f8e428]:
+            - generic [ref=f8e429]: Curated Edit
+            - heading "The Riviera Set" [level=2] [ref=f8e430]
+          - generic [ref=f8e431]:
+            - generic [ref=f8e432] [cursor=pointer]:
+              - img "Sand Linen Blazer" [ref=f8e434]
+              - generic [ref=f8e435]:
+                - generic [ref=f8e436]: Sand Linen Blazer
+                - generic [ref=f8e437]:
+                  - text: "Colour: Sand"
+                  - img [ref=f8e438]
+                - button "Add to Bag" [ref=f8e440]
+              - generic [ref=f8e441]: €520
+            - generic [ref=f8e442] [cursor=pointer]:
+              - img "Pleated Wide Trouser" [ref=f8e444]
+              - generic [ref=f8e445]:
+                - generic [ref=f8e446]: Pleated Wide Trouser
+                - generic [ref=f8e447]:
+                  - text: "Colour: Olive"
+                  - img [ref=f8e448]
+                - button "Add to Bag" [ref=f8e450]
+              - generic [ref=f8e451]: €280
+            - generic [ref=f8e452] [cursor=pointer]:
+              - img "Wide-Leg Linen Trouser" [ref=f8e454]
+              - generic [ref=f8e455]:
+                - generic [ref=f8e456]: Wide-Leg Linen Trouser
+                - generic [ref=f8e457]:
+                  - text: "Colour: Ecru"
+                  - img [ref=f8e458]
+                - button "Add to Bag" [ref=f8e460]
+              - generic [ref=f8e461]: €220€310
+          - button "Add All to Bag — €1,060" [ref=f8e462] [cursor=pointer]:
+            - text: Add All to Bag — €1,060
+            - img [ref=f8e463]
+    - region "Most loved" [ref=f8e465]:
+      - generic [ref=f8e466]:
+        - generic [ref=f8e467]:
+          - generic [ref=f8e468]:
+            - generic [ref=f8e469]: Most Loved
+            - heading "The Icons" [level=2] [ref=f8e470]:
+              - text: The
+              - emphasis [ref=f8e471]: Icons
+          - link "View All Products" [ref=f8e472] [cursor=pointer]:
+            - /url: /shop
+            - text: View All Products
+            - img [ref=f8e473]
+        - generic [ref=f8e475]:
+          - article [ref=f8e476]:
+            - generic [ref=f8e477]:
+              - generic [ref=f8e478]:
+                - button "Add to wishlist" [ref=f8e479] [cursor=pointer]:
+                  - img [ref=f8e480]
+                - button "Add to compare" [ref=f8e482] [cursor=pointer]:
+                  - img [ref=f8e483]
+                - button "Quick view" [ref=f8e485] [cursor=pointer]:
+                  - img [ref=f8e486]
+              - link "Versatile Denim Trucker Jacket" [ref=f8e489] [cursor=pointer]:
+                - /url: /products/yellow-wool-jumper
+                - img "Versatile Denim Trucker Jacket" [ref=f8e490]
+              - button "Add to Bag" [ref=f8e491] [cursor=pointer]
+            - generic [ref=f8e492]:
+              - generic [ref=f8e493]: Women · Essentials
+              - heading "Versatile Denim Trucker Jacket" [level=3] [ref=f8e494]:
+                - link "Versatile Denim Trucker Jacket" [ref=f8e495] [cursor=pointer]:
+                  - /url: /products/yellow-wool-jumper
+              - generic [ref=f8e496]:
+                - generic [ref=f8e497]: $2
+                - generic [ref=f8e498]: ★ 5
+          - article [ref=f8e499]:
+            - generic [ref=f8e500]:
+              - generic [ref=f8e501]:
+                - button "Add to wishlist" [ref=f8e502] [cursor=pointer]:
+                  - img [ref=f8e503]
+                - button "Add to compare" [ref=f8e505] [cursor=pointer]:
+                  - img [ref=f8e506]
+                - button "Quick view" [ref=f8e508] [cursor=pointer]:
+                  - img [ref=f8e509]
+              - link "Statement Geometric Print Scarf" [ref=f8e512] [cursor=pointer]:
+                - /url: /products/ocean-blue-shirt
+                - img "Statement Geometric Print Scarf" [ref=f8e513]
+              - button "Add to Bag" [ref=f8e514] [cursor=pointer]
+            - generic [ref=f8e515]:
+              - generic [ref=f8e516]:
+                - generic "black" [ref=f8e517] [cursor=pointer]
+                - generic "yellow" [ref=f8e518] [cursor=pointer]
+                - generic "white" [ref=f8e519] [cursor=pointer]
+              - generic [ref=f8e520]: Men · Essentials
+              - heading "Statement Geometric Print Scarf" [level=3] [ref=f8e521]:
+                - link "Statement Geometric Print Scarf" [ref=f8e522] [cursor=pointer]:
+                  - /url: /products/ocean-blue-shirt
+              - generic [ref=f8e523]:
+                - generic [ref=f8e524]: $1
+                - generic [ref=f8e525]: ★ 4.8
+          - article [ref=f8e526]:
+            - generic [ref=f8e527]:
+              - generic [ref=f8e528]:
+                - button "Add to wishlist" [ref=f8e529] [cursor=pointer]:
+                  - img [ref=f8e530]
+                - button "Add to compare" [ref=f8e532] [cursor=pointer]:
+                  - img [ref=f8e533]
+                - button "Quick view" [ref=f8e535] [cursor=pointer]:
+                  - img [ref=f8e536]
+              - link "Elegant Lace Cocktail Dress" [ref=f8e539] [cursor=pointer]:
+                - /url: /products/blue-stylish-sartorial
+                - img "Elegant Lace Cocktail Dress" [ref=f8e540]
+              - button "Add to Bag" [ref=f8e541] [cursor=pointer]
+            - generic [ref=f8e542]:
+              - generic [ref=f8e543]: Unisex · Essentials
+              - heading "Elegant Lace Cocktail Dress" [level=3] [ref=f8e544]:
+                - link "Elegant Lace Cocktail Dress" [ref=f8e545] [cursor=pointer]:
+                  - /url: /products/blue-stylish-sartorial
+              - generic [ref=f8e546]:
+                - generic [ref=f8e547]: $7
+                - generic [ref=f8e548]: ★ 4.8
+          - article [ref=f8e549]:
+            - generic [ref=f8e550]:
+              - generic [ref=f8e551]:
+                - button "Add to wishlist" [ref=f8e552] [cursor=pointer]:
+                  - img [ref=f8e553]
+                - button "Add to compare" [ref=f8e555] [cursor=pointer]:
+                  - img [ref=f8e556]
+                - button "Quick view" [ref=f8e558] [cursor=pointer]:
+                  - img [ref=f8e559]
+              - link "Cargo Shorts for Active Boys" [ref=f8e562] [cursor=pointer]:
+                - /url: /products/yellow-chic-chiffon
+                - img "Cargo Shorts for Active Boys" [ref=f8e563]
+              - button "Add to Bag" [ref=f8e564] [cursor=pointer]
+            - generic [ref=f8e565]:
+              - generic [ref=f8e566]: Unisex · Essentials
+              - heading "Cargo Shorts for Active Boys" [level=3] [ref=f8e567]:
+                - link "Cargo Shorts for Active Boys" [ref=f8e568] [cursor=pointer]:
+                  - /url: /products/yellow-chic-chiffon
+              - generic [ref=f8e569]:
+                - generic [ref=f8e570]: $1
+                - generic [ref=f8e571]: ★ 4.8
+    - region "Featured film" [ref=f8e572]:
+      - generic [ref=f8e573]:
+        - generic [ref=f8e574]:
+          - generic [ref=f8e575]:
+            - generic [ref=f8e576]: The Edit
+            - heading "Worn in Motion" [level=2] [ref=f8e577]:
+              - text: Worn in
+              - emphasis [ref=f8e578]: Motion
+          - generic [ref=f8e579]:
+            - generic [ref=f8e580]:
+              - img "The Atelier Overshirt" [ref=f8e582]
+              - img "Relaxed Denim Jacket" [ref=f8e584]
+              - img "Sand Linen Blazer" [ref=f8e586]
+            - button "Previous" [ref=f8e587] [cursor=pointer]:
+              - img [ref=f8e588]
+            - button "Next" [ref=f8e590] [cursor=pointer]:
+              - img [ref=f8e591]
+          - generic [ref=f8e593]:
+            - button "Slide 1" [ref=f8e594] [cursor=pointer]
+            - button "Slide 2" [ref=f8e595] [cursor=pointer]
+            - button "Slide 3" [ref=f8e596] [cursor=pointer]
+          - generic [ref=f8e597]:
+            - generic [ref=f8e598]: The Atelier Overshirt
+            - generic [ref=f8e599]: €340
+        - generic [ref=f8e603]:
+          - heading "Crafted to Last" [level=2] [ref=f8e604]:
+            - text: Crafted to
+            - emphasis [ref=f8e605]: Last
+          - paragraph [ref=f8e606]: Every piece begins in our Paris atelier — traceable fibres, hand-finishing, and a quiet patience you can feel the moment you put it on.
+    - region "Resort 2026 campaign" [ref=f8e607]:
+      - img "Resort 2026 campaign" [ref=f8e609]
+      - generic [ref=f8e611]: Côte d'Azur · 2026
+      - generic [ref=f8e613]:
+        - text: N°02
+        - generic [ref=f8e614]: The Seasonal Campaign
+        - heading "An Ode to Stillness" [level=2] [ref=f8e615]:
+          - text: An Ode to
+          - emphasis [ref=f8e616]: Stillness
+        - paragraph [ref=f8e617]: Captured at first light along the Riviera — a study in restraint, natural fibres, and the quiet confidence of a wardrobe built to last.
+        - generic [ref=f8e618]:
+          - link "Discover the Campaign" [ref=f8e619] [cursor=pointer]:
+            - /url: /shop
+            - text: Discover the Campaign
+            - img [ref=f8e620]
+          - link "Watch the Film" [ref=f8e622] [cursor=pointer]:
+            - /url: "#campaign-film"
+            - img [ref=f8e624]
+            - text: Watch the Film
+    - region "Testimonials and press" [ref=f8e626]:
+      - generic [ref=f8e627]:
+        - generic [ref=f8e628]: In Their Words
+        - heading "Voices on the Maison." [level=2] [ref=f8e629]:
+          - text: Voices on
+          - emphasis [ref=f8e630]: the Maison.
+        - paragraph [ref=f8e631]: From editors and architects to gallerists — those who wear Arden rarely need to be persuaded twice.
+      - generic [ref=f8e633]:
+        - article [ref=f8e634]:
+          - generic [ref=f8e635]: Verified Client · Paris
+          - paragraph [ref=f8e636]:
+            - text: A wardrobe philosophy more than a label. The cashmere is
+            - emphasis [ref=f8e637]: heirloom quality
+            - text: and the silhouette never dates.
+          - generic [ref=f8e638]:
+            - img "Adèle Roux" [ref=f8e639]
+            - generic [ref=f8e640]:
+              - generic [ref=f8e641]: Adèle Roux
+              - generic [ref=f8e642]: Stylist · Paris
+            - generic [ref=f8e643]:
+              - img [ref=f8e644]
+              - generic [ref=f8e646]: "4.9"
+        - article [ref=f8e647]:
+          - generic [ref=f8e648]: “
+          - generic [ref=f8e649]: Fashion Director · The Editorial
+          - paragraph [ref=f8e650]:
+            - text: Clothing that quietly outlasts every trend cycle —
+            - emphasis [ref=f8e651]: made the way it should be made,
+            - text: for women who already know what they want.
+          - generic [ref=f8e652]:
+            - img "Eloise Marchand" [ref=f8e653]
+            - generic [ref=f8e654]:
+              - generic [ref=f8e655]: Eloise Marchand
+              - generic [ref=f8e656]: Fashion Director · The Editorial, Paris
+            - generic [ref=f8e657]:
+              - img [ref=f8e658]
+              - generic [ref=f8e660]: "5.0"
+        - article [ref=f8e661]:
+          - generic [ref=f8e662]: Verified Client · Geneva
+          - paragraph [ref=f8e663]:
+            - text: The Arden Tote is the only bag I have carried for three years. It softens, it doesn't age — it
+            - emphasis [ref=f8e664]: deepens.
+          - generic [ref=f8e665]:
+            - img "Sophie Lambert" [ref=f8e666]
+            - generic [ref=f8e667]:
+              - generic [ref=f8e668]: Sophie Lambert
+              - generic [ref=f8e669]: Architect · Geneva
+            - generic [ref=f8e670]:
+              - img [ref=f8e671]
+              - generic [ref=f8e673]: "5.0"
+        - article [ref=f8e674]:
+          - generic [ref=f8e675]: Verified Client · London
+          - paragraph [ref=f8e676]:
+            - text: Few houses achieve what Arden does —
+            - emphasis [ref=f8e677]: restraint that feels generous,
+            - text: not austere. My coat is four years old and still draws compliments.
+          - generic [ref=f8e678]:
+            - img "Hugo Bertin" [ref=f8e679]
+            - generic [ref=f8e680]:
+              - generic [ref=f8e681]: Hugo Bertin
+              - generic [ref=f8e682]: Editor · The Modernist
+            - generic [ref=f8e683]:
+              - img [ref=f8e684]
+              - generic [ref=f8e686]: "5.0"
+        - article [ref=f8e687]:
+          - generic [ref=f8e688]: “
+          - generic [ref=f8e689]: Museum Director · Paris
+          - paragraph [ref=f8e690]:
+            - text: Maison Arden understands that true luxury is not what you see —
+            - emphasis [ref=f8e691]: it is what you feel when you put it on.
+          - generic [ref=f8e692]:
+            - img "Isabelle Renard" [ref=f8e693]
+            - generic [ref=f8e694]:
+              - generic [ref=f8e695]: Isabelle Renard
+              - generic [ref=f8e696]: Director · Musée des Arts Décoratifs
+            - generic [ref=f8e697]:
+              - img [ref=f8e698]
+              - generic [ref=f8e700]: "5.0"
+        - article [ref=f8e701]:
+          - generic [ref=f8e702]: Verified Client · Lyon
+          - paragraph [ref=f8e703]:
+            - text: I wore my Arden coat to a gallery opening and three people asked who made it. That is the quiet power of
+            - emphasis [ref=f8e704]: considered design.
+          - generic [ref=f8e705]:
+            - img "Mireille Fontaine" [ref=f8e706]
+            - generic [ref=f8e707]:
+              - generic [ref=f8e708]: Mireille Fontaine
+              - generic [ref=f8e709]: Gallerist · Lyon
+            - generic [ref=f8e710]:
+              - img [ref=f8e711]
+              - generic [ref=f8e713]: "4.9"
+        - article [ref=f8e714]:
+          - generic [ref=f8e715]: Verified Client · London
+          - paragraph [ref=f8e716]:
+            - text: Every piece I own has been worn weekly for years. Nothing has pilled or lost its shape. This is what
+            - emphasis [ref=f8e717]: investment dressing
+            - text: truly means.
+          - generic [ref=f8e718]:
+            - img "Clara Winthorpe" [ref=f8e719]
+            - generic [ref=f8e720]:
+              - generic [ref=f8e721]: Clara Winthorpe
+              - generic [ref=f8e722]: Creative Consultant · London
+            - generic [ref=f8e723]:
+              - img [ref=f8e724]
+              - generic [ref=f8e726]: "5.0"
+        - article [ref=f8e727]:
+          - generic [ref=f8e728]: “
+          - generic [ref=f8e729]: Journalist · Le Monde
+          - paragraph [ref=f8e730]:
+            - text: A house that designs for the woman who already knows her taste. Arden does not try to dazzle —
+            - emphasis [ref=f8e731]: it simply endures.
+          - generic [ref=f8e732]:
+            - img "Camille Dubois" [ref=f8e733]
+            - generic [ref=f8e734]:
+              - generic [ref=f8e735]: Camille Dubois
+              - generic [ref=f8e736]: Fashion Journalist · Le Monde
+            - generic [ref=f8e737]:
+              - img [ref=f8e738]
+              - generic [ref=f8e740]: "5.0"
+        - article [ref=f8e741]:
+          - generic [ref=f8e742]: Verified Client · Warsaw
+          - paragraph [ref=f8e743]:
+            - text: The cashmere coat I bought three seasons ago has only grown more beautiful with wear.
+            - emphasis [ref=f8e744]: This is the wardrobe I always wanted to build.
+          - generic [ref=f8e745]:
+            - img "Nathalie Kowalski" [ref=f8e746]
+            - generic [ref=f8e747]:
+              - generic [ref=f8e748]: Nathalie Kowalski
+              - generic [ref=f8e749]: Art Director · Warsaw
+            - generic [ref=f8e750]:
+              - img [ref=f8e751]
+              - generic [ref=f8e753]: "5.0"
+      - navigation "Testimonial navigation" [ref=f8e754]:
+        - tablist [ref=f8e755]:
+          - tab "Slide 1" [ref=f8e756] [cursor=pointer]
+          - tab "Slide 2" [ref=f8e757] [cursor=pointer]
+          - tab "Slide 3" [ref=f8e758] [cursor=pointer]
+          - tab "Slide 4" [ref=f8e759] [cursor=pointer]
+          - tab "Slide 5" [ref=f8e760] [cursor=pointer]
+          - tab "Slide 6" [ref=f8e761] [cursor=pointer]
+          - tab "Slide 7" [ref=f8e762] [cursor=pointer]
+      - generic [ref=f8e763]:
+        - generic [ref=f8e766]: As Seen In
+        - generic [ref=f8e769]:
+          - generic [ref=f8e770]: Vogue
+          - generic [ref=f8e771]: ◆
+          - generic [ref=f8e772]: Harper's Bazaar
+          - generic [ref=f8e773]: ◆
+          - generic [ref=f8e774]: T Magazine
+          - generic [ref=f8e775]: ◆
+          - generic [ref=f8e776]: FT How To Spend It
+          - generic [ref=f8e777]: ◆
+          - generic [ref=f8e778]: L'Officiel
+          - generic [ref=f8e779]: ◆
+          - generic [ref=f8e780]: Vanity Fair
+          - generic [ref=f8e781]: ◆
+          - generic [ref=f8e782]: Wallpaper*
+          - generic [ref=f8e783]: ◆
+          - generic [ref=f8e784]: Monocle
+          - generic [ref=f8e785]: ◆
+          - generic [ref=f8e786]: Vogue
+          - generic [ref=f8e787]: ◆
+          - generic [ref=f8e788]: Harper's Bazaar
+          - generic [ref=f8e789]: ◆
+          - generic [ref=f8e790]: T Magazine
+          - generic [ref=f8e791]: ◆
+          - generic [ref=f8e792]: FT How To Spend It
+          - generic [ref=f8e793]: ◆
+          - generic [ref=f8e794]: L'Officiel
+          - generic [ref=f8e795]: ◆
+          - generic [ref=f8e796]: Vanity Fair
+          - generic [ref=f8e797]: ◆
+          - generic [ref=f8e798]: Wallpaper*
+          - generic [ref=f8e799]: ◆
+          - generic [ref=f8e800]: Monocle
+          - generic [ref=f8e801]: ◆
+    - region "The journal" [ref=f8e802]:
+      - generic [ref=f8e803]:
+        - generic [ref=f8e804]:
+          - generic [ref=f8e805]: The Journal
+          - heading "Notes & Stories" [level=2] [ref=f8e806]:
+            - text: Notes &
+            - emphasis [ref=f8e807]: Stories
+        - generic [ref=f8e808]:
+          - article [ref=f8e809]:
+            - link "Wardrobe Building a Wardrobe That Lasts a Decade" [ref=f8e810] [cursor=pointer]:
+              - /url: /blog/building-a-wardrobe-that-lasts-a-decade
+              - generic [ref=f8e811]: Wardrobe
+              - img "Building a Wardrobe That Lasts a Decade" [ref=f8e812]
+            - generic [ref=f8e813]:
+              - generic [ref=f8e814]: Wardrobe · 6 min read
+              - heading "Building a Wardrobe That Lasts a Decade" [level=3] [ref=f8e815]
+              - paragraph [ref=f8e816]: The pieces worth investing in, how to choose them, and why fewer truly is more — a slow, considered approach to dressing well for years rather than seasons.
+              - link "Read Article" [ref=f8e817] [cursor=pointer]:
+                - /url: /blog/building-a-wardrobe-that-lasts-a-decade
+                - text: Read Article
+                - img [ref=f8e818]
+          - article [ref=f8e820]:
+            - link "Wardrobe The Art of Slow Living" [ref=f8e821] [cursor=pointer]:
+              - /url: /blog/building-a-wardrobe-that-lasts-a-decade
+              - generic [ref=f8e822]: Wardrobe
+              - img "The Art of Slow Living" [ref=f8e823]
+            - generic [ref=f8e824]:
+              - generic [ref=f8e825]: Wardrobe · 5 min read
+              - heading "The Art of Slow Living" [level=3] [ref=f8e826]
+              - paragraph [ref=f8e827]: Finding beauty in the unhurried paces of craftsmanship and style.
+              - link "Read Article" [ref=f8e828] [cursor=pointer]:
+                - /url: /blog/building-a-wardrobe-that-lasts-a-decade
+                - text: Read Article
+                - img [ref=f8e829]
+          - article [ref=f8e831]:
+            - link "Care Crafting the Perfect Coat" [ref=f8e832] [cursor=pointer]:
+              - /url: /blog/building-a-wardrobe-that-lasts-a-decade
+              - generic [ref=f8e833]: Care
+              - img "Crafting the Perfect Coat" [ref=f8e834]
+            - generic [ref=f8e835]:
+              - generic [ref=f8e836]: Care · 8 min read
+              - heading "Crafting the Perfect Coat" [level=3] [ref=f8e837]
+              - paragraph [ref=f8e838]: A morning with the hands that shape every Maison Arden piece.
+              - link "Read Article" [ref=f8e839] [cursor=pointer]:
+                - /url: /blog/building-a-wardrobe-that-lasts-a-decade
+                - text: Read Article
+                - img [ref=f8e840]
+    - region "Newsletter" [ref=f8e842]:
+      - generic [ref=f8e844]:
+        - generic: Arden
+        - generic [ref=f8e845]:
+          - generic [ref=f8e846]: The Maison Letter
+          - heading "Considered style, in your inbox." [level=2] [ref=f8e847]:
+            - text: Considered style,
+            - emphasis [ref=f8e848]: in your inbox.
+          - paragraph [ref=f8e849]: Be first to see new collections, atelier stories and seasonal lookbooks — thoughtfully sent, never noisy.
+        - generic [ref=f8e850]:
+          - generic [ref=f8e851]:
+            - textbox "Email" [ref=f8e852]:
+              - /placeholder: Your email address
+            - button "Subscribe" [ref=f8e853] [cursor=pointer]
+          - generic [ref=f8e854]:
+            - generic [ref=f8e855]:
+              - img [ref=f8e856]
+              - text: Early Access
+            - generic [ref=f8e858]:
+              - img [ref=f8e859]
+              - text: Member Events
+            - generic [ref=f8e861]:
+              - img [ref=f8e862]
+              - text: Seasonal Lookbooks
+          - paragraph [ref=f8e864]: By subscribing you agree to our Privacy Policy. Unsubscribe anytime.
+  - contentinfo [ref=f8e865]:
+    - generic [ref=f8e866]:
+      - generic [ref=f8e867]:
+        - generic [ref=f8e868]: VELVET
+        - generic [ref=f8e869]: EST. MMXIV · PARIS
+        - paragraph [ref=f8e870]: Quiet luxury, considered and made to last — designed in Paris, finished by hand across Europe.
+        - generic [ref=f8e871]:
+          - link "client@maisonarden.com" [ref=f8e872] [cursor=pointer]:
+            - /url: mailto:client@maisonarden.com
+            - img [ref=f8e873]
+            - text: client@maisonarden.com
+          - link "+33 1 00 00 00 00" [ref=f8e876] [cursor=pointer]:
+            - /url: tel:+33100000000
+            - img [ref=f8e877]
+            - text: +33 1 00 00 00 00
+        - generic [ref=f8e879]:
+          - link "Instagram" [ref=f8e880] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f8e881]
+          - link "Pinterest" [ref=f8e885] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f8e886]
+          - link "TikTok" [ref=f8e889] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f8e890]
+      - generic [ref=f8e893]:
+        - heading "Shop" [level=4] [ref=f8e894]
+        - list [ref=f8e895]:
+          - listitem [ref=f8e896]:
+            - link "Women" [ref=f8e897] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e898]:
+            - link "Men" [ref=f8e899] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e900]:
+            - link "Tailoring" [ref=f8e901] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e902]:
+            - link "Knitwear" [ref=f8e903] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e904]:
+            - link "New Arrivals" [ref=f8e905] [cursor=pointer]:
+              - /url: /shop
+      - generic [ref=f8e906]:
+        - heading "Maison" [level=4] [ref=f8e907]
+        - list [ref=f8e908]:
+          - listitem [ref=f8e909]:
+            - link "Our Story" [ref=f8e910] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e911]:
+            - link "Craftsmanship" [ref=f8e912] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e913]:
+            - link "Sustainability" [ref=f8e914] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e915]:
+            - link "The Journal" [ref=f8e916] [cursor=pointer]:
+              - /url: /blog
+          - listitem [ref=f8e917]:
+            - link "Careers" [ref=f8e918] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=f8e919]:
+        - heading "Client Care" [level=4] [ref=f8e920]
+        - list [ref=f8e921]:
+          - listitem [ref=f8e922]:
+            - link "Contact" [ref=f8e923] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e924]:
+            - link "Shipping & Returns" [ref=f8e925] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e926]:
+            - link "Lifetime Repairs" [ref=f8e927] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e928]:
+            - link "Size Guide" [ref=f8e929] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e930]:
+            - link "FAQ" [ref=f8e931] [cursor=pointer]:
+              - /url: /contact
+    - generic [ref=f8e932]:
+      - generic [ref=f8e933]: Visit the atelier — 18 Rue Saint-Honoré, Paris
+      - link "Book an Appointment" [ref=f8e934] [cursor=pointer]:
+        - /url: "#appointment"
+        - text: Book an Appointment
+        - img [ref=f8e935]
+    - generic: MAISON ARDEN
+    - generic [ref=f8e938]:
+      - generic [ref=f8e939]: © 2026 Maison Arden. All rights reserved.
+      - generic [ref=f8e940]:
+        - generic [ref=f8e941]: Visa
+        - generic [ref=f8e942]: MC
+        - generic [ref=f8e943]: Amex
+        - generic [ref=f8e944]: PayPal
+      - generic [ref=f8e945]:
+        - link "Privacy" [ref=f8e946] [cursor=pointer]:
+          - /url: /privacy
+        - link "Terms" [ref=f8e947] [cursor=pointer]:
+          - /url: /terms
+        - link "Cookies" [ref=f8e948] [cursor=pointer]:
+          - /url: /cookies
+        - link "Back to top" [ref=f8e949] [cursor=pointer]:
+          - /url: "#top"
+          - text: Back to top
+          - img [ref=f8e950]
+  - dialog [ref=f8e952]:
+    - generic [ref=f8e953]:
+      - generic [ref=f8e954]:
+        - generic [ref=f8e955]: Your Selection
+        - heading [level=2] [ref=f8e956]: Shopping Bag 0
+      - button [ref=f8e957] [cursor=pointer]:
+        - img [ref=f8e958]
+    - generic [ref=f8e961]:
+      - img [ref=f8e962]
+      - text: You are
+      - strong [ref=f8e965]: €1,180
+      - text: away from complimentary shipping
+    - list [ref=f8e967]:
+      - listitem [ref=f8e968]:
+        - link [ref=f8e969] [cursor=pointer]:
+          - /url: /products/white-cotton-shirt
+          - img [ref=f8e970]
+        - generic [ref=f8e971]:
+          - generic [ref=f8e972]:
+            - heading [level=3] [ref=f8e973]: Cozy Knit Oversized Sweater
+            - button [ref=f8e974] [cursor=pointer]:
+              - img [ref=f8e975]
+          - paragraph [ref=f8e977]: XS
+          - generic [ref=f8e978]:
+            - generic [ref=f8e979]:
+              - button [ref=f8e980] [cursor=pointer]:
+                - img [ref=f8e981]
+              - generic [ref=f8e982]: "3"
+              - button [ref=f8e983] [cursor=pointer]:
+                - img [ref=f8e984]
+            - generic [ref=f8e986]: €3
+    - generic [ref=f8e987]:
+      - generic [ref=f8e988]:
+        - generic [ref=f8e989]: Subtotal
+        - generic [ref=f8e990]: €0
+      - generic [ref=f8e991]:
+        - generic [ref=f8e992]: Shipping
+        - generic [ref=f8e993]: Complimentary
+      - generic [ref=f8e995]:
+        - generic [ref=f8e996]: Total
+        - generic [ref=f8e997]: €0
+      - link [ref=f8e998] [cursor=pointer]:
+        - /url: "#"
+        - text: Proceed to Checkout
+        - img [ref=f8e999]
+      - button [ref=f8e1001] [cursor=pointer]: Continue Shopping
+  - dialog [ref=f8e1002]:
+    - generic [ref=f8e1003]:
+      - generic [ref=f8e1004]:
+        - generic [ref=f8e1005]: Saved Pieces
+        - heading [level=2] [ref=f8e1006]: Wishlist 0
+      - button [ref=f8e1007] [cursor=pointer]:
+        - img [ref=f8e1008]
+    - generic [ref=f8e1010]:
+      - paragraph [ref=f8e1011]: Your wishlist is currently empty.
+      - link [ref=f8e1012] [cursor=pointer]:
+        - /url: /shop
+        - text: Explore The Collection

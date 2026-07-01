@@ -1,0 +1,3 @@
+[ 1334270ms] ReferenceError: persistedCompareItems is not defined
+    at http://localhost:4323/@id/D:/Astro%20Templates/velvet/src/components/layout/BaseLayout.astro?astro&type=script&index=0&lang.ts:140:1
+[ 1901449ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4323/cart:0

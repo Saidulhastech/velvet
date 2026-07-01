@@ -1,0 +1,544 @@
+- generic [active] [ref=f4e1]:
+  - paragraph [ref=f4e5]: Complimentary shipping & returns worldwide — Resort 2026 has arrived
+  - generic [ref=f4e8]:
+    - generic [ref=f4e9]:
+      - generic [ref=f4e10]:
+        - img [ref=f4e11]
+        - text: Secure Payments
+      - link "Find a Boutique" [ref=f4e15] [cursor=pointer]:
+        - /url: /contact#boutiques
+      - link "Lifetime Repairs" [ref=f4e17] [cursor=pointer]:
+        - /url: /about#repairs
+    - generic [ref=f4e19] [cursor=pointer]:
+      - generic:
+        - img
+        - generic: EN / USD
+        - img
+      - combobox "Country and currency" [ref=f4e20]:
+        - option "United Arab Emirates (USD)"
+        - option "Austria (USD)"
+        - option "Australia (USD)"
+        - option "Belgium (USD)"
+        - option "Canada (USD)"
+        - option "Switzerland (USD)"
+        - option "Czechia (USD)"
+        - option "Germany (USD)"
+        - option "Denmark (USD)"
+        - option "Spain (USD)"
+        - option "Finland (USD)"
+        - option "France (USD)"
+        - option "United Kingdom (USD)"
+        - option "Hong Kong SAR (USD)"
+        - option "Ireland (USD)"
+        - option "Israel (USD)"
+        - option "Italy (USD)"
+        - option "Japan (USD)"
+        - option "South Korea (USD)"
+        - option "Malaysia (USD)"
+        - option "Netherlands (USD)"
+        - option "Norway (USD)"
+        - option "New Zealand (USD)"
+        - option "Poland (USD)"
+        - option "Portugal (USD)"
+        - option "Sweden (USD)"
+        - option "Singapore (USD)"
+        - option "United States (USD)" [selected]
+  - banner [ref=f4e21]:
+    - generic [ref=f4e22]:
+      - navigation "Primary" [ref=f4e23]:
+        - list [ref=f4e24]:
+          - listitem [ref=f4e25]:
+            - link "Women" [ref=f4e26] [cursor=pointer]:
+              - /url: /shop?gender=women
+              - text: Women
+              - img
+          - listitem [ref=f4e28]:
+            - link "Men" [ref=f4e29] [cursor=pointer]:
+              - /url: /shop?gender=men
+              - text: Men
+              - img
+          - listitem [ref=f4e31]:
+            - link "Bags" [ref=f4e32] [cursor=pointer]:
+              - /url: /shop?category=bags
+              - text: Bags
+              - img
+          - listitem [ref=f4e34]:
+            - link "Accessories" [ref=f4e35] [cursor=pointer]:
+              - /url: /shop?category=accessories
+          - listitem [ref=f4e36]:
+            - link "Journal N" [ref=f4e37] [cursor=pointer]:
+              - /url: /blog
+              - text: Journal
+              - generic [ref=f4e38]: "N"
+      - link "Maison Arden — Home" [ref=f4e39] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f4e40]: VELVET
+        - generic [ref=f4e42]: EST. MMXIV · PARIS
+      - generic [ref=f4e43]:
+        - generic [ref=f4e44]:
+          - searchbox "Search"
+          - button "Search" [ref=f4e45] [cursor=pointer]:
+            - img [ref=f4e46]
+        - link "Account" [ref=f4e50] [cursor=pointer]:
+          - /url: /account
+          - img [ref=f4e51]
+        - button "Wishlist" [ref=f4e54] [cursor=pointer]:
+          - img [ref=f4e55]
+          - generic [ref=f4e57]: "0"
+        - button "Cart" [ref=f4e58] [cursor=pointer]:
+          - img [ref=f4e59]
+          - generic [ref=f4e62]: "0"
+  - main [ref=f4e63]:
+    - generic [ref=f4e65]:
+      - generic [ref=f4e66]:
+        - link "Home" [ref=f4e67] [cursor=pointer]:
+          - /url: /
+        - text: /
+        - link "Shop" [ref=f4e68] [cursor=pointer]:
+          - /url: /shop
+        - text: / Shopping Bag
+      - heading "Shopping Bag" [level=1] [ref=f4e69]:
+        - text: Shopping
+        - emphasis [ref=f4e70]: Bag
+      - paragraph [ref=f4e71]: Review your selection before checkout. Items are reserved for you for a limited time.
+    - region "Shopping bag" [ref=f4e72]:
+      - generic [ref=f4e73]:
+        - paragraph [ref=f4e75]:
+          - img [ref=f4e76]
+          - text: You are
+          - strong [ref=f4e81]: €1,799
+          - text: away from complimentary standard shipping
+        - generic [ref=f4e83]:
+          - generic [ref=f4e84]: Product
+          - generic [ref=f4e85]: Price
+          - generic [ref=f4e86]: Quantity
+          - generic [ref=f4e87]: Total
+        - generic [ref=f4e89]:
+          - img "Cozy Knit Oversized Sweater" [ref=f4e91]
+          - generic [ref=f4e92]:
+            - text: Maison Arden
+            - heading "Cozy Knit Oversized Sweater" [level=3] [ref=f4e93]:
+              - link "Cozy Knit Oversized Sweater" [ref=f4e94] [cursor=pointer]:
+                - /url: /products/white-cotton-shirt
+            - generic [ref=f4e96]: Size XS
+            - generic [ref=f4e97]:
+              - button "Save for Later" [ref=f4e98] [cursor=pointer]
+              - button "Remove" [ref=f4e99] [cursor=pointer]
+          - generic [ref=f4e100]: €1
+          - generic [ref=f4e101]:
+            - button "Decrease" [ref=f4e102] [cursor=pointer]:
+              - img [ref=f4e103]
+            - generic [ref=f4e104]: "1"
+            - button "Increase" [ref=f4e105] [cursor=pointer]:
+              - img [ref=f4e106]
+          - generic [ref=f4e108]: €1
+        - generic [ref=f4e110]: Order Options
+        - generic [ref=f4e112]:
+          - generic [ref=f4e113]:
+            - img [ref=f4e115]
+            - generic [ref=f4e120]:
+              - generic [ref=f4e121]: Shipping Method
+              - generic [ref=f4e122]: Choose how fast you would like your order
+          - generic [ref=f4e123]:
+            - generic [ref=f4e124] [cursor=pointer]:
+              - generic [ref=f4e126]:
+                - generic [ref=f4e127]: Standard Courier
+                - generic [ref=f4e128]: 3–5 business days
+              - generic [ref=f4e129]: Free
+            - generic [ref=f4e130] [cursor=pointer]:
+              - generic [ref=f4e132]:
+                - generic [ref=f4e133]: Express Air
+                - generic [ref=f4e134]: 1–2 business days
+              - generic [ref=f4e135]: +€14
+            - generic [ref=f4e136] [cursor=pointer]:
+              - generic [ref=f4e138]:
+                - generic [ref=f4e139]: Same-Day Rush
+                - generic [ref=f4e140]: Order before 2pm · select cities
+              - generic [ref=f4e141]: +€29
+            - generic [ref=f4e142] [cursor=pointer]:
+              - generic [ref=f4e144]:
+                - generic [ref=f4e145]: Boutique Pickup
+                - generic [ref=f4e146]: Ready in 2 hours · Paris flagship
+              - generic [ref=f4e147]: Free
+        - generic [ref=f4e148]:
+          - generic [ref=f4e149]:
+            - generic [ref=f4e150]:
+              - generic [ref=f4e151]:
+                - img [ref=f4e153]
+                - generic [ref=f4e156]:
+                  - generic [ref=f4e157]: Delivery Date
+                  - generic [ref=f4e158]: Pick a preferred day
+              - textbox "Preferred delivery date" [ref=f4e159]
+              - paragraph [ref=f4e160]:
+                - img [ref=f4e161]
+                - text: Leave blank for the earliest available date. We’ll confirm your delivery window by email.
+            - generic [ref=f4e164]:
+              - generic [ref=f4e165]:
+                - img [ref=f4e167]
+                - generic [ref=f4e170]:
+                  - generic [ref=f4e171]: Order Notes
+                  - generic [ref=f4e172]: Delivery instructions
+              - textbox "Leave a note for our team — buzzer code, drop-off spot, anything else…" [ref=f4e173]
+          - generic [ref=f4e174]:
+            - generic [ref=f4e175]:
+              - generic [ref=f4e176]:
+                - img [ref=f4e178]
+                - generic [ref=f4e181]:
+                  - generic [ref=f4e182]: Protection Plan
+                  - generic [ref=f4e183]: Repairs, damage & care
+              - generic [ref=f4e184]:
+                - generic [ref=f4e185] [cursor=pointer]:
+                  - generic [ref=f4e188]: No coverage
+                  - generic [ref=f4e189]: Free
+                - generic [ref=f4e190] [cursor=pointer]:
+                  - generic [ref=f4e193]: 2-Year Care
+                  - generic [ref=f4e194]: +€49
+                - generic [ref=f4e195] [cursor=pointer]:
+                  - generic [ref=f4e198]: 3-Year Care
+                  - generic [ref=f4e199]: +€79
+            - generic [ref=f4e200]:
+              - generic [ref=f4e201]:
+                - img [ref=f4e203]
+                - generic [ref=f4e207]:
+                  - generic [ref=f4e208]: Gift Wrap
+                  - generic [ref=f4e209]: Ivory box · satin ribbon · card
+              - generic [ref=f4e210]:
+                - generic [ref=f4e211]:
+                  - generic [ref=f4e212]: Add gift wrapping +€12
+                  - generic [ref=f4e213]: Hand-finished with a written message card.
+                - generic [ref=f4e214]:
+                  - checkbox
+              - textbox "Your gift message (optional)…" [ref=f4e216]
+      - complementary "Order summary" [ref=f4e217]:
+        - generic [ref=f4e218]:
+          - text: Order Summary
+          - heading "Your Total" [level=2] [ref=f4e219]
+        - generic [ref=f4e220]:
+          - generic [ref=f4e221]:
+            - generic [ref=f4e222]: Subtotal (1 items)
+            - generic [ref=f4e223]: €1
+          - generic [ref=f4e224]:
+            - generic [ref=f4e225]: Shipping
+            - generic [ref=f4e226]: Complimentary
+          - generic [ref=f4e227]:
+            - generic [ref=f4e228]: Duties & Taxes
+            - generic [ref=f4e229]: At checkout
+          - generic [ref=f4e231]:
+            - generic [ref=f4e232]: Estimated Total
+            - generic [ref=f4e233]: €1
+        - generic [ref=f4e235]:
+          - textbox "Coupon or gift card code" [ref=f4e236]
+          - button "Apply" [ref=f4e237] [cursor=pointer]
+        - generic [ref=f4e238]:
+          - link "Proceed to Checkout" [ref=f4e239] [cursor=pointer]:
+            - /url: "#"
+            - text: Proceed to Checkout
+            - img [ref=f4e240]
+          - generic [ref=f4e242]: or express checkout
+          - generic [ref=f4e243]:
+            - button " Pay" [ref=f4e244] [cursor=pointer]
+            - button "G Pay" [ref=f4e245] [cursor=pointer]
+        - generic [ref=f4e246]:
+          - generic [ref=f4e247]:
+            - img [ref=f4e248]
+            - text: SSL secure checkout
+          - generic [ref=f4e251]:
+            - img [ref=f4e252]
+            - text: Free returns within 30 days
+          - generic [ref=f4e254]:
+            - img [ref=f4e255]
+            - text: Lifetime repairs included
+        - paragraph [ref=f4e257]: Taxes & duties calculated at checkout. All prices in EUR.
+    - region "You may also like" [ref=f4e258]:
+      - generic [ref=f4e259]:
+        - generic [ref=f4e260]:
+          - generic [ref=f4e261]:
+            - generic [ref=f4e262]: Add to Your Order
+            - heading "You May Also Like" [level=2] [ref=f4e263]:
+              - text: You May Also
+              - emphasis [ref=f4e264]: Like
+          - link "View All" [ref=f4e265] [cursor=pointer]:
+            - /url: /shop
+            - text: View All
+            - img [ref=f4e266]
+        - generic [ref=f4e268]:
+          - article [ref=f4e269]:
+            - generic [ref=f4e270]:
+              - generic [ref=f4e271]:
+                - button "Add to wishlist" [ref=f4e272] [cursor=pointer]:
+                  - img [ref=f4e273]
+                - button "Add to compare" [ref=f4e275] [cursor=pointer]:
+                  - img [ref=f4e276]
+                - button "Quick view" [ref=f4e278] [cursor=pointer]:
+                  - img [ref=f4e279]
+              - link "Classic Black Denim Jacket" [ref=f4e282] [cursor=pointer]:
+                - /url: /products/striped-skirt-and-top
+                - img "Classic Black Denim Jacket" [ref=f4e283]
+              - button "Add to Bag" [ref=f4e284] [cursor=pointer]
+            - generic [ref=f4e285]:
+              - generic [ref=f4e286]:
+                - generic "black" [ref=f4e287] [cursor=pointer]
+                - generic "blue" [ref=f4e288] [cursor=pointer]
+                - generic "bronze orange" [ref=f4e289] [cursor=pointer]
+              - generic [ref=f4e290]: Women · Essentials
+              - heading "Classic Black Denim Jacket" [level=3] [ref=f4e291]:
+                - link "Classic Black Denim Jacket" [ref=f4e292] [cursor=pointer]:
+                  - /url: /products/striped-skirt-and-top
+              - generic [ref=f4e293]:
+                - generic [ref=f4e294]: $1
+                - generic [ref=f4e295]: ★ 4.8
+          - article [ref=f4e296]:
+            - generic [ref=f4e297]:
+              - generic [ref=f4e298]:
+                - button "Add to wishlist" [ref=f4e299] [cursor=pointer]:
+                  - img [ref=f4e300]
+                - button "Add to compare" [ref=f4e302] [cursor=pointer]:
+                  - img [ref=f4e303]
+                - button "Quick view" [ref=f4e305] [cursor=pointer]:
+                  - img [ref=f4e306]
+              - link "Cozy Knit Oversized Sweater" [ref=f4e309] [cursor=pointer]:
+                - /url: /products/white-cotton-shirt
+                - img "Cozy Knit Oversized Sweater" [ref=f4e310]
+              - button "Add to Bag" [ref=f4e311] [cursor=pointer]
+            - generic [ref=f4e312]:
+              - generic [ref=f4e313]: Women · Essentials
+              - heading "Cozy Knit Oversized Sweater" [level=3] [ref=f4e314]:
+                - link "Cozy Knit Oversized Sweater" [ref=f4e315] [cursor=pointer]:
+                  - /url: /products/white-cotton-shirt
+              - generic [ref=f4e316]:
+                - generic [ref=f4e317]: $1
+                - generic [ref=f4e318]: ★ 4.8
+          - article [ref=f4e319]:
+            - generic [ref=f4e320]:
+              - generic [ref=f4e321]:
+                - button "Add to wishlist" [ref=f4e322] [cursor=pointer]:
+                  - img [ref=f4e323]
+                - button "Add to compare" [ref=f4e325] [cursor=pointer]:
+                  - img [ref=f4e326]
+                - button "Quick view" [ref=f4e328] [cursor=pointer]:
+                  - img [ref=f4e329]
+              - link "Classic Striped Button-Up Shirt" [ref=f4e332] [cursor=pointer]:
+                - /url: /products/olive-green-jacket
+                - img "Classic Striped Button-Up Shirt" [ref=f4e333]
+              - button "Add to Bag" [ref=f4e334] [cursor=pointer]
+            - generic [ref=f4e335]:
+              - generic [ref=f4e336]:
+                - generic "red" [ref=f4e337] [cursor=pointer]
+                - generic "yellow" [ref=f4e338] [cursor=pointer]
+                - generic "white" [ref=f4e339] [cursor=pointer]
+                - generic "black" [ref=f4e340] [cursor=pointer]
+              - generic [ref=f4e341]: Women · Essentials
+              - heading "Classic Striped Button-Up Shirt" [level=3] [ref=f4e342]:
+                - link "Classic Striped Button-Up Shirt" [ref=f4e343] [cursor=pointer]:
+                  - /url: /products/olive-green-jacket
+              - generic [ref=f4e344]:
+                - generic [ref=f4e345]: $1
+                - generic [ref=f4e346]: ★ 4.8
+          - article [ref=f4e347]:
+            - generic [ref=f4e348]:
+              - generic [ref=f4e349]:
+                - button "Add to wishlist" [ref=f4e350] [cursor=pointer]:
+                  - img [ref=f4e351]
+                - button "Add to compare" [ref=f4e353] [cursor=pointer]:
+                  - img [ref=f4e354]
+                - button "Quick view" [ref=f4e356] [cursor=pointer]:
+                  - img [ref=f4e357]
+              - link "Trendy Denim Jacket with Patches" [ref=f4e360] [cursor=pointer]:
+                - /url: /products/silk-summer-top
+                - img "Trendy Denim Jacket with Patches" [ref=f4e361]
+              - button "Add to Bag" [ref=f4e362] [cursor=pointer]
+            - generic [ref=f4e363]:
+              - generic [ref=f4e364]: Women · Essentials
+              - heading "Trendy Denim Jacket with Patches" [level=3] [ref=f4e365]:
+                - link "Trendy Denim Jacket with Patches" [ref=f4e366] [cursor=pointer]:
+                  - /url: /products/silk-summer-top
+              - generic [ref=f4e367]:
+                - generic [ref=f4e368]: $1
+                - generic [ref=f4e369]: ★ 4.8
+    - region "Newsletter" [ref=f4e370]:
+      - generic [ref=f4e372]:
+        - generic: Arden
+        - generic [ref=f4e373]:
+          - generic [ref=f4e374]: The Maison Letter
+          - heading "Considered style, in your inbox." [level=2] [ref=f4e375]:
+            - text: Considered style,
+            - emphasis [ref=f4e376]: in your inbox.
+          - paragraph [ref=f4e377]: Be first to see new collections, atelier stories and seasonal lookbooks — thoughtfully sent, never noisy.
+        - generic [ref=f4e378]:
+          - generic [ref=f4e379]:
+            - textbox "Email" [ref=f4e380]:
+              - /placeholder: Your email address
+            - button "Subscribe" [ref=f4e381] [cursor=pointer]
+          - generic [ref=f4e382]:
+            - generic [ref=f4e383]:
+              - img [ref=f4e384]
+              - text: Early Access
+            - generic [ref=f4e386]:
+              - img [ref=f4e387]
+              - text: Member Events
+            - generic [ref=f4e389]:
+              - img [ref=f4e390]
+              - text: Seasonal Lookbooks
+          - paragraph [ref=f4e392]: By subscribing you agree to our Privacy Policy. Unsubscribe anytime.
+  - contentinfo [ref=f4e393]:
+    - generic [ref=f4e394]:
+      - generic [ref=f4e395]:
+        - generic [ref=f4e396]: VELVET
+        - generic [ref=f4e397]: EST. MMXIV · PARIS
+        - paragraph [ref=f4e398]: Quiet luxury, considered and made to last — designed in Paris, finished by hand across Europe.
+        - generic [ref=f4e399]:
+          - link "client@maisonarden.com" [ref=f4e400] [cursor=pointer]:
+            - /url: mailto:client@maisonarden.com
+            - img [ref=f4e401]
+            - text: client@maisonarden.com
+          - link "+33 1 00 00 00 00" [ref=f4e404] [cursor=pointer]:
+            - /url: tel:+33100000000
+            - img [ref=f4e405]
+            - text: +33 1 00 00 00 00
+        - generic [ref=f4e407]:
+          - link "Instagram" [ref=f4e408] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f4e409]
+          - link "Pinterest" [ref=f4e413] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f4e414]
+          - link "TikTok" [ref=f4e417] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f4e418]
+      - generic [ref=f4e421]:
+        - heading "Shop" [level=4] [ref=f4e422]
+        - list [ref=f4e423]:
+          - listitem [ref=f4e424]:
+            - link "Women" [ref=f4e425] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f4e426]:
+            - link "Men" [ref=f4e427] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f4e428]:
+            - link "Tailoring" [ref=f4e429] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f4e430]:
+            - link "Knitwear" [ref=f4e431] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f4e432]:
+            - link "New Arrivals" [ref=f4e433] [cursor=pointer]:
+              - /url: /shop
+      - generic [ref=f4e434]:
+        - heading "Maison" [level=4] [ref=f4e435]
+        - list [ref=f4e436]:
+          - listitem [ref=f4e437]:
+            - link "Our Story" [ref=f4e438] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f4e439]:
+            - link "Craftsmanship" [ref=f4e440] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f4e441]:
+            - link "Sustainability" [ref=f4e442] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f4e443]:
+            - link "The Journal" [ref=f4e444] [cursor=pointer]:
+              - /url: /blog
+          - listitem [ref=f4e445]:
+            - link "Careers" [ref=f4e446] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=f4e447]:
+        - heading "Client Care" [level=4] [ref=f4e448]
+        - list [ref=f4e449]:
+          - listitem [ref=f4e450]:
+            - link "Contact" [ref=f4e451] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f4e452]:
+            - link "Shipping & Returns" [ref=f4e453] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f4e454]:
+            - link "Lifetime Repairs" [ref=f4e455] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f4e456]:
+            - link "Size Guide" [ref=f4e457] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f4e458]:
+            - link "FAQ" [ref=f4e459] [cursor=pointer]:
+              - /url: /contact
+    - generic [ref=f4e460]:
+      - generic [ref=f4e461]: Visit the atelier — 18 Rue Saint-Honoré, Paris
+      - link "Book an Appointment" [ref=f4e462] [cursor=pointer]:
+        - /url: "#appointment"
+        - text: Book an Appointment
+        - img [ref=f4e463]
+    - generic: MAISON ARDEN
+    - generic [ref=f4e466]:
+      - generic [ref=f4e467]: © 2026 Maison Arden. All rights reserved.
+      - generic [ref=f4e468]:
+        - generic [ref=f4e469]: Visa
+        - generic [ref=f4e470]: MC
+        - generic [ref=f4e471]: Amex
+        - generic [ref=f4e472]: PayPal
+      - generic [ref=f4e473]:
+        - link "Privacy" [ref=f4e474] [cursor=pointer]:
+          - /url: /privacy
+        - link "Terms" [ref=f4e475] [cursor=pointer]:
+          - /url: /terms
+        - link "Cookies" [ref=f4e476] [cursor=pointer]:
+          - /url: /cookies
+        - link "Back to top" [ref=f4e477] [cursor=pointer]:
+          - /url: "#top"
+          - text: Back to top
+          - img [ref=f4e478]
+  - dialog [ref=f4e480]:
+    - generic [ref=f4e481]:
+      - generic [ref=f4e482]:
+        - generic [ref=f4e483]: Your Selection
+        - heading [level=2] [ref=f4e484]: Shopping Bag 0
+      - button [ref=f4e485] [cursor=pointer]:
+        - img [ref=f4e486]
+    - generic [ref=f4e489]:
+      - img [ref=f4e490]
+      - text: You are
+      - strong [ref=f4e493]: €1,180
+      - text: away from complimentary shipping
+    - list [ref=f4e495]:
+      - listitem [ref=f4e496]:
+        - link [ref=f4e497] [cursor=pointer]:
+          - /url: /products/white-cotton-shirt
+          - img [ref=f4e498]
+        - generic [ref=f4e499]:
+          - generic [ref=f4e500]:
+            - heading [level=3] [ref=f4e501]: Cozy Knit Oversized Sweater
+            - button [ref=f4e502] [cursor=pointer]:
+              - img [ref=f4e503]
+          - paragraph [ref=f4e505]: XS
+          - generic [ref=f4e506]:
+            - generic [ref=f4e507]:
+              - button [ref=f4e508] [cursor=pointer]:
+                - img [ref=f4e509]
+              - generic [ref=f4e510]: "1"
+              - button [ref=f4e511] [cursor=pointer]:
+                - img [ref=f4e512]
+            - generic [ref=f4e514]: €1
+    - generic [ref=f4e515]:
+      - generic [ref=f4e516]:
+        - generic [ref=f4e517]: Subtotal
+        - generic [ref=f4e518]: €0
+      - generic [ref=f4e519]:
+        - generic [ref=f4e520]: Shipping
+        - generic [ref=f4e521]: Complimentary
+      - generic [ref=f4e523]:
+        - generic [ref=f4e524]: Total
+        - generic [ref=f4e525]: €0
+      - link [ref=f4e526] [cursor=pointer]:
+        - /url: "#"
+        - text: Proceed to Checkout
+        - img [ref=f4e527]
+      - button [ref=f4e529] [cursor=pointer]: Continue Shopping
+  - dialog [ref=f4e530]:
+    - generic [ref=f4e531]:
+      - generic [ref=f4e532]:
+        - generic [ref=f4e533]: Saved Pieces
+        - heading [level=2] [ref=f4e534]: Wishlist 0
+      - button [ref=f4e535] [cursor=pointer]:
+        - img [ref=f4e536]
+    - generic [ref=f4e538]:
+      - paragraph [ref=f4e539]: Your wishlist is currently empty.
+      - link [ref=f4e540] [cursor=pointer]:
+        - /url: /shop
+        - text: Explore The Collection

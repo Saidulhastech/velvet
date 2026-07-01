@@ -156,8 +156,12 @@
         }, 300);
       });
 
-      // Add to bag
+      // Add to bag — multi-option items go to the PDP to pick a size.
       rowEl.querySelector('[data-add-bag-from-wish]')?.addEventListener('click', () => {
+        if (item.needsPicker && !item.size) {
+          window.location.href = `/products/${item.description || item.id}`;
+          return;
+        }
         addToCart({
           id: item.id,
           name: item.name,
@@ -172,10 +176,12 @@
     });
   });
 
-  // Add all items to bag
+  // Add all items to bag — skip multi-option items that still need a size choice;
+  // they stay in the wishlist for the shopper to add individually.
   addAllBtn?.addEventListener('click', () => {
     const items = persistedWishItems.get();
     items.forEach((item) => {
+      if (item.needsPicker && !item.size) return;
       addToCart({
         id: item.id,
         name: item.name,
@@ -186,7 +192,7 @@
         description: item.description || ''
       }, 1);
     });
-    persistedWishItems.set([]); // Clear wishlist
+    persistedWishItems.set(items.filter((i) => i.needsPicker && !i.size));
   });
 
   // Subscribe to count
@@ -253,8 +259,8 @@
   }
 
   .drawer__close {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--lux-light-border-strong);
     display: inline-flex;

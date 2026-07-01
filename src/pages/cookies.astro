@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../components/layout/BaseLayout.astro';
+
+const updated = 'January 2026';
+---
+
+<BaseLayout title="Cookie Policy" description="How Maison Arden uses cookies and similar technologies.">
+  <section class="legal">
+    <div class="legal__inner">
+      <div class="legal__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Cookies</span></div>
+      <h1 class="legal__title">Cookie <em>Policy</em></h1>
+      <p class="legal__updated">Last updated — {updated}</p>
+
+      <div class="legal__body">
+        <h2>What Are Cookies</h2>
+        <p>Cookies are small text files stored on your device that help a website function and remember your preferences. We use cookies and similar technologies to operate the store and understand how it is used.</p>
+
+        <h2>How We Use Cookies</h2>
+        <p><strong>Essential</strong> cookies keep your bag, market selection, and session working. <strong>Performance</strong> cookies help us understand usage so we can improve the experience. <strong>Preference</strong> cookies remember choices such as your region and language.</p>
+
+        <h2>Managing Cookies</h2>
+        <p>You can control or delete cookies through your browser settings. Disabling essential cookies may affect core features such as checkout and the shopping bag.</p>
+
+        <h2>Contact</h2>
+        <p>Questions about our use of cookies can be sent via the <a href="/contact">contact page</a>.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: clamp(56px, 8vw, 120px) var(--gutter) var(--section-y);
+  }
+  .legal__crumb {
+    font-size: 12px;
+    letter-spacing: .5px;
+    color: var(--lux-on-light-soft);
+    margin-bottom: 20px;
+  }
+  .legal__crumb a { color: var(--lux-on-light-soft); }
+  .legal__crumb a:hover { color: var(--lux-secondary-olive); }
+  .legal__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1.05;
+    color: var(--lux-on-light);
+    margin: 0 0 10px;
+  }
+  .legal__title em { font-style: italic; }
+  .legal__updated {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 44px;
+  }
+  .legal__body h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(20px, 3vw, 26px);
+    color: var(--lux-on-light);
+    margin: 36px 0 12px;
+  }
+  .legal__body p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 14px;
+  }
+  .legal__body a {
+    color: var(--lux-secondary-olive);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .legal__body strong { color: var(--lux-on-light); font-weight: 600; }
+</style>

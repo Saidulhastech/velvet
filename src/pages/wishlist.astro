@@ -102,6 +102,11 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
         setTimeout(() => removeFromWishlist(id), 250);
       });
       card.querySelector('[data-wl-add]')?.addEventListener('click', () => {
+        // Multi-option product with no chosen size → go to the PDP to pick one.
+        if (item.needsPicker && !item.size) {
+          window.location.href = `/products/${item.description || item.id}`;
+          return;
+        }
         addToCart({
           id: item.id,
           name: item.name,

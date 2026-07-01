@@ -141,18 +141,26 @@ const {
         if (addBagBtn) {
           // If it's a multi-add button (e.g., ShopTheLook), don't process it here
           if (addBagBtn.hasAttribute('data-ids')) return;
-          
+
           e.preventDefault();
           const card = addBagBtn.closest('.pc') as HTMLElement | null;
           if (card) {
+            // Multi-option product (e.g. Colour + Size) → open Quick View to pick a
+            // size and resolve the real variant, instead of adding the wrong one.
+            if (card.dataset.needsPicker === 'true') {
+              (card.querySelector('[data-qv]') as HTMLElement | null)?.click();
+              return;
+            }
             const dataset = card.dataset;
             const priceNum = parseFloat((dataset.price || '').replace(/[^0-9.]/g, '')) || 0;
             const resolvedImg = dataset.img || '';
             const activeSwatch = card.querySelector('.pc__sw.is-active') as HTMLElement | null;
             const color = activeSwatch ? activeSwatch.dataset.color : undefined;
             const swatchImg = activeSwatch ? activeSwatch.dataset.img : undefined;
+            // Colour-only / single-variant: the active swatch's variant (or the
+            // product's first variant) is the correct one; no size to choose.
             const variantId = addBagBtn.getAttribute('data-id') || dataset.id || '';
-            
+
             addToCart({
               id: variantId,
               name: dataset.name || '',
@@ -185,7 +193,8 @@ const {
               color: color || undefined,
               size: undefined,
               category: dataset.cat || '',
-              description: dataset.handle || ''
+              description: dataset.handle || '',
+              needsPicker: dataset.needsPicker === 'true'
             });
           }
         }
@@ -211,6 +220,7 @@ const {
               material: (dataset.material || '').split(' ')[0] || undefined,
               sizes: dataset.size || undefined,
               stock: dataset.stock || undefined,
+              needsPicker: dataset.needsPicker === 'true',
             });
           }
         }

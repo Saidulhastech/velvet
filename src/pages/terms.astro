@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../components/layout/BaseLayout.astro';
+
+const updated = 'January 2026';
+---
+
+<BaseLayout title="Terms of Service" description="The terms and conditions governing your use of the Maison Arden store.">
+  <section class="legal">
+    <div class="legal__inner">
+      <div class="legal__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Terms</span></div>
+      <h1 class="legal__title">Terms of <em>Service</em></h1>
+      <p class="legal__updated">Last updated — {updated}</p>
+
+      <div class="legal__body">
+        <h2>Agreement</h2>
+        <p>By accessing or purchasing from Maison Arden, you agree to these terms. Please read them carefully. If you do not agree, please refrain from using the store.</p>
+
+        <h2>Orders &amp; Pricing</h2>
+        <p>All orders are subject to acceptance and availability. Prices are shown in the currency of your selected market and may change without notice. We reserve the right to cancel any order where an item is mispriced or unavailable, in which case a full refund is issued.</p>
+
+        <h2>Shipping &amp; Returns</h2>
+        <p>Delivery times are estimates. Eligible items may be returned within the window stated at checkout, in original condition. Made-to-order and final-sale items are excluded unless faulty.</p>
+
+        <h2>Intellectual Property</h2>
+        <p>All content — imagery, text, and design — is the property of Maison Arden and may not be reproduced without written permission.</p>
+
+        <h2>Limitation of Liability</h2>
+        <p>To the fullest extent permitted by law, Maison Arden is not liable for indirect or consequential loss arising from use of the store.</p>
+
+        <h2>Contact</h2>
+        <p>For questions regarding these terms, reach us via the <a href="/contact">contact page</a>.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: clamp(56px, 8vw, 120px) var(--gutter) var(--section-y);
+  }
+  .legal__crumb {
+    font-size: 12px;
+    letter-spacing: .5px;
+    color: var(--lux-on-light-soft);
+    margin-bottom: 20px;
+  }
+  .legal__crumb a { color: var(--lux-on-light-soft); }
+  .legal__crumb a:hover { color: var(--lux-secondary-olive); }
+  .legal__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1.05;
+    color: var(--lux-on-light);
+    margin: 0 0 10px;
+  }
+  .legal__title em { font-style: italic; }
+  .legal__updated {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 44px;
+  }
+  .legal__body h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(20px, 3vw, 26px);
+    color: var(--lux-on-light);
+    margin: 36px 0 12px;
+  }
+  .legal__body p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 14px;
+  }
+  .legal__body a {
+    color: var(--lux-secondary-olive);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

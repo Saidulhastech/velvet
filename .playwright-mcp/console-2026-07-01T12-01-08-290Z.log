@@ -1,0 +1,8 @@
+[  182605ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:4323/@vite/client:1726
+[  196232ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4323/shop:0
+[  216292ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:4323/@vite/client:1726
+[  278484ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4323/shop:0
+[  332274ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:4323/@vite/client:1726
+[  349458ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4323/shop:0
+[  409002ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4323/shop:0
+[  465237ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:4323/@vite/client:1726

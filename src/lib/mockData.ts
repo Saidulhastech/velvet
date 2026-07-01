@@ -26,6 +26,23 @@ export interface Product {
   isFeatured?: boolean;
   isNew?: boolean;
   isBestSeller?: boolean;
+  /** Full Shopify variant matrix (size×colour → real variant). Absent for mock
+   *  entries; populated by the legacy bridge so grids/quick-view can resolve a
+   *  specific variant the same way the PDP does. */
+  variants?: {
+    id: string;
+    opts: Record<string, string>;
+    price: number;
+    compareAt: number | null;
+    available: boolean;
+    qty: number | null;
+    img: string | null;
+  }[];
+  /** Product options (name + values, colour values carry a hex). */
+  options?: { name: string; values: { name: string; color?: string | null }[] }[];
+  /** True when the product has ≥2 real options (e.g. Colour+Size) and >1 variant,
+   *  so a size/colour must be chosen (via Quick View) before adding to cart. */
+  needsPicker?: boolean;
 }
 
 export const products: Product[] = [

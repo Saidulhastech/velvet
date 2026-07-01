@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../components/layout/BaseLayout.astro';
+
+const updated = 'January 2026';
+---
+
+<BaseLayout title="Privacy Policy" description="How Maison Arden collects, uses, and protects your personal information.">
+  <section class="legal">
+    <div class="legal__inner">
+      <div class="legal__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Privacy</span></div>
+      <h1 class="legal__title">Privacy <em>Policy</em></h1>
+      <p class="legal__updated">Last updated — {updated}</p>
+
+      <div class="legal__body">
+        <h2>Overview</h2>
+        <p>Maison Arden ("we", "us") is committed to protecting your privacy. This policy explains what information we collect when you visit our store or place an order, how we use it, and the choices available to you.</p>
+
+        <h2>Information We Collect</h2>
+        <p>We collect information you provide directly — such as your name, email, shipping address, and payment details — when you create an account, place an order, or contact our client care team. We also collect limited technical data (device, browser, and usage information) to operate and improve the store.</p>
+
+        <h2>How We Use Your Information</h2>
+        <p>Your information is used to process orders, arrange delivery, respond to enquiries, prevent fraud, and — where you have opted in — send you editorial and product updates. We do not sell your personal information.</p>
+
+        <h2>Payments</h2>
+        <p>Payment transactions are processed by our payment providers over encrypted connections. We do not store full card details on our servers.</p>
+
+        <h2>Your Rights</h2>
+        <p>You may request access to, correction of, or deletion of your personal data, and you may withdraw marketing consent at any time by contacting <a href="mailto:client@maisonarden.com">client@maisonarden.com</a>.</p>
+
+        <h2>Contact</h2>
+        <p>Questions about this policy can be directed to our client care team via the <a href="/contact">contact page</a>.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: clamp(56px, 8vw, 120px) var(--gutter) var(--section-y);
+  }
+  .legal__crumb {
+    font-size: 12px;
+    letter-spacing: .5px;
+    color: var(--lux-on-light-soft);
+    margin-bottom: 20px;
+  }
+  .legal__crumb a { color: var(--lux-on-light-soft); }
+  .legal__crumb a:hover { color: var(--lux-secondary-olive); }
+  .legal__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1.05;
+    color: var(--lux-on-light);
+    margin: 0 0 10px;
+  }
+  .legal__title em { font-style: italic; }
+  .legal__updated {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 44px;
+  }
+  .legal__body h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(20px, 3vw, 26px);
+    color: var(--lux-on-light);
+    margin: 36px 0 12px;
+  }
+  .legal__body p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 14px;
+  }
+  .legal__body a {
+    color: var(--lux-secondary-olive);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

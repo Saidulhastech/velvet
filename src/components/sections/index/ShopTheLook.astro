@@ -53,6 +53,7 @@ const lookItems = await Promise.all([
         name: shopifyProduct.name,
         price: shopifyProduct.price,
         formattedPrice: shopifyProduct.formattedPrice,
+        needsPicker: shopifyProduct.needsPicker ?? false,
       };
     }
   } catch (err) {
@@ -107,6 +108,7 @@ const lookItems = await Promise.all([
             data-img={typeof item.image === 'string' ? item.image : item.image.src}
             data-color={item.color}
             data-handle={item.handle}
+            data-needs-picker={(item as any).needsPicker ? 'true' : 'false'}
           >
             <div class="look__row-thumb">
               <Image src={item.image} alt={item.name} width={66} height={66} />
@@ -175,19 +177,18 @@ const lookItems = await Promise.all([
       const rowEl = btn.closest('.look__row') as HTMLElement | null;
       if (rowEl) {
         const dataset = rowEl.dataset;
-        const id = dataset.id || '';
-        const name = dataset.name || '';
-        const price = parseFloat(dataset.price || '0');
-        const image = dataset.img || '';
-        const color = dataset.color || '';
         const handle = dataset.handle || '';
-        
+        // Multi-option piece → choose a size on the PDP instead of guessing.
+        if (dataset.needsPicker === 'true') {
+          window.location.href = `/products/${handle || dataset.id}`;
+          return;
+        }
         addToCart({
-          id,
-          name,
-          price,
-          image,
-          color: color || undefined,
+          id: dataset.id || '',
+          name: dataset.name || '',
+          price: parseFloat(dataset.price || '0'),
+          image: dataset.img || '',
+          color: dataset.color || undefined,
           size: undefined,
           description: handle
         }, 1);
@@ -202,21 +203,16 @@ const lookItems = await Promise.all([
     const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
     rows.forEach((rowEl) => {
       const dataset = rowEl.dataset;
-      const id = dataset.id || '';
-      const name = dataset.name || '';
-      const price = parseFloat(dataset.price || '0');
-      const image = dataset.img || '';
-      const color = dataset.color || '';
-      const handle = dataset.handle || '';
-
+      // Skip multi-option pieces in a bulk add — they need a size chosen on the PDP.
+      if (dataset.needsPicker === 'true') return;
       addToCart({
-        id,
-        name,
-        price,
-        image,
-        color: color || undefined,
+        id: dataset.id || '',
+        name: dataset.name || '',
+        price: parseFloat(dataset.price || '0'),
+        image: dataset.img || '',
+        color: dataset.color || undefined,
         size: undefined,
-        description: handle
+        description: dataset.handle || ''
       }, 1);
     });
   });

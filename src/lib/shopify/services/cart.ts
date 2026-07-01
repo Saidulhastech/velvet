@@ -2,7 +2,7 @@
 //  Cart services — the Cart API is the checkout (2026-04)
 // ============================================================
 import { shopifyFetch, type ShopifyFetchOptions } from '../client';
-import { DEFAULT_COUNTRY } from '~/config/omnix';
+import { DEFAULT_COUNTRY } from '~/config/velvet';
 import {
   CART_CREATE_MUTATION,
   CART_QUERY,

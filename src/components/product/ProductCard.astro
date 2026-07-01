@@ -39,6 +39,9 @@ if (!isRemoteImage && product.image && images[imagePath]) {
   data-material={product.filterMaterials?.join(' ')}
   data-stock={product.stock}
   data-pnum={product.price}
+  data-needs-picker={product.needsPicker ? 'true' : 'false'}
+  data-variants={product.variants && product.variants.length ? JSON.stringify(product.variants) : ''}
+  data-options={product.options && product.options.length ? JSON.stringify(product.options) : ''}
 >
   <div class="pc__media">
     {product.badge && (

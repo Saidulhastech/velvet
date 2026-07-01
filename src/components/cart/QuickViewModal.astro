@@ -30,13 +30,13 @@
     <p class="qv__desc" id="qvDesc">Description text goes here...</p>
     
     <!-- Color Swatches selection -->
-    <div class="qv__label">Colour</div>
+    <div class="qv__label" id="qvColorLabel">Colour</div>
     <div class="qv__swatches" id="qvSwatches">
       <!-- Populated via script -->
     </div>
-    
-    <!-- Size Selector -->
-    <div class="qv__label">Size</div>
+
+    <!-- Second option (Size / Material / …) — label set dynamically -->
+    <div class="qv__label" id="qvSizeLabel">Size</div>
     <div class="qv__sizes" id="qvSizes">
       <!-- Populated via script -->
     </div>
@@ -72,6 +72,8 @@
   const qvDesc = document.getElementById('qvDesc');
   const qvSwatches = document.getElementById('qvSwatches');
   const qvSizes = document.getElementById('qvSizes');
+  const qvColorLabel = document.getElementById('qvColorLabel');
+  const qvSizeLabel = document.getElementById('qvSizeLabel');
   const addToCartBtn = document.getElementById('qvAddToCartBtn');
   const wishlistBtn = document.getElementById('qvWishlistBtn');
 
@@ -101,6 +103,45 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
 
+  // ---- Real variant matrix state (size×colour → specific Shopify variant) ----
+  let qvVariants: any[] = [];
+  let qvSelected: Record<string, string> = {};
+  let qvColorKey = '';
+  let qvSizeKey = '';
+  let qvSymbol = '$';
+
+  const qvMoney = (n: number) => `${qvSymbol}${Math.round(n).toLocaleString('en-US')}`;
+
+  function qvCurrentVariant() {
+    if (!qvVariants.length) return null;
+    return qvVariants.find((v) => Object.keys(qvSelected).every((k) => v.opts[k] === qvSelected[k])) || null;
+  }
+  function qvOptionAvailable(key: string, value: string) {
+    const trial = { ...qvSelected, [key]: value };
+    return qvVariants.some((v) => v.available && Object.keys(trial).every((k) => v.opts[k] === trial[k]));
+  }
+  // Recompute price / image / availability / add-button from the current selection.
+  function qvResolve() {
+    if (!qvVariants.length) return;
+    const v = qvCurrentVariant();
+    if (qvPrice) qvPrice.textContent = v ? qvMoney(v.price) : 'Unavailable';
+    if (v?.img && qvImg) qvImg.src = v.img;
+    if (qvColorKey) selectedColor = qvSelected[qvColorKey] || selectedColor;
+    if (qvSizeKey) selectedSize = qvSelected[qvSizeKey] || selectedSize;
+    if (addToCartBtn) (addToCartBtn as HTMLButtonElement).disabled = !(v && v.available);
+    // Dawn-style grey-out of values with no available variant given the rest.
+    qvSwatches?.querySelectorAll('.qv__sw').forEach((el) => {
+      const val = (el as HTMLElement).dataset.value || '';
+      el.classList.toggle('is-unavailable', !!qvColorKey && !qvOptionAvailable(qvColorKey, val));
+    });
+    qvSizes?.querySelectorAll('.qv__size').forEach((el) => {
+      const val = (el as HTMLElement).dataset.value || '';
+      const ok = !qvSizeKey || qvOptionAvailable(qvSizeKey, val);
+      (el as HTMLButtonElement).disabled = !ok;
+      el.classList.toggle('is-oos', !ok);
+    });
+  }
+
   function openQV(card: HTMLElement) {
     if (!modal || !overlay || !qvImg || !qvCat || !qvName || !qvPrice || !qvRating || !qvDesc || !qvSwatches || !qvSizes || !wishlistBtn) return;
 
@@ -127,54 +168,108 @@
     qvRating.textContent = '★ ' + (dataset.rating || '5.0');
     qvDesc.textContent = dataset.desc || 'A considered piece in natural fibres, finished by hand in our Paris atelier.';
 
-    // Populate Swatches by copying from the card
-    const cardSwatches = Array.from(card.querySelectorAll('.pc__sw')) as HTMLElement[];
-    selectedColor = cardSwatches[0]?.dataset.color || '';
-    qvSwatches.innerHTML = cardSwatches.map((sw, idx) => {
-      const col = sw.dataset.color || '';
-      const hex = sw.style.backgroundColor || '';
-      const vId = sw.dataset.variantId || '';
-      const img = sw.dataset.img || '';
-      return `<span class="qv__sw ${idx === 0 ? 'is-active' : ''}" data-value="${col}" data-variant-id="${vId}" data-img="${img}" style="background:${hex}" title="${col}"></span>`;
-    }).join('');
+    // ---- Pickers: prefer the real variant matrix, fall back to card swatches ----
+    qvVariants = [];
+    qvColorKey = ''; qvSizeKey = '';
+    try { qvVariants = dataset.variants ? JSON.parse(dataset.variants) : []; } catch { qvVariants = []; }
+    let optionData: any[] = [];
+    try { optionData = dataset.options ? JSON.parse(dataset.options) : []; } catch { optionData = []; }
+    qvSymbol = (String(dataset.price || '').match(/^[^\d.,]+/) || ['$'])[0];
 
-    // Attach swatch event listeners
-    qvSwatches.querySelectorAll('.qv__sw').forEach((sw) => {
-      sw.addEventListener('click', () => {
+    if (qvVariants.length) {
+      const optNames = Object.keys(qvVariants[0].opts || {}).filter((n) => !/^title$/i.test(n));
+      qvColorKey = optNames.find((n) => /colou?r/i.test(n)) || '';
+      // Second dimension: prefer Size, else the first non-colour option (Material, …).
+      qvSizeKey = optNames.find((n) => /size/i.test(n)) || optNames.find((n) => n !== qvColorKey) || '';
+      // Reflect the real option name + hide inapplicable groups.
+      if (qvSizeLabel) { qvSizeLabel.textContent = qvSizeKey || 'Options'; (qvSizeLabel as HTMLElement).style.display = qvSizeKey ? '' : 'none'; }
+      if (qvSizes) (qvSizes as HTMLElement).style.display = qvSizeKey ? '' : 'none';
+      if (qvColorLabel) (qvColorLabel as HTMLElement).style.display = qvColorKey ? '' : 'none';
+      if (qvSwatches) (qvSwatches as HTMLElement).style.display = qvColorKey ? '' : 'none';
+      const hexMap: Record<string, string> = {};
+      (optionData.find((o: any) => /colou?r/i.test(o.name))?.values || []).forEach((cv: any) => { if (cv.color) hexMap[cv.name] = cv.color; });
+      const seed = qvVariants.find((v) => v.available) || qvVariants[0];
+      qvSelected = { ...seed.opts };
+      selectedColor = qvColorKey ? qvSelected[qvColorKey] : '';
+      selectedSize = qvSizeKey ? qvSelected[qvSizeKey] : '';
+
+      const distinct = (key: string) => {
+        const seen: string[] = [];
+        qvVariants.forEach((v) => { const val = v.opts[key]; if (val && !seen.includes(val)) seen.push(val); });
+        return seen;
+      };
+      const colors = qvColorKey ? distinct(qvColorKey) : [];
+      const sizeVals = qvSizeKey ? distinct(qvSizeKey) : [];
+
+      qvSwatches.innerHTML = colors.map((c) =>
+        `<span class="qv__sw ${qvSelected[qvColorKey] === c ? 'is-active' : ''}" data-value="${c}" style="background:${hexMap[c] || ''}" title="${c}"></span>`
+      ).join('');
+      qvSizes.innerHTML = sizeVals.map((s) =>
+        `<button class="qv__size ${qvSelected[qvSizeKey] === s ? 'is-active' : ''}" data-value="${s}">${s.toUpperCase()}</button>`
+      ).join('');
+
+      qvSwatches.querySelectorAll('.qv__sw').forEach((sw) => sw.addEventListener('click', () => {
+        if (sw.classList.contains('is-unavailable')) return;
         qvSwatches.querySelectorAll('.qv__sw').forEach(x => x.classList.remove('is-active'));
         sw.classList.add('is-active');
-        selectedColor = sw.getAttribute('data-value') || '';
-        
-        // Swap image
-        const imgUrl = sw.getAttribute('data-img');
-        if (imgUrl && qvImg) {
-          qvImg.src = imgUrl;
-        }
-      });
-    });
-
-    // Populate Sizes
-    const sizes = (dataset.size || 's m l').split(' ');
-    selectedSize = sizes[0] || 'S';
-    qvSizes.innerHTML = sizes.map((size, idx) => {
-      return `<button class="qv__size ${idx === 0 ? 'is-active' : ''}" data-value="${size}">${size.toUpperCase()}</button>`;
-    }).join('');
-
-    // Attach size event listeners
-    qvSizes.querySelectorAll('.qv__size').forEach((sz) => {
-      sz.addEventListener('click', () => {
+        if (qvColorKey) qvSelected[qvColorKey] = sw.getAttribute('data-value') || '';
+        qvResolve();
+      }));
+      qvSizes.querySelectorAll('.qv__size').forEach((sz) => sz.addEventListener('click', () => {
+        if ((sz as HTMLButtonElement).disabled) return;
         qvSizes.querySelectorAll('.qv__size').forEach(x => x.classList.remove('is-active'));
         sz.classList.add('is-active');
-        selectedSize = sz.getAttribute('data-value') || '';
+        if (qvSizeKey) qvSelected[qvSizeKey] = sz.getAttribute('data-value') || '';
+        qvResolve();
+      }));
+
+      qvResolve();
+    } else {
+      // Fallback: mock products without a matrix — clone card swatches + size strings.
+      if (qvColorLabel) { qvColorLabel.textContent = 'Colour'; (qvColorLabel as HTMLElement).style.display = ''; }
+      if (qvSizeLabel) { qvSizeLabel.textContent = 'Size'; (qvSizeLabel as HTMLElement).style.display = ''; }
+      if (qvSizes) (qvSizes as HTMLElement).style.display = '';
+      if (qvSwatches) (qvSwatches as HTMLElement).style.display = '';
+      const cardSwatches = Array.from(card.querySelectorAll('.pc__sw')) as HTMLElement[];
+      selectedColor = cardSwatches[0]?.dataset.color || '';
+      qvSwatches.innerHTML = cardSwatches.map((sw, idx) => {
+        const col = sw.dataset.color || '';
+        const hex = sw.style.backgroundColor || '';
+        const vId = sw.dataset.variantId || '';
+        const img = sw.dataset.img || '';
+        return `<span class="qv__sw ${idx === 0 ? 'is-active' : ''}" data-value="${col}" data-variant-id="${vId}" data-img="${img}" style="background:${hex}" title="${col}"></span>`;
+      }).join('');
+      qvSwatches.querySelectorAll('.qv__sw').forEach((sw) => {
+        sw.addEventListener('click', () => {
+          qvSwatches.querySelectorAll('.qv__sw').forEach(x => x.classList.remove('is-active'));
+          sw.classList.add('is-active');
+          selectedColor = sw.getAttribute('data-value') || '';
+          const imgUrl = sw.getAttribute('data-img');
+          if (imgUrl && qvImg) qvImg.src = imgUrl;
+        });
       });
-    });
+
+      const sizes = (dataset.size || 's m l').split(' ');
+      selectedSize = sizes[0] || 'S';
+      qvSizes.innerHTML = sizes.map((size, idx) =>
+        `<button class="qv__size ${idx === 0 ? 'is-active' : ''}" data-value="${size}">${size.toUpperCase()}</button>`
+      ).join('');
+      qvSizes.querySelectorAll('.qv__size').forEach((sz) => {
+        sz.addEventListener('click', () => {
+          qvSizes.querySelectorAll('.qv__size').forEach(x => x.classList.remove('is-active'));
+          sz.classList.add('is-active');
+          selectedSize = sz.getAttribute('data-value') || '';
+        });
+      });
+    }
 
     // Sync wishlist button icon state
     const isSaved = persistedWishItems.get().some(item => item.id === currentProduct?.id);
     wishlistBtn.setAttribute('aria-pressed', String(isSaved));
 
-    // Reflect availability — disable Add when the product isn't in stock.
-    if (addToCartBtn) {
+    // Reflect availability — for matrix products qvResolve() already set this
+    // per-variant; only fall back to the product-level stock flag otherwise.
+    if (addToCartBtn && !qvVariants.length) {
       (addToCartBtn as HTMLButtonElement).disabled = (dataset.stock || 'in') !== 'in';
     }
 
@@ -223,20 +318,34 @@
     if (e.key === 'Escape') closeQV();
   });
 
+  // Resolve the add-to-cart target: the real size×colour variant when the matrix
+  // is present, else the active swatch's variant / product id (fallback).
+  function qvResolveTarget(): { id: string; price: number; image: string } | null {
+    if (qvVariants.length) {
+      const v = qvCurrentVariant();
+      if (!v || !v.available) return null; // unresolved / out of stock
+      return { id: v.id, price: v.price, image: v.img || currentProduct!.image };
+    }
+    const activeSwatch = qvSwatches?.querySelector('.qv__sw.is-active') as HTMLElement | null;
+    return {
+      id: activeSwatch?.getAttribute('data-variant-id') || currentProduct!.id,
+      price: currentProduct!.price,
+      image: activeSwatch?.getAttribute('data-img') || currentProduct!.image,
+    };
+  }
+
   // Add to Bag action inside Modal
   addToCartBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     if (!currentProduct) return;
+    const target = qvResolveTarget();
+    if (!target) return; // matrix product with no valid variant selected
 
-    const activeSwatch = qvSwatches?.querySelector('.qv__sw.is-active') as HTMLElement | null;
-    const variantId = activeSwatch?.getAttribute('data-variant-id') || currentProduct.id;
-    const swatchImg = activeSwatch?.getAttribute('data-img') || currentProduct.image;
-    
     addToCart({
-      id: variantId,
+      id: target.id,
       name: currentProduct.name,
-      price: currentProduct.price,
-      image: swatchImg,
+      price: target.price,
+      image: target.image,
       color: selectedColor || undefined,
       size: selectedSize || undefined,
       description: (currentProduct as any).handle || ''
@@ -249,16 +358,14 @@
   wishlistBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     if (!currentProduct) return;
-
-    const activeSwatch = qvSwatches?.querySelector('.qv__sw.is-active') as HTMLElement | null;
-    const variantId = activeSwatch?.getAttribute('data-variant-id') || currentProduct.id;
-    const swatchImg = activeSwatch?.getAttribute('data-img') || currentProduct.image;
+    const target = qvResolveTarget();
+    const id = target?.id || currentProduct.id;
 
     toggleWishlist({
-      id: variantId,
+      id,
       name: currentProduct.name,
-      price: currentProduct.price,
-      image: swatchImg,
+      price: target?.price ?? currentProduct.price,
+      image: target?.image || currentProduct.image,
       color: selectedColor || undefined,
       size: selectedSize || undefined,
       category: currentProduct.category,

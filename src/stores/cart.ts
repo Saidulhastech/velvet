@@ -24,6 +24,9 @@ export interface WishItem {
   size?: string;
   category?: string;
   description?: string; // Stores product handle
+  /** True when the product needs a size/colour choice — move-to-bag routes to
+   *  the PDP instead of silently adding the wrong variant. */
+  needsPicker?: boolean;
 }
 
 // Persistent Atoms
@@ -389,6 +392,8 @@ export interface CompareItem {
   material?: string;
   sizes?: string;
   stock?: string;
+  /** True when a size/colour must be chosen — add routes to the PDP. */
+  needsPicker?: boolean;
 }
 
 export const COMPARE_MAX = 4;
