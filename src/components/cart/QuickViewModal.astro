@@ -86,6 +86,20 @@
 
   let selectedColor = '';
   let selectedSize = '';
+  // Element focused before the modal opened, restored on close (a11y).
+  let lastFocused: HTMLElement | null = null;
+
+  // Trap Tab focus within the modal while it's open.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || !modal?.classList.contains('is-open')) return;
+    const f = Array.from(modal.querySelectorAll<HTMLElement>(
+      'a[href],button:not([disabled]),input,textarea,select,[tabindex]:not([tabindex="-1"])'
+    )).filter((el) => el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   function openQV(card: HTMLElement) {
     if (!modal || !overlay || !qvImg || !qvCat || !qvName || !qvPrice || !qvRating || !qvDesc || !qvSwatches || !qvSizes || !wishlistBtn) return;
@@ -159,12 +173,19 @@
     const isSaved = persistedWishItems.get().some(item => item.id === currentProduct?.id);
     wishlistBtn.setAttribute('aria-pressed', String(isSaved));
 
+    // Reflect availability — disable Add when the product isn't in stock.
+    if (addToCartBtn) {
+      (addToCartBtn as HTMLButtonElement).disabled = (dataset.stock || 'in') !== 'in';
+    }
+
     // Show Modal
+    lastFocused = document.activeElement as HTMLElement | null;
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('no-scroll');
+    requestAnimationFrame(() => (closeBtn as HTMLElement | null)?.focus());
   }
 
   function closeQV() {
@@ -180,6 +201,9 @@
     if (!isCartOpen && !isWishlistOpen) {
       document.body.classList.remove('no-scroll');
     }
+
+    // Restore focus to the element that opened the modal.
+    lastFocused?.focus();
   }
 
   // Bind Open Trigger globally across the DOM (for product cards)
@@ -309,8 +333,8 @@
     top: 16px;
     left: 16px;
     z-index: 5;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: rgba(252, 252, 248, .88);
     -webkit-backdrop-filter: blur(4px);

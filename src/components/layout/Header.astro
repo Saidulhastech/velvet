@@ -143,40 +143,110 @@ import MarketSelector from './MarketSelector.astro';
 <script>
   import { isCartOpen, isWishOpen, cartCount, wishCount } from '../../stores/cart';
 
-  // Search Toggle Handler
+  // Search toggle + live predictive results
   const sToggle = document.getElementById('searchToggle');
   const sWrap = document.getElementById('searchWrap');
   const sInput = document.getElementById('searchInput') as HTMLInputElement | null;
 
   if (sToggle && sWrap && sInput) {
+    // Results dropdown injected at runtime — no change to existing markup/CSS.
+    if (getComputedStyle(sWrap).position === 'static') sWrap.style.position = 'relative';
+    const results = document.createElement('div');
+    results.className = 'header__search-results';
+    results.setAttribute('role', 'listbox');
+    results.style.cssText = 'position:absolute;top:calc(100% + 8px);right:0;width:min(420px,92vw);max-height:70vh;overflow-y:auto;background:var(--lux-light-elevated,#fdfdf8);border:1px solid var(--lux-light-border,#e6e3da);box-shadow:0 18px 44px -18px rgba(48,56,44,.45);z-index:120;display:none;';
+    sWrap.appendChild(results);
+
+    const openSearch = () => {
+      sWrap.classList.add('is-open');
+      sToggle.setAttribute('aria-expanded', 'true');
+      setTimeout(() => sInput.focus(), 60);
+    };
+    const closeSearch = () => {
+      sWrap.classList.remove('is-open');
+      sToggle.setAttribute('aria-expanded', 'false');
+      results.style.display = 'none';
+    };
+
     sToggle.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = sWrap.classList.toggle('is-open');
-      sToggle.setAttribute('aria-expanded', String(isOpen));
-      if (isOpen) {
-        setTimeout(() => sInput.focus(), 60);
-      } else {
-        sInput.value = '';
+      if (sWrap.classList.contains('is-open')) { closeSearch(); sInput.value = ''; }
+      else openSearch();
+    });
+
+    const fmt = (m: any) => {
+      try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: m?.currencyCode || 'USD', minimumFractionDigits: 0 }).format(Number(m?.amount || 0)); }
+      catch { return ''; }
+    };
+    const esc = (t: any) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
+    const lbl = 'padding:10px 14px 4px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--lux-on-light-soft)';
+
+    let seq = 0;
+    let timer: any;
+
+    function renderResults(data: any, q: string) {
+      const products = data.products || [], collections = data.collections || [], queries = data.queries || [];
+      let html = '';
+      if (queries.length) {
+        html += `<div style="${lbl}">Suggestions</div>`;
+        html += queries.slice(0, 4).map((x: any) => `<a href="/search?q=${encodeURIComponent(x.text)}" style="display:block;padding:7px 14px;font-size:13px;color:var(--lux-on-light);text-decoration:none">${esc(x.text)}</a>`).join('');
       }
+      if (products.length) {
+        html += `<div style="${lbl}">Products</div>`;
+        html += products.slice(0, 6).map((p: any) => `<a href="/products/${esc(p.handle)}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;text-decoration:none;color:var(--lux-on-light)"><span style="width:44px;height:52px;flex:0 0 auto;background:var(--lux-light-surface);overflow:hidden">${p.featuredImage?.url ? `<img src="${esc(p.featuredImage.url)}" alt="" style="width:100%;height:100%;object-fit:cover">` : ''}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</span><span style="font-size:12px;color:var(--lux-secondary-olive)">${fmt(p.priceRange?.minVariantPrice)}</span></span></a>`).join('');
+      }
+      if (collections.length) {
+        html += `<div style="${lbl}">Collections</div>`;
+        html += collections.slice(0, 4).map((c: any) => `<a href="/collections/${esc(c.handle)}" style="display:block;padding:7px 14px;font-size:13px;color:var(--lux-on-light);text-decoration:none">${esc(c.title)}</a>`).join('');
+      }
+      if (!html) {
+        html = `<div style="padding:20px 14px;font-size:13px;color:var(--lux-on-light-soft)">No matches for "${esc(q)}"</div>`;
+      } else {
+        html += `<a href="/search?q=${encodeURIComponent(q)}" style="display:block;padding:11px 14px;border-top:1px solid var(--lux-light-border);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lux-on-light);text-decoration:none">See all results →</a>`;
+      }
+      results.innerHTML = html;
+      results.style.display = 'block';
+    }
+
+    sInput.addEventListener('input', () => {
+      const q = sInput.value.trim();
+      clearTimeout(timer);
+      if (q.length < 2) { results.style.display = 'none'; return; }
+      timer = setTimeout(async () => {
+        const mySeq = ++seq;
+        results.innerHTML = '<div style="padding:18px 14px;font-size:13px;color:var(--lux-on-light-soft)">Searching…</div>';
+        results.style.display = 'block';
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          if (mySeq !== seq) return; // discard out-of-order responses
+          if (data.error) throw new Error(data.error);
+          renderResults(data, q);
+        } catch {
+          if (mySeq !== seq) return;
+          results.innerHTML = '<div style="padding:18px 14px;font-size:13px;color:var(--lux-on-light-soft)">Search is unavailable right now.</div>';
+          results.style.display = 'block';
+        }
+      }, 220);
     });
 
     sInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        sWrap.classList.remove('is-open');
-        sToggle.setAttribute('aria-expanded', 'false');
-        sInput.value = '';
-      } else if (e.key === 'Enter') {
-        const query = sInput.value.trim();
-        if (query) {
-          window.location.href = `/search?q=${encodeURIComponent(query)}`;
-        }
+      if (e.key === 'Escape') { closeSearch(); sInput.value = ''; }
+      else if (e.key === 'Enter') {
+        const q = sInput.value.trim();
+        if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
       }
     });
 
     document.addEventListener('click', (e) => {
-      if (sWrap.classList.contains('is-open') && !sWrap.contains(e.target as Node)) {
-        sWrap.classList.remove('is-open');
-        sToggle.setAttribute('aria-expanded', 'false');
+      if (sWrap.classList.contains('is-open') && !sWrap.contains(e.target as Node)) closeSearch();
+    });
+
+    // Cmd/Ctrl-K opens the search.
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        openSearch();
       }
     });
   }
@@ -185,12 +255,17 @@ import MarketSelector from './MarketSelector.astro';
   const burger = document.getElementById('menuToggle');
   const navLeft = document.querySelector('.nav--left');
   if (burger && navLeft) {
-    burger.addEventListener('click', () => {
-      const isOpen = burger.getAttribute('aria-expanded') === 'true';
-      burger.setAttribute('aria-expanded', String(!isOpen));
-      document.body.classList.toggle('no-scroll', !isOpen);
-      navLeft.classList.toggle('is-open', !isOpen);
+    const setMenu = (open: boolean) => {
+      burger.setAttribute('aria-expanded', String(open));
+      document.body.classList.toggle('no-scroll', open);
+      navLeft.classList.toggle('is-open', open);
+    };
+    burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
+    // Escape closes the menu; tapping a nav link closes it too.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navLeft.classList.contains('is-open')) setMenu(false);
     });
+    navLeft.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
   }
 
   // Open Cart Drawer

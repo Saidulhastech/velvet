@@ -238,6 +238,30 @@ const {
           if (card) btn.setAttribute('aria-pressed', String(ids.has(card.dataset.id || '')));
         });
       });
+
+      // Newsletter forms — validate the email + show inline success feedback
+      // (site-wide, any .news__form). No markup change: reuses existing hooks.
+      document.addEventListener('submit', (e) => {
+        const form = (e.target as HTMLElement)?.closest?.('.news__form') as HTMLFormElement | null;
+        if (!form) return;
+        e.preventDefault();
+        const input = form.querySelector('.news__input') as HTMLInputElement | null;
+        const btn = form.querySelector('.news__btn') as HTMLButtonElement | null;
+        const email = (input?.value || '').trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          input?.setAttribute('aria-invalid', 'true');
+          input?.focus();
+          return;
+        }
+        input?.removeAttribute('aria-invalid');
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = '✓ Subscribed';
+          btn.disabled = true;
+          if (input) input.value = '';
+          setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 4000);
+        }
+      });
     </script>
     
     <style is:global>

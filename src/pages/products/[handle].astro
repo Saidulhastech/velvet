@@ -631,9 +631,12 @@ const initialReviews = [
   // ---- Render price / availability / stock badge ----
   function renderVariantState() {
     const v = currentVariant();
+    // No variant matches the current option combo (and it's not a single-variant
+    // product) → treat as unavailable rather than falling back to a wrong price.
+    const invalidCombo = !v && !singleVariant && variants.length > 0;
     const price = v?.price ?? (baseVariant?.price ?? 0);
     const compareAt = v?.compareAt ?? null;
-    const available = v?.available ?? true; // fallback true for mock data
+    const available = invalidCombo ? false : (v?.available ?? true); // fallback true for mock data
     const onSale = compareAt != null && compareAt > price;
 
     // Update price display
@@ -658,7 +661,7 @@ const initialReviews = [
       addBtn.disabled = !available;
       const priceSpan = addBtn.querySelector('[data-btn-price]');
       if (priceSpan) priceSpan.textContent = money(price * qty);
-      if (!priceSpan) addBtn.textContent = available ? `Add to Bag — ${money(price * qty)}` : 'Sold Out';
+      if (!priceSpan) addBtn.textContent = available ? `Add to Bag — ${money(price * qty)}` : (invalidCombo ? 'Unavailable' : 'Sold Out');
     }
 
     // Update stock badge
@@ -673,6 +676,16 @@ const initialReviews = [
       stockBadge.textContent = label;
       (stockBadge as HTMLElement).dataset.stock = available ? (q != null && q <= 10 ? 'low' : 'in') : 'out';
     }
+
+    // Swap the gallery to the selected variant's image (match ignoring query string).
+    if (v?.img && thumbs && thumbs.length) {
+      const bare = (u: string) => (u || '').split('?')[0];
+      const target = thumbs.findIndex((t) => bare(t.dataset.src || '') === bare(v.img || ''));
+      if (target >= 0 && target !== idx) show(target);
+    }
+
+    // Re-evaluate which sizes are still available for the current colour.
+    updateOptionAvailability();
   }
 
   // ---- Option selection (colour + size) ----
@@ -783,6 +796,15 @@ const initialReviews = [
   const next = $('#pdpNext');
   if (prev) prev.addEventListener('click', () => show(idx - 1));
   if (next) next.addEventListener('click', () => show(idx + 1));
+
+  // Arrow-key gallery navigation — skip while typing or when a drawer/modal is open.
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const el = document.activeElement as HTMLElement | null;
+    if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+    if (document.querySelector('#cartDrawer.is-open, #wishDrawer.is-open, #qvOverlay.is-open, .nav--left.is-open')) return;
+    show(e.key === 'ArrowLeft' ? idx - 1 : idx + 1);
+  });
 
   // Zoom on hover
   const zoomBox = $('#pdpMain');
@@ -922,14 +944,14 @@ const initialReviews = [
       return parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : n.slice(0, 2).toUpperCase();
     };
 
-    const rForm = $('#rForm') as HTMLFormElement | null;
+    const rForm = $('#reviewForm') as HTMLFormElement | null;
     if (rForm) {
       rForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const fd = new FormData(rForm);
-        const name = String(fd.get('name') || 'Anonymous');
-        const title = String(fd.get('title') || '');
-        const comment = String(fd.get('comment') || '');
+        // Inputs use ids (rvName/rvTitle/rvBody), not name attributes.
+        const name = ($('#rvName') as HTMLInputElement | null)?.value.trim() || 'Anonymous';
+        const title = ($('#rvTitle') as HTMLInputElement | null)?.value.trim() || '';
+        const comment = ($('#rvBody') as HTMLTextAreaElement | null)?.value.trim() || '';
         if (!rating || !comment) { alert('Please select a rating and write a review.'); return; }
         const initials = getInitials(name);
         const html = `

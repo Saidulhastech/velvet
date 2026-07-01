@@ -412,6 +412,22 @@ const maxPrice = Math.max(...products.map(p => p.price));
       }
 
       renderChips();
+      writeUrl();
+    }
+
+    // Mirror the active filter state into the URL (shareable + survives reload).
+    function writeUrl() {
+      const p = new URLSearchParams();
+      if (state.cat !== 'all') p.set('category', state.cat);
+      if (state.color.size) p.set('color', Array.from(state.color).join(','));
+      if (state.size.size) p.set('size', Array.from(state.size).join(','));
+      if (state.material.size) p.set('material', Array.from(state.material).join(','));
+      if (state.stock.size) p.set('stock', Array.from(state.stock).join(','));
+      if (state.price < initialPriceMax) p.set('price', String(state.price));
+      if (state.sort !== 'featured') p.set('sort', state.sort);
+      if ((state as any).gender && (state as any).gender !== 'all') p.set('gender', (state as any).gender);
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
     }
 
     // Render filter chips
@@ -622,24 +638,41 @@ const maxPrice = Math.max(...products.map(p => p.price));
     document.querySelectorAll('[data-filter-close]').forEach(b => b.addEventListener('click', closeFilters));
     if (fov) fov.addEventListener('click', closeFilters);
 
-    // Initial pre-filter checks (e.g. from URL parameters like ?category=tailoring or ?gender=women)
-    const params = new URLSearchParams(window.location.search);
-    const initialCat = params.get('category');
-    const initialGender = params.get('gender');
-
-    if (initialCat) {
-      state.cat = initialCat.toLowerCase();
-      document.querySelectorAll('.fpill[data-group="cat"]').forEach(x => {
-        x.classList.toggle('is-active', (x as HTMLElement).dataset.value === state.cat);
-      });
+    // Reflect all filter UI classes/inputs from the current state.
+    function syncFilterUI() {
+      document.querySelectorAll('.fpill[data-group="cat"]').forEach(x => x.classList.toggle('is-active', (x as HTMLElement).dataset.value === state.cat));
+      document.querySelectorAll('.fpill[data-group="size"]').forEach(x => x.classList.toggle('is-active', state.size.has((x as HTMLElement).dataset.value || '')));
+      document.querySelectorAll('.fpill[data-group="stock"]').forEach(x => x.classList.toggle('is-active', state.stock.has((x as HTMLElement).dataset.value || '')));
+      document.querySelectorAll('.fswatch').forEach(x => x.classList.toggle('is-active', state.color.has((x as HTMLElement).dataset.value || '')));
+      document.querySelectorAll('.fcheck input').forEach(x => { const i = x as HTMLInputElement; i.checked = state.material.has(i.dataset.value || ''); });
+      if (range) range.value = String(state.price);
+      if (readout) readout.textContent = '€' + state.price;
+      if (sortSel) sortSel.value = state.sort;
     }
 
-    if (initialGender) {
-      const g = initialGender.toLowerCase();
-      (state as any).gender = g;
+    // Hydrate filter state from the URL (?category, ?color, ?size, …, ?gender).
+    function applyUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const csv = (k: string) => new Set((params.get(k) || '').split(',').filter(Boolean));
+      state.cat = (params.get('category') || 'all').toLowerCase();
+      state.color = csv('color');
+      state.size = csv('size');
+      state.material = csv('material');
+      state.stock = csv('stock');
+      const priceP = params.get('price');
+      state.price = priceP ? parseFloat(priceP) : initialPriceMax;
+      state.sort = params.get('sort') || 'featured';
+      const gender = params.get('gender');
+      if (gender) (state as any).gender = gender.toLowerCase(); else delete (state as any).gender;
+      state.shown = 16;
+      syncFilterUI();
     }
 
+    applyUrl();
     render();
+
+    // Back/forward re-applies the filter state.
+    window.addEventListener('popstate', () => { applyUrl(); render(); });
   }
 </script>
 

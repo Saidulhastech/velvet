@@ -231,20 +231,19 @@ const pressLogos = [
       track.style.transform = 'translateX(' + (-idx * step()) + 'px)';
     }
     
-    let auto = setInterval(() => {
-      if (idx >= maxI) go(0);
-      else go(idx + 1);
-    }, 6000);
-    
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let auto: any = null;
+    const tick = () => { if (document.hidden) return; if (idx >= maxI) go(0); else go(idx + 1); };
+    const startAuto = () => { if (reduceMotion || auto) return; auto = setInterval(tick, 6000); };
+    const stopAuto = () => { clearInterval(auto); auto = null; };
+    startAuto();
+
     if (wrap) {
-      wrap.addEventListener('mouseenter', () => clearInterval(auto));
-      wrap.addEventListener('mouseleave', () => {
-        auto = setInterval(() => {
-          if (idx >= maxI) go(0);
-          else go(idx + 1);
-        }, 6000);
-      });
+      wrap.addEventListener('mouseenter', stopAuto);
+      wrap.addEventListener('mouseleave', startAuto);
     }
+    // Pause when the tab is backgrounded; resume when it returns.
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopAuto(); else startAuto(); });
     
     // Swipe Gestures for touch devices
     let startX = 0;
@@ -255,7 +254,7 @@ const pressLogos = [
       startX = e.touches[0].clientX;
       isDragging = true;
       track.style.transition = 'none';
-      clearInterval(auto);
+      stopAuto();
     }, { passive: true });
     
     track.addEventListener('touchmove', (e) => {
