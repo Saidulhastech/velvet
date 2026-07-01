@@ -182,7 +182,8 @@ export const shopifyConfig = {
 //  Legacy Bridge Mapper (Maison Arden local templates format)
 // ============================================================
 import { products as mockProducts, type Product as LegacyProduct } from '../mockData';
-import { getProducts as getShopifyProductsNew, getProduct as getShopifyProductNew } from './services/products';
+import { getProducts as getShopifyProductsNew, getProduct as getShopifyProductNew, getProductRecommendations as getShopifyRecommendations } from './services/products';
+import type { Market } from '../market';
 
 const HEX_MAP: Record<string, string> = {
   olive: '#6B705E',
@@ -299,12 +300,12 @@ const isShopifyConnected = () => {
   }
 };
 
-export async function getShopifyProducts(): Promise<LegacyProduct[]> {
+export async function getShopifyProducts(market?: Market): Promise<LegacyProduct[]> {
   if (!isShopifyConnected()) {
     return mockProducts;
   }
   try {
-    const res = await getShopifyProductsNew({ pageSize: 50 });
+    const res = await getShopifyProductsNew({ pageSize: 250 }, market);
     if (!res.items || res.items.length === 0) return mockProducts;
     return res.items.map(item => mapToLegacyProduct(item));
   } catch (error) {
@@ -313,12 +314,12 @@ export async function getShopifyProducts(): Promise<LegacyProduct[]> {
   }
 }
 
-export async function getShopifyProductByHandle(handle: string): Promise<LegacyProduct | undefined> {
+export async function getShopifyProductByHandle(handle: string, market?: Market): Promise<LegacyProduct | undefined> {
   if (!isShopifyConnected()) {
     return mockProducts.find(p => p.handle === handle);
   }
   try {
-    const p = await getShopifyProductNew(handle);
+    const p = await getShopifyProductNew(handle, market);
     if (!p) return mockProducts.find(p => p.handle === handle);
     return mapToLegacyProduct(p);
   } catch (error) {
@@ -341,18 +342,20 @@ export interface VariantData {
  * Returns both the LegacyProduct (for the existing template) and raw variant data
  * (for the client-side variant-selection controller that drives price/stock/add-to-cart).
  */
-export async function getShopifyProductWithVariants(handle: string): Promise<{
+export async function getShopifyProductWithVariants(handle: string, market?: Market): Promise<{
   product: LegacyProduct | undefined;
   variants: VariantData[];
   currency: string;
   singleVariant: boolean;
+  /** Real Shopify product GID — drives server-side "related products" via recommendations. */
+  productId: string | null;
 }> {
-  const legacyProduct = await getShopifyProductByHandle(handle);
+  const legacyProduct = await getShopifyProductByHandle(handle, market);
 
   if (!isShopifyConnected()) {
     // Build variant data from mock product
-    if (!legacyProduct) return { product: undefined, variants: [], currency: 'EUR', singleVariant: true };
-    const mockVariants: VariantData[] = legacyProduct.sizes.map((size, i) => ({
+    if (!legacyProduct) return { product: undefined, variants: [], currency: 'EUR', singleVariant: true, productId: null };
+    const mockVariants: VariantData[] = legacyProduct.sizes.map((size) => ({
       id: legacyProduct.id,
       opts: { Size: size.toUpperCase() },
       price: legacyProduct.price,
@@ -366,12 +369,13 @@ export async function getShopifyProductWithVariants(handle: string): Promise<{
       variants: mockVariants,
       currency: 'EUR',
       singleVariant: mockVariants.length <= 1,
+      productId: null,
     };
   }
 
   try {
-    const rawProduct = await getShopifyProductNew(handle);
-    if (!rawProduct) return { product: legacyProduct, variants: [], currency: 'EUR', singleVariant: true };
+    const rawProduct = await getShopifyProductNew(handle, market);
+    if (!rawProduct) return { product: legacyProduct, variants: [], currency: 'EUR', singleVariant: true, productId: null };
 
     const rawVariants: any[] = rawProduct.variants ?? [];
     const currency = rawProduct.priceRange?.minVariantPrice?.currencyCode ?? 'EUR';
@@ -398,9 +402,31 @@ export async function getShopifyProductWithVariants(handle: string): Promise<{
       variants,
       currency,
       singleVariant: isSingleDefaultVariant,
+      productId: rawProduct.id ?? null,
     };
   } catch (error) {
     console.error(`Failed to fetch variant data for "${handle}":`, error);
-    return { product: legacyProduct, variants: [], currency: 'EUR', singleVariant: true };
+    return { product: legacyProduct, variants: [], currency: 'EUR', singleVariant: true, productId: null };
+  }
+}
+
+/**
+ * Server-side "related products" via Shopify's real recommendation engine.
+ * Returns legacy-shaped cards for the existing PDP grid. Empty array when not
+ * connected or when Shopify returns no recommendations — the caller then falls
+ * back to its heuristic (same-category) related list so the grid never empties.
+ */
+export async function getShopifyRelatedProducts(
+  productId: string | null,
+  limit = 4,
+  market?: Market,
+): Promise<LegacyProduct[]> {
+  if (!productId || !isShopifyConnected()) return [];
+  try {
+    const cards = await getShopifyRecommendations(productId, limit, market);
+    return cards.map((c) => mapToLegacyProduct(c));
+  } catch (error) {
+    console.error(`Failed to fetch recommendations for "${productId}":`, error);
+    return [];
   }
 }

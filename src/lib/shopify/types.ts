@@ -97,6 +97,10 @@ export interface Product {
   specs?: { label: string; value: string }[];
   /** Highlight bullets from `custom.highlights` (JSON list); [] when none. */
   highlights?: string[];
+  /** Materials & care bullets from `custom.materials_care` (JSON list); [] when none. */
+  materialsCare?: string[];
+  /** Shipping & returns bullets from `custom.shipping_returns` (JSON list); [] when none. */
+  shippingReturns?: string[];
   /** Individual reviews from a review metafield; [] when none available. */
   reviews?: ProductReview[];
   /** Star distribution [5★..1★] counts, derived from `reviews`; null when none. */
@@ -130,6 +134,8 @@ export interface ProductCard {
   compareAtPriceRange?: {
     minVariantPrice: Money;
   };
+  /** Collections this product belongs to — dynamic category tabs/facets. */
+  collections?: { title: string; handle: string }[];
   /** First variant gid — lets product grids "quick add" without a PDP fetch. */
   firstVariantId?: string | null;
   /** Whether that first variant can be purchased. */

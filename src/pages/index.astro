@@ -16,7 +16,7 @@ import imgCampaign from '../assets/images/Campaign section image.png';
 // Import product catalog from Shopify client
 import { getShopifyProducts } from '../lib/shopify/client';
 
-const productsList = await getShopifyProducts();
+const productsList = await getShopifyProducts(Astro.locals.market);
 
 // Map specific products to homepage sections (matching Luxury Homepage.html)
 const newArrivals = [

@@ -83,6 +83,15 @@ export const PRODUCT_BY_HANDLE_QUERY = /* GraphQL */ `
         value
         type
       }
+      # Optional materials/care + shipping/returns bullets (custom metafields, JSON list).
+      materialsCareMetafield: metafield(namespace: "custom", key: "materials_care") {
+        value
+        type
+      }
+      shippingReturnsMetafield: metafield(namespace: "custom", key: "shipping_returns") {
+        value
+        type
+      }
       # Optional individual reviews (JSON list) — populated by a reviews app.
       reviewsMetafield: metafield(namespace: "custom", key: "reviews") {
         value

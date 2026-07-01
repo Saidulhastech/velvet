@@ -3,11 +3,11 @@ import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../components/layout/BaseLayout.astro';
 import ProductCard from '../../components/product/ProductCard.astro';
-import { getShopifyProductWithVariants, getShopifyProducts } from '../../lib/shopify/client';
+import { getShopifyProductWithVariants, getShopifyProducts, getShopifyRelatedProducts } from '../../lib/shopify/client';
 import type { Product } from '../../lib/mockData';
 
 const { handle } = Astro.params;
-const { product, variants: shopifyVariants, currency, singleVariant } = await getShopifyProductWithVariants(handle || '');
+const { product, variants: shopifyVariants, currency, singleVariant, productId } = await getShopifyProductWithVariants(handle || '', Astro.locals.market);
 if (!product) {
   return Astro.redirect('/404');
 }
@@ -54,23 +54,24 @@ const getSrcString = (img: any) => {
   return img?.src || '';
 };
 
-const productsList = await getShopifyProducts();
+const productsList = await getShopifyProducts(Astro.locals.market);
 
-// Generate related products
-const related = productsList
-  .filter((p) => p.category === product.category && p.id !== product.id)
-  .slice(0, 4);
+// Related products: prefer Shopify's real recommendation engine; fall back to a
+// same-category/gender heuristic over the catalogue (covers mock mode + stores
+// with no recommendations) so the grid never empties.
+const related = await getShopifyRelatedProducts(productId, 4, Astro.locals.market);
 
 if (related.length < 4) {
-  const extra = productsList
-    .filter(
-      (p) =>
-        p.gender === product.gender &&
-        p.id !== product.id &&
-        !related.find((r) => r.id === p.id)
+  const heuristic = productsList
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .concat(
+      productsList.filter((p) => p.gender === product.gender && p.id !== product.id)
     )
-    .slice(0, 4 - related.length);
-  related.push(...extra);
+    .filter((p) => !related.find((r) => r.id === p.id));
+  for (const p of heuristic) {
+    if (related.length >= 4) break;
+    if (!related.find((r) => r.id === p.id)) related.push(p);
+  }
 }
 
 // Pre-defined customer reviews for the product, initialized in the DOM
@@ -2071,7 +2072,7 @@ const initialReviews = [
 
   @media (max-width: 900px) {
     .pdp {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 32px;
     }
 
@@ -2095,7 +2096,7 @@ const initialReviews = [
 
   @media (max-width: 560px) {
     .pdp-gallery {
-      grid-template-columns: 60px 1fr;
+      grid-template-columns: 60px minmax(0, 1fr);
     }
  
     .pdp-arrow {

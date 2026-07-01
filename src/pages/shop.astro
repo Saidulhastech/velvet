@@ -3,7 +3,7 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
 import ProductCard from '../components/product/ProductCard.astro';
 import { getShopifyProducts } from '../lib/shopify/client';
 
-const products = await getShopifyProducts();
+const products = await getShopifyProducts(Astro.locals.market);
 
 // Fetch all categories, colors, sizes, materials from catalog
 const allMaterials = Array.from(new Set(products.flatMap(p => p.materials)));
@@ -84,16 +84,23 @@ const maxPrice = Math.max(...products.map(p => p.price));
           <div class="fswatches">
             {allColors.map(color => {
               const hexMap: Record<string, string> = {
-                sand: '#C2AE8E',
-                stone: '#858A76',
-                olive: '#6B705E',
-                charcoal: '#30382C',
-                sage: '#B8BCA9',
-                ecru: '#E4E6DA'
+                // fabric tones
+                sand: '#C2AE8E', stone: '#858A76', olive: '#6B705E',
+                charcoal: '#30382C', sage: '#B8BCA9', ecru: '#E4E6DA',
+                // common colours
+                black: '#1A1A1A', white: '#F4F4EF', grey: '#9A9A93', gray: '#9A9A93',
+                blue: '#3E5C7E', navy: '#26344A', 'light blue': '#9BB6CE',
+                red: '#9E3B34', burgundy: '#5C2A2A', pink: '#D8A7AE',
+                yellow: '#D9B44A', gold: '#C6A15B', green: '#4F6146',
+                brown: '#6B4E36', 'bronze orange': '#A6683C', orange: '#C77B3E',
+                beige: '#D9CDB6', cream: '#EDE7D6', tan: '#C6A985', camel: '#B48A5E',
+                purple: '#5D4B6E', teal: '#3E6B66', silver: '#C3C6C4',
               };
+              const key = color.trim().toLowerCase();
+              const hex = hexMap[key] || '#858A76';
               return (
                 <div class="fswatch" data-group="color" data-value={color}>
-                  <span class="fswatch__dot" style={`background: ${hexMap[color] || '#858A76'}`}></span>
+                  <span class="fswatch__dot" style={`background: ${hex}`}></span>
                   <span class="fswatch__name">{color.charAt(0).toUpperCase() + color.slice(1)}</span>
                 </div>
               );

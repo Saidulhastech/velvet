@@ -2,10 +2,42 @@
 import BaseLayout from '../components/layout/BaseLayout.astro';
 import ProductCard from '../components/product/ProductCard.astro';
 import { getShopifyProducts } from '../lib/shopify/client';
+import { resolveCartExtras } from '../lib/cart-extras';
+import { formatMoney } from '../lib/money';
 
-const products = await getShopifyProducts();
+const market = Astro.locals.market;
+const products = await getShopifyProducts(market);
 // Take the first 4 products for cross-sell
 const crossSellProducts = products.slice(0, 4);
+
+// Resolve real gift-wrap + protection products (by handle) for this market.
+// When configured in the store, the toggles become real paid Shopify lines;
+// when not, the template falls back to its original decorative markup so the
+// shipped (mock) design is unchanged.
+const EXTRAS = await resolveCartExtras(market);
+
+const protectionPlans = EXTRAS.protection.show
+  ? EXTRAS.protection.plans
+      .filter((p) => p.id !== 'none' && p.variantId)
+      .map((p) => ({
+        variantId: p.variantId,
+        name: p.name,
+        best: p.best,
+        priceLabel: p.price ? formatMoney(p.price) : '',
+      }))
+  : [];
+const PROTECT_ON = protectionPlans.length > 0;
+
+const giftWrap = EXTRAS.giftWrap;
+const GIFTWRAP_ON = giftWrap.show && !!giftWrap.variantId;
+const giftWrapPriceLabel = giftWrap.price ? formatMoney(giftWrap.price) : '';
+
+// Client bootstrap for the real-extras wiring (empty/nulls in fallback mode).
+const extrasData = JSON.stringify({
+  giftMessageMax: giftWrap.messageMaxLength ?? 200,
+  protection: protectionPlans.map((p) => ({ variantId: p.variantId, name: p.name })),
+  giftWrap: GIFTWRAP_ON ? { variantId: giftWrap.variantId, label: giftWrap.label } : null,
+});
 ---
 
 <BaseLayout 
@@ -22,7 +54,7 @@ const crossSellProducts = products.slice(0, 4);
   </section>
 
   <!-- CART LAYOUT -->
-  <section class="cart-layout" aria-label="Shopping bag">
+  <section class="cart-layout" aria-label="Shopping bag" data-cart-root data-extras={extrasData}>
     <div class="cart-main">
       <!-- Shipping Progress indicator -->
       <div class="cart-ship">
@@ -183,29 +215,50 @@ const crossSellProducts = products.slice(0, 4);
               </div>
             </div>
             
-            <div class="optcards" data-opt-group="protect">
-              <div class="optcard is-active" data-val="0" data-label="No coverage">
-                <span class="optcard__radio"></span>
-                <div class="optcard__main">
-                  <div class="optcard__title">No coverage</div>
+            {PROTECT_ON ? (
+              <div class="optcards" data-opt-group="protect" data-protect-real>
+                <div class="optcard is-active" data-variant="" data-label="No coverage">
+                  <span class="optcard__radio"></span>
+                  <div class="optcard__main">
+                    <div class="optcard__title">No coverage</div>
+                  </div>
+                  <span class="optcard__price optcard__price--free">Free</span>
                 </div>
-                <span class="optcard__price optcard__price--free">Free</span>
+                {protectionPlans.map((p) => (
+                  <div class="optcard" data-variant={p.variantId} data-label={p.name}>
+                    <span class="optcard__radio"></span>
+                    <div class="optcard__main">
+                      <div class="optcard__title">{p.name}{p.best ? <span class="optcard__best"> · Best value</span> : ''}</div>
+                    </div>
+                    {p.priceLabel ? <span class="optcard__price">{p.priceLabel}</span> : ''}
+                  </div>
+                ))}
               </div>
-              <div class="optcard" data-val="49" data-label="2-Year Care">
-                <span class="optcard__radio"></span>
-                <div class="optcard__main">
-                  <div class="optcard__title">2-Year Care</div>
+            ) : (
+              <div class="optcards" data-opt-group="protect">
+                <div class="optcard is-active" data-val="0" data-label="No coverage">
+                  <span class="optcard__radio"></span>
+                  <div class="optcard__main">
+                    <div class="optcard__title">No coverage</div>
+                  </div>
+                  <span class="optcard__price optcard__price--free">Free</span>
                 </div>
-                <span class="optcard__price">+€49</span>
-              </div>
-              <div class="optcard" data-val="79" data-label="3-Year Care">
-                <span class="optcard__radio"></span>
-                <div class="optcard__main">
-                  <div class="optcard__title">3-Year Care</div>
+                <div class="optcard" data-val="49" data-label="2-Year Care">
+                  <span class="optcard__radio"></span>
+                  <div class="optcard__main">
+                    <div class="optcard__title">2-Year Care</div>
+                  </div>
+                  <span class="optcard__price">+€49</span>
                 </div>
-                <span class="optcard__price">+€79</span>
+                <div class="optcard" data-val="79" data-label="3-Year Care">
+                  <span class="optcard__radio"></span>
+                  <div class="optcard__main">
+                    <div class="optcard__title">3-Year Care</div>
+                  </div>
+                  <span class="optcard__price">+€79</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <!-- Gift Options -->
@@ -226,7 +279,7 @@ const crossSellProducts = products.slice(0, 4);
             
             <div class="copt__gift">
               <div class="copt__gift-main">
-                <div class="copt__gift-title">Add gift wrapping <b>+€12</b></div>
+                <div class="copt__gift-title">Add gift wrapping <b>+{GIFTWRAP_ON && giftWrapPriceLabel ? giftWrapPriceLabel : '€12'}</b></div>
                 <div class="copt__gift-sub">Hand-finished with a written message card.</div>
               </div>
               <label class="gw-switch">
@@ -235,7 +288,7 @@ const crossSellProducts = products.slice(0, 4);
               </label>
             </div>
             <div class="copt__giftmsg" data-gift-msg>
-              <textarea class="copt__note" placeholder="Your gift message (optional)…" style="margin-top:12px;min-height:64px;"></textarea>
+              <textarea class="copt__note" data-gift-message maxlength={giftWrap.messageMaxLength ?? 200} placeholder="Your gift message (optional)…" style="margin-top:12px;min-height:64px;"></textarea>
             </div>
           </div>
         </div>
@@ -404,22 +457,40 @@ const crossSellProducts = products.slice(0, 4);
 </BaseLayout>
 
 <script>
-  import { 
-    persistedCartItems, 
+  import {
+    persistedCartItems,
     persistedSavedItems,
-    cartSubtotal,
     cartDiscount,
     appliedDiscounts,
     cartNote,
-    cartCount,
+    cartCurrency,
     updateCartQuantity,
     removeFromCart,
     saveForLater,
     moveToBag,
     removeFromSaved,
     applyDiscount,
-    updateCartNote
+    updateCartNote,
+    setCartAttributes,
+    addExtraLine,
+    removeExtraLine,
+    checkout
   } from '../stores/cart';
+
+  // Real gift-wrap / protection config injected by the server. In fallback mode
+  // (no configured products) protection[] is empty and giftWrap is null, so the
+  // toggles keep their original decorative-only behavior.
+  const rootEl = document.querySelector('[data-cart-root]') as HTMLElement | null;
+  const EXTRAS = (() => {
+    try { return JSON.parse(rootEl?.dataset.extras || '{}'); }
+    catch { return { giftMessageMax: 200, protection: [], giftWrap: null }; }
+  })() as { giftMessageMax: number; protection: { variantId: string; name: string }[]; giftWrap: { variantId: string; label: string } | null };
+
+  const GIFTWRAP_VID = EXTRAS.giftWrap?.variantId || '';
+  const PROTECT_VIDS = new Set((EXTRAS.protection || []).map((p) => p.variantId));
+  // Variant gids that are "extras" — hidden from the visible bag list and
+  // excluded from the product subtotal (they show as their own summary rows).
+  const EXTRA_VIDS = new Set<string>([...PROTECT_VIDS, ...(GIFTWRAP_VID ? [GIFTWRAP_VID] : [])]);
 
   const $ = (s: string, c: HTMLElement | Document = document) => c.querySelector(s);
   const $$ = (s: string, c: HTMLElement | Document = document) => Array.from(c.querySelectorAll(s));
@@ -438,16 +509,34 @@ const crossSellProducts = products.slice(0, 4);
   const state = { ship: 0, shipLabel: 'Standard Courier', protect: 0, protLabel: '', gift: false };
   const GIFT_COST = 12;
 
+  // Active currency, synced from the authoritative Shopify cart (falls back to
+  // EUR until the first sync / in mock mode). Amounts are already localized by
+  // @inContext on the server — only the symbol/format needs to follow the cart.
+  let currentCurrency = 'EUR';
   function formatEur(n: number) {
-    return '€' + Math.round(n).toLocaleString('en-US');
+    const rounded = Math.round(n);
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currentCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(rounded);
+    } catch {
+      return '€' + rounded.toLocaleString('en-US');
+    }
   }
 
   const MINUS_SVG = '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5h6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>';
   const PLUS_SVG = '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 2v6M2 5h6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>';
 
   // Render dynamic list of items in the cart
-  function renderCartItems(items: any[]) {
+  function renderCartItems(allItems: any[]) {
     if (!itemsBox || !emptyEl) return;
+
+    // Hide gift-wrap / protection lines from the visible bag — they show only
+    // as their own summary rows.
+    const items = allItems.filter((i) => !EXTRA_VIDS.has(i.id));
 
     if (items.length === 0) {
       itemsBox.innerHTML = '';
@@ -601,18 +690,28 @@ const crossSellProducts = products.slice(0, 4);
   }
 
   // Recalculate summary details
-  function recomputeSummary(items: any[]) {
+  function recomputeSummary(allItems: any[]) {
+    // Product lines only — gift-wrap / protection are shown as their own rows.
+    const productItems = allItems.filter((i) => !EXTRA_VIDS.has(i.id));
     let sub = 0;
     let count = 0;
-    
-    items.forEach(item => {
+    productItems.forEach(item => {
       count += item.quantity;
       sub += item.price * item.quantity;
     });
 
+    // Extras: prefer the real Shopify lines (authoritative price) when present,
+    // else fall back to the decorative local state (unconfigured store).
+    const protectLine = allItems.find((i) => PROTECT_VIDS.has(i.id));
+    const giftLine = GIFTWRAP_VID ? allItems.find((i) => i.id === GIFTWRAP_VID) : undefined;
+
+    const protectAmount = protectLine ? protectLine.price * protectLine.quantity : state.protect;
+    const protectLabel = protectLine ? (protectLine.name || state.protLabel) : state.protLabel;
+    const giftAmount = giftLine ? giftLine.price * giftLine.quantity : (state.gift ? GIFT_COST : 0);
+    const giftOn = giftLine ? true : state.gift;
+
     const disc = currentDiscount;
-    const gift = state.gift ? GIFT_COST : 0;
-    const total = Math.max(sub - disc, 0) + state.ship + state.protect + gift;
+    const total = Math.max(sub - disc, 0) + state.ship + protectAmount + giftAmount;
 
     // Subtotal values
     const sumCountEl = $('[data-sum-count]');
@@ -655,10 +754,10 @@ const crossSellProducts = products.slice(0, 4);
     const protVal = $('[data-sum-prot]');
     const protLabelSpan = $('[data-prot-label]');
     if (protRow && protVal) {
-      if (state.protect > 0) {
+      if (protectAmount > 0) {
         (protRow as HTMLElement).style.display = 'flex';
-        protVal.textContent = '+' + formatEur(state.protect);
-        if (protLabelSpan) protLabelSpan.textContent = '(' + state.protLabel + ')';
+        protVal.textContent = '+' + formatEur(protectAmount);
+        if (protLabelSpan) protLabelSpan.textContent = protectLabel ? '(' + protectLabel + ')' : '';
       } else {
         (protRow as HTMLElement).style.display = 'none';
       }
@@ -668,9 +767,9 @@ const crossSellProducts = products.slice(0, 4);
     const giftRow = $('[data-sum-gift-row]');
     const giftVal = $('[data-sum-gift]');
     if (giftRow && giftVal) {
-      if (state.gift) {
+      if (giftOn) {
         (giftRow as HTMLElement).style.display = 'flex';
-        giftVal.textContent = '+' + formatEur(GIFT_COST);
+        giftVal.textContent = '+' + formatEur(giftAmount);
       } else {
         (giftRow as HTMLElement).style.display = 'none';
       }
@@ -703,25 +802,55 @@ const crossSellProducts = products.slice(0, 4);
     renderSavedItems(savedItems);
   });
 
+  // Build the full cart-attribute set (wholesale replace) from the current
+  // gift + protection selection. Uses live DOM/store state so it's correct
+  // whenever a toggle changes.
+  function buildAttributes() {
+    const attrs: { key: string; value: string }[] = [];
+    const giftBox = document.querySelector('[data-gift]') as HTMLInputElement | null;
+    const giftLine = GIFTWRAP_VID ? persistedCartItems.get().find((i) => i.id === GIFTWRAP_VID) : undefined;
+    if (giftLine || giftBox?.checked) {
+      attrs.push({ key: 'Gift Wrap', value: 'Yes' });
+      const msg = (document.querySelector('[data-gift-message]') as HTMLTextAreaElement | null)?.value.trim();
+      if (msg) attrs.push({ key: 'Gift Message', value: msg });
+    }
+    const protCard = document.querySelector('[data-opt-group="protect"] .optcard.is-active');
+    const protName = protCard?.getAttribute('data-label') || '';
+    const protVariant = protCard?.getAttribute('data-variant') || '';
+    if (protVariant && protName && protName !== 'No coverage') {
+      attrs.push({ key: 'Protection Plan', value: protName });
+    }
+    return attrs;
+  }
+
   // Setup options selection listeners
   $$('[data-opt-group]').forEach(group => {
     const groupName = group.getAttribute('data-opt-group');
+    const isRealProtect = groupName === 'protect' && group.hasAttribute('data-protect-real');
     const cards = $$('.optcard', group);
     cards.forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', async () => {
         cards.forEach(c => c.classList.remove('is-active'));
         card.classList.add('is-active');
-        const val = parseInt(card.getAttribute('data-val') || '0', 10);
         const label = card.getAttribute('data-label') || '';
 
         if (groupName === 'ship') {
-          state.ship = val;
+          state.ship = parseInt(card.getAttribute('data-val') || '0', 10);
           state.shipLabel = label;
+          recomputeSummary(persistedCartItems.get());
+        } else if (isRealProtect) {
+          // Real paid tiers: swap the protection line, then persist the plan name.
+          const variantId = card.getAttribute('data-variant') || '';
+          const current = persistedCartItems.get().find((i) => PROTECT_VIDS.has(i.id));
+          if (current && current.id !== variantId) await removeExtraLine(current.id);
+          if (variantId && (!current || current.id !== variantId)) await addExtraLine(variantId, 1);
+          await setCartAttributes(buildAttributes());
         } else if (groupName === 'protect') {
-          state.protect = val;
+          // Fallback decorative mode (no configured protection product).
+          state.protect = parseInt(card.getAttribute('data-val') || '0', 10);
           state.protLabel = label;
+          recomputeSummary(persistedCartItems.get());
         }
-        recomputeSummary(persistedCartItems.get());
       });
     });
   });
@@ -729,14 +858,32 @@ const crossSellProducts = products.slice(0, 4);
   // Gift checkbox wrapping message drawer
   const giftCheckbox = $('[data-gift]');
   const giftMsgBlock = $('[data-gift-msg]');
+  const giftMsgArea = $('[data-gift-message]') as HTMLTextAreaElement | null;
   if (giftCheckbox) {
-    giftCheckbox.addEventListener('change', (e) => {
+    giftCheckbox.addEventListener('change', async (e) => {
       const checked = (e.target as HTMLInputElement).checked;
-      state.gift = checked;
-      if (giftMsgBlock) {
-        giftMsgBlock.classList.toggle('is-open', checked);
+      if (giftMsgBlock) giftMsgBlock.classList.toggle('is-open', checked);
+
+      if (GIFTWRAP_VID) {
+        // Real paid gift-wrap line + gift attributes.
+        if (checked) await addExtraLine(GIFTWRAP_VID, 1);
+        else await removeExtraLine(GIFTWRAP_VID);
+        await setCartAttributes(buildAttributes());
+      } else {
+        // Fallback decorative mode.
+        state.gift = checked;
+        recomputeSummary(persistedCartItems.get());
       }
-      recomputeSummary(persistedCartItems.get());
+    });
+  }
+  // Persist the gift message (debounced) when real gift-wrap is active.
+  if (giftMsgArea && GIFTWRAP_VID) {
+    let giftMsgTimer: any;
+    giftMsgArea.addEventListener('input', () => {
+      clearTimeout(giftMsgTimer);
+      giftMsgTimer = setTimeout(() => {
+        if ((giftCheckbox as HTMLInputElement | null)?.checked) setCartAttributes(buildAttributes());
+      }, 600);
     });
   }
 
@@ -755,32 +902,29 @@ const crossSellProducts = products.slice(0, 4);
       const originalText = couponBtn.textContent;
       couponBtn.textContent = 'Applying...';
       try {
-        await applyDiscount(code ? [code] : []);
-        setTimeout(() => {
-          const applied = appliedDiscounts.get();
-          if (applied.includes(code)) {
-            if (couponInp) couponInp.value = '';
-            if (couponMsg) {
-              couponMsg.textContent = `Coupon applied successfully!`;
-              couponMsg.classList.add('is-success');
-            }
-          } else {
-            if (couponMsg) {
-              couponMsg.textContent = 'Invalid or expired code.';
-              couponMsg.classList.add('is-error');
-            }
+        // applyDiscount syncs the cart before resolving, so appliedDiscounts +
+        // any Shopify userError are authoritative here — no timing guess needed.
+        const res = await applyDiscount(code ? [code] : []);
+        const applied = appliedDiscounts.get();
+        const userErr = (res.userErrors && res.userErrors[0]) || null;
+        if (code && applied.includes(code)) {
+          if (couponInp) couponInp.value = '';
+          if (couponMsg) {
+            couponMsg.textContent = 'Coupon applied successfully!';
+            couponMsg.classList.add('is-success');
           }
-        }, 800);
+        } else if (couponMsg) {
+          couponMsg.textContent = userErr ? userErr.message : 'Invalid or expired code.';
+          couponMsg.classList.add('is-error');
+        }
       } catch {
         if (couponMsg) {
           couponMsg.textContent = 'Error applying code. Please try again.';
           couponMsg.classList.add('is-error');
         }
       } finally {
-        setTimeout(() => {
-          couponBtn.disabled = false;
-          couponBtn.textContent = originalText;
-        }, 800);
+        couponBtn.disabled = false;
+        couponBtn.textContent = originalText;
       }
     });
   }
@@ -797,20 +941,24 @@ const crossSellProducts = products.slice(0, 4);
     });
   }
 
-  // Real Shopify checkout trigger
+  // Real Shopify checkout trigger — re-fetches the cart to avoid a stale/expired
+  // checkoutUrl before redirecting (see store checkout()).
   if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', (e) => {
+    checkoutBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      const currentItems = persistedCartItems.get();
-      if (currentItems.length === 0) {
+      const hasProducts = persistedCartItems.get().some((i) => !EXTRA_VIDS.has(i.id));
+      if (!hasProducts) {
         alert('Your bag is empty.');
         return;
       }
-      const checkoutUrl = window.sessionStorage.getItem('ma_checkout_url');
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      } else {
-        alert('Checkout is preparing. Please try again.');
+      const btn = checkoutBtn as HTMLAnchorElement;
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.7';
+      try {
+        await checkout();
+      } finally {
+        btn.style.pointerEvents = '';
+        btn.style.opacity = '';
       }
     });
   }
@@ -846,6 +994,12 @@ const crossSellProducts = products.slice(0, 4);
     if (noteArea && !noteArea.matches(':focus')) {
       noteArea.value = val;
     }
+  });
+
+  // Re-render money in the authoritative cart currency once it syncs.
+  cartCurrency.subscribe(code => {
+    currentCurrency = code || 'EUR';
+    recomputeSummary(persistedCartItems.get());
   });
 </script>
 
@@ -913,7 +1067,7 @@ const crossSellProducts = products.slice(0, 4);
     margin: 0 auto;
     padding: clamp(32px, 4vw, 56px) var(--gutter) var(--section-y);
     display: grid;
-    grid-template-columns: 1fr 388px;
+    grid-template-columns: minmax(0, 1fr) 388px;
     gap: clamp(28px, 3.5vw, 64px);
     align-items: start;
   }
@@ -1807,7 +1961,7 @@ const crossSellProducts = products.slice(0, 4);
   /* ============ RESPONSIVE BREAKPOINTS ============ */
   @media (max-width: 960px) {
     .cart-layout {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     :global(.csum) {

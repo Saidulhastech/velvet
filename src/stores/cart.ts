@@ -52,6 +52,48 @@ export const cartDiscount = atom<number>(0);
 export const appliedDiscounts = atom<string[]>([]);
 export const cartNote = atom<string>('');
 export const wishCount = atom<number>(0);
+/** Currency code of the authoritative Shopify cart ('EUR' until first sync). */
+export const cartCurrency = atom<string>('EUR');
+/** Cart total (incl. tax/discount) from Shopify; mirrors subtotal until synced. */
+export const cartTotal = atom<number>(0);
+/** Last user-facing cart error/warning ('' when none). Bound to existing UI, no new markup. */
+export const cartError = atom<string>('');
+
+// --- Concurrency control -------------------------------------------------
+// Cart mutations fire independently (qty steppers, coupon, note, gift toggle)
+// and their /api/cart/* responses can race. Two guards keep local state
+// consistent with the authoritative Shopify cart:
+//  1. A monotonic request sequence: each post stamps a seq; a response only
+//     re-syncs local state if no NEWER response already landed (out-of-order).
+//  2. Per-line serialization: posts for the same line run in submit order via
+//     a promise chain, so a slow earlier reply can't apply after a newer one.
+let mutationSeq = 0;
+let lastAppliedSeq = 0;
+const lineQueues = new Map<string, Promise<unknown>>();
+
+interface CartApiResponse {
+  cart?: any;
+  userErrors?: { message: string; field?: string[] | null }[];
+  warnings?: { message: string; code?: string }[];
+  error?: string;
+}
+
+/** A discount-code validation error — belongs in the coupon area, not globally. */
+function isDiscountError(e: { message: string; field?: string[] | null }): boolean {
+  if (e.field?.some((f) => f.toLowerCase().includes('discountcode'))) return true;
+  return /discount code/i.test(e.message);
+}
+
+/** Run a task after the previous one queued for the same line resolves. */
+function enqueueLine<T>(key: string, task: () => Promise<T>): Promise<T> {
+  const prev = lineQueues.get(key) ?? Promise.resolve();
+  const next = prev.then(task, task);
+  lineQueues.set(key, next);
+  next.finally(() => {
+    if (lineQueues.get(key) === next) lineQueues.delete(key);
+  });
+  return next;
+}
 
 // Helper to map Shopify Cart response into local state format
 function syncWithShopifyCart(shopifyCart: any) {
@@ -78,6 +120,14 @@ function syncWithShopifyCart(shopifyCart: any) {
   cartId.set(shopifyCart.id);
   cartCount.set(shopifyCart.totalQuantity);
   cartSubtotal.set(parseFloat(shopifyCart.cost.subtotalAmount.amount));
+
+  // Authoritative currency + total straight from Shopify (matches checkout).
+  const currencyCode =
+    shopifyCart.cost?.subtotalAmount?.currencyCode ||
+    shopifyCart.cost?.totalAmount?.currencyCode ||
+    'EUR';
+  cartCurrency.set(currencyCode);
+  cartTotal.set(parseFloat(shopifyCart.cost?.totalAmount?.amount ?? shopifyCart.cost.subtotalAmount.amount));
 
   // Compute total discount allocations
   const discountAmount = (shopifyCart.discountAllocations || []).reduce((acc: number, da: any) => {
@@ -113,32 +163,82 @@ export function updateWishTotals() {
   wishCount.set(currentItems.length);
 }
 
-// Action to apply a Shopify coupon/discount code
-export async function applyDiscount(codes: string[]) {
-  await postToApi('/api/cart/discount', { codes });
+// Action to apply a Shopify coupon/discount code. Returns the raw response so
+// callers (cart.astro coupon area) can show the real validation message instead
+// of guessing. Discount validation errors are kept OUT of the global cartError.
+export async function applyDiscount(codes: string[]): Promise<CartApiResponse> {
+  return postToApi('/api/cart/discount', { codes }, { silentErrors: true });
 }
 
 // Action to update the Shopify cart note
-export async function updateCartNote(note: string) {
-  await postToApi('/api/cart/note', { note });
+export async function updateCartNote(note: string): Promise<CartApiResponse> {
+  return postToApi('/api/cart/note', { note }, { silentErrors: true });
 }
 
-// Background api call helper
-async function postToApi(url: string, body: any) {
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    const data = await res.json();
-    if (data.cart) {
-      syncWithShopifyCart(data.cart);
+// Action to replace the cart's custom attributes (gift wrap/message, protection).
+// Wholesale replace — pass the full desired set each call.
+export async function setCartAttributes(
+  attributes: { key: string; value: string }[],
+): Promise<CartApiResponse> {
+  return postToApi('/api/cart/attributes', { attributes }, { silentErrors: true });
+}
+
+// Add a real paid "extra" line (gift wrap / protection tier) straight to the
+// Shopify cart — no optimistic push, no drawer. The server sync re-populates
+// persistedCartItems (the cart page filters these out of the visible bag list).
+export async function addExtraLine(variantId: string, quantity = 1): Promise<CartApiResponse> {
+  if (!variantId.startsWith('gid://shopify/ProductVariant/')) return { cart: null };
+  return postToApi('/api/cart/add', { merchandiseId: variantId, quantity }, { silentErrors: true });
+}
+
+// Remove a previously-added extra line by its variant id.
+export async function removeExtraLine(variantId: string): Promise<CartApiResponse> {
+  const item = persistedCartItems.get().find((i) => i.id === variantId && i.shopifyLineId);
+  if (!item?.shopifyLineId) return { cart: null };
+  return postToApi('/api/cart/remove', { lineId: item.shopifyLineId }, { lineKey: item.shopifyLineId, silentErrors: true });
+}
+
+// Background api call helper. `lineKey` serializes posts for a single line so an
+// earlier slow reply can't apply after a newer one; `silentErrors` keeps the
+// response's userErrors out of the global banner (caller handles them locally).
+async function postToApi(
+  url: string,
+  body: any,
+  opts: { lineKey?: string; silentErrors?: boolean } = {},
+): Promise<CartApiResponse> {
+  const run = async (): Promise<CartApiResponse> => {
+    const seq = ++mutationSeq;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = (await res.json().catch(() => ({}))) as CartApiResponse;
+
+      // Apply only if this is still the newest response (out-of-order guard).
+      if (data.cart && seq >= lastAppliedSeq) {
+        lastAppliedSeq = seq;
+        syncWithShopifyCart(data.cart);
+      }
+
+      if (!opts.silentErrors) {
+        const relevant = (data.userErrors ?? []).filter((e) => !isDiscountError(e));
+        const message =
+          relevant[0]?.message ??
+          data.warnings?.[0]?.message ??
+          (res.ok ? '' : data.error ?? `Cart update failed (${res.status})`);
+        cartError.set(message);
+      }
+      return data;
+    } catch (err) {
+      console.error(`Shopify cart sync error on ${url}:`, err);
+      if (!opts.silentErrors) cartError.set('Could not reach the server. Please try again.');
+      return { error: err instanceof Error ? err.message : 'network' };
     }
-  } catch (err) {
-    console.error(`Shopify cart sync error on ${url}:`, err);
-  }
+  };
+
+  return opts.lineKey ? enqueueLine(opts.lineKey, run) : run();
 }
 
 // Initialize count and sync with Shopify on load
@@ -201,9 +301,10 @@ export async function updateCartQuantity(id: string, color: string | undefined, 
     persistedCartItems.set(currentItems);
     updateCartTotals();
 
-    // Background Shopify sync
+    // Background Shopify sync — serialized per line so rapid stepper clicks
+    // apply in order and the newest absolute quantity wins.
     if (item.shopifyLineId) {
-      await postToApi('/api/cart/update', { lineId: item.shopifyLineId, quantity });
+      await postToApi('/api/cart/update', { lineId: item.shopifyLineId, quantity }, { lineKey: item.shopifyLineId });
     }
   }
 }
@@ -220,9 +321,36 @@ export async function removeFromCart(id: string, color?: string, size?: string) 
   persistedCartItems.set(filteredItems);
   updateCartTotals();
 
-  // Background Shopify sync
+  // Background Shopify sync — serialized per line.
   if (item && item.shopifyLineId) {
-    await postToApi('/api/cart/remove', { lineId: item.shopifyLineId });
+    await postToApi('/api/cart/remove', { lineId: item.shopifyLineId }, { lineKey: item.shopifyLineId });
+  }
+}
+
+/**
+ * Jump to Shopify's hosted checkout. Re-fetches the cart first so we never
+ * redirect to a stale/expired checkoutUrl (which lands on a dead checkout).
+ * Falls back to the cached sessionStorage url, and surfaces an error if none.
+ */
+export async function checkout(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  let url: string | null = window.sessionStorage.getItem('ma_checkout_url');
+  try {
+    const res = await fetch('/api/cart', { headers: { accept: 'application/json' } });
+    const data = (await res.json()) as CartApiResponse;
+    if (data.cart) {
+      syncWithShopifyCart(data.cart);
+      url = data.cart.checkoutUrl ?? url;
+    } else {
+      url = null; // cart expired server-side
+    }
+  } catch {
+    /* network — fall back to the cached url below */
+  }
+  if (url) {
+    window.location.href = url;
+  } else {
+    cartError.set('Your cart has expired. Please add items again.');
   }
 }
 

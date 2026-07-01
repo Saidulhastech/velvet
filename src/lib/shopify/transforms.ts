@@ -70,12 +70,25 @@ const COLOR_MAP: Record<string, string> = {
 
 const COLOR_OPTION_NAMES = new Set(['color', 'colour']);
 
+/**
+ * Resolve a colour swatch hex: an explicit Shopify swatch value wins; otherwise
+ * fall back to COLOR_MAP by name (exact, then loose "bronze orange" → orange).
+ * Returns null when nothing matches so callers can pick their own placeholder.
+ */
+export function colorHex(name?: string | null, raw?: string | null): string | null {
+  if (raw) return raw;
+  const key = String(name ?? '').toLowerCase().trim();
+  if (COLOR_MAP[key]) return COLOR_MAP[key];
+  const hit = Object.keys(COLOR_MAP).find((k) => key.includes(k));
+  return hit ? COLOR_MAP[hit] : null;
+}
+
 function deriveSwatches(p: Raw): { name: string; color: string }[] {
   const opt = (p.options ?? []).find((o: Raw) => COLOR_OPTION_NAMES.has(String(o?.name).toLowerCase()));
   if (!opt) return [];
   return (opt.optionValues ?? [])
     .map((v: Raw) => {
-      const color = v?.swatch?.color || COLOR_MAP[String(v?.name).toLowerCase()];
+      const color = colorHex(v?.name, v?.swatch?.color);
       return color ? { name: v.name, color } : null;
     })
     .filter(Boolean)
@@ -202,6 +215,7 @@ export function mapProductCard(p: Raw): ProductCard {
     featuredImage: p.featuredImage ?? null,
     priceRange: p.priceRange ?? ZERO_PRICE_RANGE,
     compareAtPriceRange: p.compareAtPriceRange ?? ZERO_PRICE_RANGE,
+    collections: nodes<Raw>(p.collections).map((c) => ({ title: c.title, handle: c.handle })),
     firstVariantId: firstVariant?.id ?? null,
     // If there are no variants we can't add anything — default unavailable so
     // grid "Quick Add" never promises stock it can't deliver (was `?? true`).
@@ -263,6 +277,8 @@ export function mapProduct(p: Raw): Product {
     ratingCount: parseIntOrNull(p.ratingCountMetafield?.value),
     specs: parseSpecs(p.specsMetafield?.value),
     highlights: parseStringList(p.highlightsMetafield?.value),
+    materialsCare: parseStringList(p.materialsCareMetafield?.value),
+    shippingReturns: parseStringList(p.shippingReturnsMetafield?.value),
     // Parse the reviews metafield once, reuse for both the list and the
     // star-distribution (was parsed twice per product).
     ...(() => {

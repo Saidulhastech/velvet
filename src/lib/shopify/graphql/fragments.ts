@@ -92,6 +92,16 @@ export const PRODUCT_CARD_FRAGMENT = /* GraphQL */ `
         }
       }
     }
+    # Collections the product belongs to — drives dynamic category tabs/facets
+    # when productType is unset. Capped small to keep query cost sane.
+    collections(first: 8) {
+      edges {
+        node {
+          title
+          handle
+        }
+      }
+    }
     # Total sellable units across variants — powers the deal stock bar.
     # Needs the storefront token's "read product inventory" scope; returns
     # null when inventory isn't tracked.
