@@ -1,0 +1,315 @@
+---
+import BaseLayout from '../components/layout/BaseLayout.astro';
+import ProductCard from '../components/product/ProductCard.astro';
+import { searchProducts, SEARCH_SORT_OPTIONS, resolveSort } from '../lib/shopify';
+import { mapToLegacyProduct } from '../lib/shopify/client';
+import { paginationUrls } from '../lib/pagination';
+
+const url = Astro.url;
+const q = (url.searchParams.get('q') ?? '').trim();
+const sortValue = url.searchParams.get('sort') ?? SEARCH_SORT_OPTIONS[0].value;
+const sort = resolveSort(SEARCH_SORT_OPTIONS, sortValue);
+const after = url.searchParams.get('after');
+const before = url.searchParams.get('before');
+
+let products: any[] = [];
+let total = 0;
+let prevUrl: string | null = null;
+let nextUrl: string | null = null;
+let loadFailed = false;
+
+if (q) {
+  try {
+    const page = await searchProducts(
+      {
+        query: q,
+        pageSize: 12,
+        after,
+        before,
+        sortKey: sort.sortKey,
+        reverse: sort.reverse,
+      },
+      Astro.locals.market,
+    );
+    products = (page.items || []).map(p => mapToLegacyProduct(p));
+    total = page.totalCount;
+    ({ prevUrl, nextUrl } = paginationUrls(url, page.pageInfo));
+  } catch (err) {
+    loadFailed = true;
+    console.error('[search] load failed:', (err as Error).message);
+  }
+}
+
+const countLabel = q ? `${total} result${total === 1 ? '' : 's'} for “${q}”` : 'Enter a search term';
+---
+
+<BaseLayout title={q ? `Search · ${q}` : 'Search'} description="Search the Maison Arden collection.">
+  <!-- SEARCH HERO -->
+  <section class="shop-hero">
+    <div class="shop-hero__inner">
+      <div class="shop-hero__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Search</span></div>
+      <h1 class="shop-hero__title">Search the <em>Collection</em></h1>
+    </div>
+  </section>
+
+  <!-- SEARCH LAYOUT -->
+  <section class="search-layout">
+    <div class="search-container">
+      <form class="srch-box" method="get" action="/search" role="search">
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <circle cx="9.5" cy="9.5" r="7" stroke="currentColor" stroke-width="1.4"></circle>
+          <path d="m14.5 14.5 5.5 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          value={q}
+          placeholder="Search products…"
+          autocomplete="off"
+          aria-label="Search products"
+          required
+        />
+        <button type="submit" class="btn-dark srch-box__btn">Search</button>
+      </form>
+
+      {
+        q ? (
+          products.length > 0 ? (
+            <>
+              <div class="coll-toolbar">
+                <span class="coll-count">{countLabel}</span>
+                <form class="coll-sortwrap" method="get" action="/search">
+                  <input type="hidden" name="q" value={q} />
+                  <label for="srchSort">Sort by</label>
+                  <select class="coll-sort" id="srchSort" name="sort" onchange="this.form.submit()">
+                    {SEARCH_SORT_OPTIONS.map((o) => (
+                      <option value={o.value} selected={o.value === sort.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </form>
+              </div>
+
+              <div class="shop-grid">
+                {products.map((p) => (
+                  <ProductCard product={p} />
+                ))}
+              </div>
+
+              {(prevUrl || nextUrl) && (
+                <nav class="coll-pager" aria-label="Pagination">
+                  {prevUrl ? (
+                    <a class="btn-pager" href={prevUrl}>
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="transform: rotate(180deg);">
+                        <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+                      </svg>
+                      Previous
+                    </a>
+                  ) : (
+                    <span class="btn-pager is-disabled" aria-disabled="true">
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="transform: rotate(180deg);">
+                        <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+                      </svg>
+                      Previous
+                    </span>
+                  )}
+                  {nextUrl ? (
+                    <a class="btn-pager" href={nextUrl}>
+                      Next
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                        <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+                      </svg>
+                    </a>
+                  ) : (
+                    <span class="btn-pager is-disabled" aria-disabled="true">
+                      Next
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                        <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+                      </svg>
+                    </span>
+                  )}
+                </nav>
+              )}
+            </>
+          ) : (
+            <div class="coll-empty">
+              <b>{loadFailed ? 'Search is temporarily unavailable' : 'No matches found'}</b>
+              <p>
+                {loadFailed
+                  ? 'We could not run that search right now. Please try again shortly.'
+                  : `Nothing matched your search for “${q}”. Try another term or explore our essentials.`}
+              </p>
+              <a class="btn-dark" href="/shop" style="margin-top: 18px; display: inline-flex; align-items: center; justify-content: center;">Browse all products</a>
+            </div>
+          )
+        ) : (
+          <div class="coll-empty">
+            <b>Start typing to search</b>
+            <p>Search the Maison Arden collection by product name, category, or fabric.</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .search-layout {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 60px var(--gutter) var(--section-y);
+  }
+  .search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .srch-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 6px 6px 18px;
+    border: 1px solid var(--lux-light-border-strong);
+    background: var(--lux-light-surface);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 16px;
+    transition: border-color .3s var(--ease);
+  }
+  .srch-box:focus-within {
+    border-color: var(--lux-secondary-olive);
+  }
+  .srch-box svg {
+    color: var(--lux-on-light-soft);
+    flex-shrink: 0;
+  }
+  .srch-box input {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--lux-on-light);
+    outline: none;
+    font-family: var(--font-body);
+  }
+  .srch-box__btn {
+    padding: 12px 24px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+  }
+  .coll-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--lux-light-border);
+    padding-bottom: 14px;
+    font-size: 12px;
+    color: var(--lux-on-light-soft);
+  }
+  .coll-count {
+    font-style: italic;
+  }
+  .coll-sortwrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .coll-sort {
+    border: 1px solid var(--lux-light-border);
+    background: var(--lux-light-surface);
+    padding: 6px 28px 6px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23171A15' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 38px 24px;
+  }
+  .coll-pager {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 50px;
+  }
+  .btn-pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+    border: 1px solid var(--lux-light-border-strong);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.3s var(--ease), color 0.3s var(--ease);
+  }
+  .btn-pager:hover:not(.is-disabled) {
+    background: var(--lux-on-light);
+    color: var(--lux-text-primary);
+  }
+  .btn-pager.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .coll-empty {
+    text-align: center;
+    padding: 80px 20px;
+    border: 1px solid var(--lux-light-border);
+    background: var(--lux-light-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .coll-empty b {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+    font-family: var(--font-display);
+  }
+  .coll-empty p {
+    font-size: 13px;
+    color: var(--lux-on-light-soft);
+    max-width: 440px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 980px) {
+    .shop-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 680px) {
+    .shop-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px 12px;
+    }
+    .coll-toolbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .coll-sortwrap {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>

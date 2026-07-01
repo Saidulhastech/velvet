@@ -1,0 +1,1783 @@
+---
+import BaseLayout from '../components/layout/BaseLayout.astro';
+import { Image } from 'astro:assets';
+
+// Import images
+import imgBout1 from '../assets/images/ct-bout__overlay image 01.png';
+import imgBout2 from '../assets/images/ct-bout__overlay image 02.png';
+import imgBout3 from '../assets/images/ct-bout__overlay image 03.png';
+
+const boutiques = [
+  {
+    city: 'Paris',
+    address: '18 Rue Saint-Honoré, 75001',
+    hours: 'Mon–Sat · 10am–7pm CET',
+    badge: 'Flagship',
+    num: '01',
+    image: imgBout1,
+    delay: ''
+  },
+  {
+    city: 'London',
+    address: '9 Mount Street, Mayfair W1K',
+    hours: 'Mon–Sat · 10am–6pm GMT',
+    num: '02',
+    image: imgBout2,
+    delay: 'd1'
+  },
+  {
+    city: 'Milan',
+    address: 'Via Montenapoleone 12, 20121',
+    hours: 'Mon–Sat · 10am–7pm CET',
+    num: '03',
+    image: imgBout3,
+    delay: 'd2'
+  }
+];
+
+const faqItems = [
+  {
+    cat: 'shipping',
+    q: 'How long does delivery take?',
+    a: 'Standard courier arrives within 3–5 business days and Express Air within 1–2. Orders placed before 2pm CET ship the same day, with complimentary carbon-neutral delivery worldwide.'
+  },
+  {
+    cat: 'returns',
+    q: 'What is your returns policy?',
+    a: 'We offer complimentary returns within 30 days of delivery. Items should be unworn with original tags. Refunds are issued to your original payment method within 5 business days of receipt.'
+  },
+  {
+    cat: 'sizing',
+    q: 'How do I choose the right size?',
+    a: 'Each product page includes a detailed size guide with measurements. For tailoring or in-between sizes, our specialists are happy to advise — just select "Product & Sizing" in the form above.'
+  },
+  {
+    cat: 'sizing',
+    q: 'Can I book a private appointment?',
+    a: 'Yes — private styling appointments are available at all boutiques. Select "Private Appointment" in the form above or call your nearest atelier directly.'
+  },
+  {
+    cat: 'care',
+    q: 'How should I care for my pieces?',
+    a: 'Each garment includes detailed care guidance. In general, store knitwear folded, steam to refresh, and use a specialist dry cleaner for tailoring. Complimentary lifetime repairs are included on every piece.'
+  },
+  {
+    cat: 'shipping',
+    q: 'Do you offer gift wrapping?',
+    a: 'Yes. Add complimentary gift wrapping at checkout — ivory tissue, a satin ribbon and a hand-written message card, presented in our signature box.'
+  },
+  {
+    cat: 'returns',
+    q: 'Can I amend or cancel my order?',
+    a: 'Orders can be amended or cancelled within one hour of placing them. Contact client care as soon as possible and we\'ll do everything we can before your order enters fulfilment.'
+  }
+];
+---
+
+<BaseLayout title="Contact Us">
+  <!-- HERO -->
+  <section class="shop-hero">
+    <div class="shop-hero__inner">
+      <div class="shop-hero__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Contact</span></div>
+      <h1 class="shop-hero__title">Get in <em>Touch</em></h1>
+      <p class="shop-hero__sub">Questions about an order, a fitting, or a private appointment? Our client care team replies within one business day.</p>
+    </div>
+  </section>
+
+  <!-- FORM + INFO -->
+  <section class="ct-grid" aria-label="Contact">
+    <form class="ct-form" id="contactForm" novalidate>
+      <span class="ct-form__eyebrow">Send a Message</span>
+      <h2 class="ct-form__title">We’d love to hear from you</h2>
+      <p class="ct-form__lede">Complete the form and a member of our atelier team will be in touch shortly.</p>
+      
+      <div class="ct-assure">
+        <span class="ct-assure__item">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.5" stroke="currentColor" />
+            <path d="M8 5v3.2l2 1.3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+          </svg> 
+          Replies within 1 business day
+        </span>
+        <span class="ct-assure__item">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="2.5" y="7" width="11" height="6.5" rx="1" stroke="currentColor" />
+            <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-linecap="round" />
+          </svg> 
+          Private &amp; secure
+        </span>
+        <span class="ct-assure__item">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="6" r="2.6" stroke="currentColor" />
+            <path d="M3 13.5c1-2.6 2.8-3.8 5-3.8s4 1.2 5 3.8" stroke="currentColor" stroke-linecap="round" />
+          </svg> 
+          Real specialists, not bots
+        </span>
+      </div>
+      
+      <div class="ct-fgrid">
+        <div class="ct-field">
+          <label class="ct-label" for="ctName">Full Name</label>
+          <input class="ct-input" id="ctName" required />
+        </div>
+        <div class="ct-field">
+          <label class="ct-label" for="ctEmail">Email</label>
+          <input class="ct-input" type="email" id="ctEmail" placeholder="you@email.com" required />
+        </div>
+        <div class="ct-field">
+          <label class="ct-label" for="ctPhone">Phone <span style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--lux-on-light-soft)">(optional)</span></label>
+          <input class="ct-input" type="tel" id="ctPhone" />
+        </div>
+        <div class="ct-field">
+          <label class="ct-label" for="ctTopic">Topic</label>
+          <select class="ct-select" id="ctTopic">
+            <option>Order &amp; Delivery</option>
+            <option>Product &amp; Sizing</option>
+            <option>Private Appointment</option>
+            <option>Repairs &amp; Care</option>
+            <option>Press &amp; Partnerships</option>
+            <option>Something Else</option>
+          </select>
+        </div>
+        <div class="ct-field ct-field--full">
+          <label class="ct-label">Preferred reply</label>
+          <div class="ct-pills" data-pref>
+            <button type="button" class="ct-pill is-active" data-pref-val="Email">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="3.5" width="12" height="9" stroke="currentColor" />
+                <path d="M2.5 4.5L8 8.5l5.5-4" stroke="currentColor" />
+              </svg> 
+              Email
+            </button>
+            <button type="button" class="ct-pill" data-pref-val="Phone">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <path d="M5 2.5H3.2a.8.8 0 0 0-.8.9c0 5.6 4.6 10.2 10.2 10.2a.8.8 0 0 0 .9-.8V11l-2.7-.9-1.3 1.3a7.5 7.5 0 0 1-3.8-3.8L6.9 6.2 6 3.5z" stroke="currentColor" stroke-linejoin="round" />
+              </svg> 
+              Phone Call
+            </button>
+          </div>
+        </div>
+        <div class="ct-field ct-field--full">
+          <label class="ct-label" for="ctMsg">Message</label>
+          <textarea class="ct-textarea" id="ctMsg" maxlength="600" placeholder="How can we help?" required></textarea>
+          <span class="ct-count"><span data-count>0</span> / 600</span>
+        </div>
+      </div>
+      
+      <div class="ct-actions">
+        <button type="submit" class="btn-dark ct-send">
+          Send Message 
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </button>
+        <p class="ct-form__msg" data-ct-msg></p>
+      </div>
+    </form>
+
+    <aside class="ct-info">
+      <h2 class="ct-info__title">Client Care</h2>
+      <p class="ct-info__intro">Our specialists are here Monday to Saturday to help with orders, styling and appointments — however you prefer to reach us.</p>
+      <div class="ct-info__list">
+        <a class="ct-info__item" href="mailto:client@maisonarden.com">
+          <span class="ct-info__icon">
+            <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
+              <rect x="2" y="3.5" width="14" height="11" stroke="currentColor" stroke-width="1.2" />
+              <path d="M2.5 4.5L9 9l6.5-4.5" stroke="currentColor" stroke-width="1.2" />
+            </svg>
+          </span>
+          <span class="ct-info__txt">
+            <span class="ct-info__label">Email Us</span>
+            <span class="ct-info__val">client@maisonarden.com</span>
+          </span>
+        </a>
+        
+        <a class="ct-info__item" href="tel:+33100000000">
+          <span class="ct-info__icon">
+            <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
+              <path d="M5 2.5H3a1 1 0 0 0-1 1c0 6.6 5.4 12 12 12a1 1 0 0 0 1-1v-2l-3.2-1.1-1.6 1.6a9 9 0 0 1-4.6-4.6L7.6 6.7 6.5 3.5 5 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="ct-info__txt">
+            <span class="ct-info__label">Call Us</span>
+            <span class="ct-info__val">+33 1 00 00 00 00</span>
+          </span>
+        </a>
+        
+        <div class="ct-info__item">
+          <span class="ct-info__icon">
+            <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
+              <path d="M9 1.5C6.2 1.5 4 3.7 4 6.5c0 3.6 5 10 5 10s5-6.4 5-10c0-2.8-2.2-5-5-5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+              <circle cx="9" cy="6.5" r="1.8" stroke="currentColor" stroke-width="1.2" />
+            </svg>
+          </span>
+          <span class="ct-info__txt">
+            <span class="ct-info__label">Flagship Atelier</span>
+            <span class="ct-info__val">18 Rue Saint-Honoré, 75001 Paris</span>
+          </span>
+        </div>
+        
+        <div class="ct-info__item">
+          <span class="ct-info__icon">
+            <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.2" />
+              <path d="M9 5v4.2l2.6 1.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="ct-info__txt">
+            <span class="ct-info__label">Opening Hours</span>
+            <span class="ct-info__val">Mon–Sat · 10am–7pm CET<br />Sunday · By appointment</span>
+          </span>
+        </div>
+      </div>
+      
+      <div class="ct-info__divider"></div>
+      <div class="ct-info__soc-label">Follow the Maison</div>
+      <div class="ct-soc">
+        <a href="#" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <rect x="2.5" y="2.5" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.3" />
+            <circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.3" />
+            <circle cx="14.5" cy="5.5" r="1" fill="currentColor" />
+          </svg>
+        </a>
+        <a href="#" aria-label="Pinterest">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" />
+            <path d="M8 15l2-7m0 0a2.5 2.5 0 1 1 2.4 1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M11 3v9.5a3 3 0 1 1-3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            <path d="M11 5.5c.6 1.5 1.8 2.4 3.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+    </aside>
+  </section>
+
+  <!-- DEPARTMENTS -->
+  <section class="ct-dept" aria-label="Departments">
+    <div class="ct-dept__inner">
+      <div class="ct-dept__head reveal">
+        <span class="eyebrow eyebrow--center">Reach the Right Team</span>
+        <h2 class="section-title">By <em>Department</em></h2>
+      </div>
+      <div class="ct-dept__grid">
+        <div class="ct-deptcard reveal">
+          <div class="ct-deptcard__icon">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+              <circle cx="11" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3" />
+              <path d="M3 19c1.3-4 4.2-6 8-6s6.7 2 8 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="ct-deptcard__title">Client Care</div>
+          <p class="ct-deptcard__desc">Orders, sizing, returns and lifetime repairs.</p>
+          <a href="mailto:client@maisonarden.com" class="ct-deptcard__link">client@maisonarden.com</a>
+        </div>
+        
+        <div class="ct-deptcard reveal d1">
+          <div class="ct-deptcard__icon">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+              <rect x="3" y="4" width="16" height="14" stroke="currentColor" stroke-width="1.3" />
+              <path d="M3 8h16M7 12h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="ct-deptcard__title">Press &amp; Media</div>
+          <p class="ct-deptcard__desc">Editorial requests, imagery and interviews.</p>
+          <a href="mailto:press@maisonarden.com" class="ct-deptcard__link">press@maisonarden.com</a>
+        </div>
+        
+        <div class="ct-deptcard reveal d2">
+          <div class="ct-deptcard__icon">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+              <path d="M4 8l7-4 7 4v8l-7 4-7-4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="ct-deptcard__title">Wholesale</div>
+          <p class="ct-deptcard__desc">Stockist and partnership enquiries.</p>
+          <a href="mailto:partners@maisonarden.com" class="ct-deptcard__link">partners@maisonarden.com</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section class="ct-map" aria-label="Our flagship">
+    <div class="ct-map__inner">
+      <div class="ct-map__head reveal">
+        <div>
+          <span class="eyebrow">Visit Us</span>
+          <h2 class="section-title" style="margin-top:14px;">Find the <em>Atelier</em></h2>
+        </div>
+        <a href="https://www.google.com/maps?q=18+Rue+Saint-Honor%C3%A9+Paris" target="_blank" rel="noopener" class="btn-dark reveal d1">
+          Get Directions 
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+      
+      <div class="ct-map__frame reveal">
+        <iframe src="https://www.google.com/maps?q=18+Rue+Saint-Honor%C3%A9+Paris&output=embed" loading="lazy" title="Maison Arden Paris flagship"></iframe>
+        <div class="ct-map__card">
+          <div class="ct-map__eyebrow">Paris Flagship</div>
+          <h3 class="ct-map__title">18 Rue Saint-Honoré</h3>
+          <p class="ct-map__addr">75001 Paris, France<br />Open Mon–Sat, 10am–7pm CET</p>
+          <a href="tel:+33100000000" class="ct-map__link">
+            Call the Boutique 
+            <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+              <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOUTIQUES -->
+  <section class="ct-bouts" aria-label="Boutiques">
+    <div class="ct-bouts__inner">
+      <div class="ct-bouts__head reveal">
+        <span class="eyebrow eyebrow--center">Worldwide</span>
+        <h2 class="section-title">Our <em>Boutiques</em></h2>
+        <p style="font-size:14px;color:var(--lux-on-light-soft);max-width:48ch;margin:4px auto 0;line-height:1.7">Book a private appointment or visit us in person — our specialists are ready to help you find the perfect piece.</p>
+      </div>
+      
+      <div class="ct-bouts__grid">
+        {boutiques.map((bout) => (
+          <a href="#" class:list={['ct-bout reveal', bout.delay]}>
+            <div class="ct-bout__media">
+              {bout.badge && <span class="ct-bout__badge">{bout.badge}</span>}
+              <span class="ct-bout__num">{bout.num}</span>
+              <div class="ct-bout__overlay"></div>
+              <Image src={bout.image} alt={`${bout.city} boutique`} width={360} height={480} loading="lazy" />
+            </div>
+            <div class="ct-bout__body">
+              <div class="ct-bout__city">{bout.city}</div>
+              <p class="ct-bout__addr">{bout.address}</p>
+              <p class="ct-bout__hours">{bout.hours}</p>
+              <span class="ct-bout__link">
+                Book a Visit 
+                <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+                  <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion -->
+  <section class="faq2" aria-label="Frequently asked questions">
+    <div class="faq2__inner">
+      <header class="faq2__head reveal">
+        <span class="eyebrow eyebrow--center">Help Centre</span>
+        <h2 class="section-title">Frequently <em>Asked</em></h2>
+        <p class="faq2__sub">Everything you need to know about ordering, delivery and caring for your Maison Arden pieces.</p>
+      </header>
+      
+      <div class="faq2__cats reveal d1" data-faq-cats>
+        <button class="faq2__cat is-active" data-filter="all">All</button>
+        <button class="faq2__cat" data-filter="shipping">Shipping</button>
+        <button class="faq2__cat" data-filter="returns">Returns</button>
+        <button class="faq2__cat" data-filter="sizing">Sizing</button>
+        <button class="faq2__cat" data-filter="care">Care</button>
+      </div>
+      
+      <div class="faq2__list reveal d1" data-faq-list>
+        {faqItems.map((item) => (
+          <div class="faq2__item" data-cat={item.cat}>
+            <button class="faq2__q">
+              <span class="faq2__num"></span>
+              <span class="faq2__qtext">{item.q}</span>
+              <span class="faq2__ic" aria-hidden="true"></span>
+            </button>
+            <div class="faq2__a">
+              <div class="faq2__a-in">
+                <p>{item.a}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div class="faq2__cta reveal">
+        <span class="faq2__cta-text">Still have a question?</span>
+        <a href="mailto:client@maisonarden.com" class="btn-dark">
+          Contact Client Care 
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER CTA -->
+  <section class="news" id="newsletter" aria-label="Newsletter">
+    <div class="news__inner">
+      <div class="news__card reveal">
+        <span class="news__ghost" aria-hidden="true">Arden</span>
+        <div class="news__left">
+          <span class="news__eyebrow">The Maison Letter</span>
+          <h2 class="news__title">Considered style, <em>in your inbox.</em></h2>
+          <p class="news__sub">Be first to see new collections, atelier stories and seasonal lookbooks — thoughtfully sent, never noisy.</p>
+        </div>
+        <div class="news__right">
+          <form class="news__form" onsubmit="return false;">
+            <input class="news__input" type="email" placeholder="Your email address" aria-label="Email" required />
+            <button class="news__btn" type="submit">Subscribe</button>
+          </form>
+          <div class="news__benefits">
+            <span class="news__benefit">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg> 
+              Early Access
+            </span>
+            <span class="news__benefit">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg> 
+              Member Events
+            </span>
+            <span class="news__benefit">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg> 
+              Seasonal Lookbooks
+            </span>
+          </div>
+          <p class="news__note">By subscribing you agree to our Privacy Policy. Unsubscribe anytime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Char counter for contact form message
+  const msgEl = document.querySelector('#ctMsg') as HTMLTextAreaElement;
+  const cnt = document.querySelector('[data-count]') as HTMLElement;
+  if (msgEl && cnt) {
+    msgEl.addEventListener('input', () => {
+      cnt.textContent = String(msgEl.value.length);
+    });
+  }
+
+  // Preferred reply pills selection toggle
+  const pills = Array.from(document.querySelectorAll('[data-pref] .ct-pill')) as HTMLButtonElement[];
+  pills.forEach(b => {
+    b.addEventListener('click', () => {
+      pills.forEach(x => x.classList.remove('is-active'));
+      b.classList.add('is-active');
+    });
+  });
+
+  // Accordion open/close toggle for FAQs
+  const faqQs = Array.from(document.querySelectorAll('.faq2__q')) as HTMLButtonElement[];
+  const faqItems = Array.from(document.querySelectorAll('.faq2__item')) as HTMLElement[];
+  faqQs.forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.faq2__item') as HTMLElement;
+      const isOpen = item.classList.contains('is-open');
+      faqItems.forEach(x => x.classList.remove('is-open'));
+      if (!isOpen) {
+        item.classList.add('is-open');
+      }
+    });
+  });
+
+  // Accordion dynamic categorised filtering
+  const catBtns = Array.from(document.querySelectorAll('[data-faq-cats] .faq2__cat')) as HTMLButtonElement[];
+  const listItems = Array.from(document.querySelectorAll('[data-faq-list] .faq2__item')) as HTMLElement[];
+  catBtns.forEach(c => {
+    c.addEventListener('click', () => {
+      const filter = c.dataset.filter || 'all';
+      catBtns.forEach(x => x.classList.toggle('is-active', x === c));
+      
+      listItems.forEach(it => {
+        const show = filter === 'all' || it.dataset.cat === filter;
+        it.classList.toggle('is-hidden', !show);
+        it.classList.remove('is-open');
+      });
+    });
+  });
+
+  // Contact form client validation and submit feedback
+  const form = document.querySelector('#contactForm') as HTMLFormElement;
+  if (form) {
+    const feedbackMsg = document.querySelector('[data-ct-msg]') as HTMLElement;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let isValid = true;
+      
+      const requiredInputs = Array.from(form.querySelectorAll('.ct-input[required], .ct-textarea[required]')) as (HTMLInputElement | HTMLTextAreaElement)[];
+      requiredInputs.forEach(f => {
+        const empty = !f.value.trim();
+        f.classList.toggle('is-invalid', empty);
+        if (empty) isValid = false;
+      });
+      
+      const emailInput = document.querySelector('#ctEmail') as HTMLInputElement;
+      if (emailInput.value && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput.value)) {
+        emailInput.classList.add('is-invalid');
+        isValid = false;
+      }
+      
+      if (!isValid) {
+        feedbackMsg.textContent = 'Please complete the required fields with a valid email.';
+        feedbackMsg.className = 'ct-form__msg is-err';
+        return;
+      }
+      
+      feedbackMsg.textContent = 'Thank you — your message has been sent. We will reply within one business day.';
+      feedbackMsg.className = 'ct-form__msg is-ok';
+      form.reset();
+      if (cnt) cnt.textContent = '0';
+    });
+
+    const formInputs = Array.from(form.querySelectorAll('.ct-input, .ct-textarea')) as (HTMLInputElement | HTMLTextAreaElement)[];
+    formInputs.forEach(f => {
+      f.addEventListener('input', () => f.classList.remove('is-invalid'));
+    });
+  }
+</script>
+
+<style>
+  /* ============ INTERNAL PAGE HERO ============ */
+  .shop-hero {
+    background: var(--lux-light-surface);
+    border-bottom: 1px solid var(--lux-light-border);
+  }
+
+  .shop-hero__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(40px, 5vw, 76px) var(--gutter) clamp(34px, 4vw, 56px);
+    text-align: center;
+  }
+
+  .shop-hero__crumb {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+    margin-bottom: 16px;
+  }
+
+  .shop-hero__crumb a {
+    color: var(--lux-on-light-soft);
+    transition: color .2s var(--ease);
+  }
+
+  .shop-hero__crumb a:hover {
+    color: var(--lux-on-light);
+  }
+
+  .shop-hero__crumb span {
+    color: var(--lux-secondary-olive);
+  }
+
+  .shop-hero__title {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -1.5px;
+    color: var(--lux-on-light);
+  }
+
+  .shop-hero__title em {
+    font-style: italic;
+    color: var(--lux-secondary-olive);
+  }
+
+  .shop-hero__sub {
+    font-size: clamp(14px, 1.05vw, 16px);
+    line-height: 1.7;
+    color: var(--lux-on-light-soft);
+    max-width: 58ch;
+    margin: 16px auto 0;
+  }
+
+  /* ============ CONTACT GRID & FORM ============ */
+  .ct-grid {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(40px, 5vw, 72px) var(--gutter);
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: clamp(28px, 3.5vw, 56px);
+    align-items: start;
+  }
+
+  .ct-form__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.9px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+  }
+
+  .ct-form__eyebrow::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--lux-primary-dark);
+  }
+
+  .ct-form__title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 500;
+    letter-spacing: -1px;
+    color: var(--lux-on-light);
+    margin: 14px 0 8px;
+  }
+
+  .ct-form__lede {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 28px;
+    max-width: 50ch;
+  }
+
+  .ct-fgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .ct-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .ct-field--full {
+    grid-column: 1 / -1;
+  }
+
+  .ct-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+  }
+
+  .ct-input,
+  .ct-select,
+  .ct-textarea {
+    width: 100%;
+    background: var(--lux-light-elevated);
+    border: 1px solid var(--lux-light-border-strong);
+    padding: 13px 15px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--lux-on-light);
+    outline: none;
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+
+  .ct-input::placeholder,
+  .ct-textarea::placeholder {
+    color: var(--lux-on-light-soft);
+  }
+
+  .ct-input:focus,
+  .ct-select:focus,
+  .ct-textarea:focus {
+    border-color: var(--lux-primary-dark);
+    box-shadow: 0 0 0 3px rgba(48, 56, 44, .07);
+  }
+
+  .ct-input.is-invalid,
+  .ct-textarea.is-invalid {
+    border-color: #B0492F;
+    box-shadow: 0 0 0 3px rgba(176, 73, 47, .08);
+  }
+
+  .ct-textarea {
+    resize: vertical;
+    min-height: 130px;
+  }
+
+  .ct-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%232A3024' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 38px;
+    background-color: var(--lux-light-elevated);
+    border-radius: 0;
+  }
+
+  .ct-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+
+  .ct-send {
+    padding: 16px 34px;
+  }
+
+  .ct-form__msg {
+    font-size: 13px;
+    display: none;
+  }
+
+  .ct-form__msg.is-err {
+    display: block;
+    color: #B0492F;
+  }
+
+  .ct-form__msg.is-ok {
+    display: block;
+    color: var(--lux-secondary-olive);
+  }
+
+  /* ============ CONTACT ASSURANCES ============ */
+  .ct-assure {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    margin: 0 0 26px;
+    padding: 16px 18px;
+    background: var(--lux-light-surface);
+    border: 1px solid var(--lux-light-border);
+  }
+
+  .ct-assure__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--lux-on-light-soft);
+  }
+
+  .ct-assure__item svg {
+    color: var(--lux-secondary-olive);
+    flex-shrink: 0;
+  }
+
+  .ct-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .ct-pill {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    color: var(--lux-on-light-soft);
+    border: 1px solid var(--lux-light-border-strong);
+    background: var(--lux-light-elevated);
+    padding: 9px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+  }
+
+  .ct-pill svg {
+    opacity: .7;
+  }
+
+  .ct-pill.is-active {
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    border-color: var(--lux-primary-dark);
+  }
+
+  .ct-count {
+    font-size: 11px;
+    color: var(--lux-on-light-soft);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* ============ DARK ATELIER INFO PANEL ============ */
+  .ct-info {
+    position: relative;
+    overflow: hidden;
+    background: var(--lux-bg-dark);
+    color: var(--lux-text-secondary);
+    padding: clamp(30px, 3vw, 46px);
+  }
+
+  .ct-info > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ct-info__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: repeating-linear-gradient(0deg, rgba(231, 236, 120, .04) 0, rgba(231, 236, 120, .04) 1px, transparent 1px, transparent 46px), repeating-linear-gradient(90deg, rgba(231, 236, 120, .04) 0, rgba(231, 236, 120, .04) 1px, transparent 1px, transparent 46px);
+    pointer-events: none;
+  }
+
+  .ct-info__eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.4px;
+    text-transform: uppercase;
+    color: var(--lux-accent-lime);
+  }
+
+  .ct-info__title {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 2.6vw, 34px);
+    font-weight: 500;
+    letter-spacing: -.4px;
+    color: var(--lux-text-primary);
+    margin: 10px 0 12px;
+  }
+
+  .ct-info__intro {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--lux-text-secondary);
+    margin: 0 0 26px;
+    max-width: 42ch;
+  }
+
+  .ct-info__list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .ct-info__item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--lux-border);
+  }
+
+  .ct-info__item:first-child {
+    border-top: 1px solid var(--lux-border);
+  }
+
+  .ct-info__icon {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--lux-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lux-accent-lime);
+    flex-shrink: 0;
+    transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+  }
+
+  a.ct-info__item:hover .ct-info__icon {
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+    border-color: var(--lux-accent-lime);
+  }
+
+  .ct-info__txt {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .ct-info__label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--lux-surface-muted);
+  }
+
+  .ct-info__val {
+    font-size: 14.5px;
+    color: var(--lux-text-soft);
+    line-height: 1.5;
+    margin-top: 3px;
+  }
+
+  a.ct-info__item:hover .ct-info__val {
+    color: var(--lux-text-primary);
+  }
+
+  .ct-info__appt {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 18px 20px;
+    border: 1px solid var(--lux-border);
+    background: rgba(231, 236, 120, .05);
+  }
+
+  .ct-info__appt-txt {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+  }
+
+  .ct-info__appt-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--lux-text-primary);
+  }
+
+  .ct-info__appt-sub {
+    font-size: 12px;
+    color: var(--lux-text-secondary);
+  }
+
+  .ct-info__btn {
+    flex-shrink: 0;
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    transition: background .25s var(--ease);
+    border: none;
+  }
+
+  .ct-info__btn:hover {
+    background: var(--lux-accent-hover);
+  }
+
+  .ct-info__divider {
+    height: 1px;
+    background: var(--lux-border);
+    margin: 26px 0 20px;
+  }
+
+  .ct-info__soc-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--lux-surface-muted);
+    margin-bottom: 12px;
+  }
+
+  .ct-soc {
+    display: flex;
+    gap: 10px;
+  }
+
+  .ct-soc a {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--lux-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lux-text-soft);
+    transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+  }
+
+  .ct-soc a:hover {
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+    border-color: var(--lux-accent-lime);
+  }
+
+  /* ============ ATELIER DEPARTMENTS ============ */
+  .ct-dept {
+    background: var(--lux-light-surface);
+    border-top: 1px solid var(--lux-light-border);
+    border-bottom: 1px solid var(--lux-light-border);
+  }
+
+  .ct-dept__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(40px, 4.5vw, 64px) var(--gutter);
+  }
+
+  .ct-dept__head {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: clamp(30px, 3.5vw, 46px);
+  }
+
+  .ct-dept__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 2vw, 24px);
+  }
+
+  .ct-deptcard {
+    position: relative;
+    overflow: hidden;
+    background: var(--lux-light-elevated);
+    border: 1px solid var(--lux-light-border);
+    padding: clamp(24px, 2.4vw, 34px);
+    transition: border-color .3s var(--ease), transform .3s var(--ease);
+    text-align: left;
+  }
+
+  .ct-deptcard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--lux-accent-lime);
+    transition: width .4s var(--ease);
+  }
+
+  .ct-deptcard:hover::before {
+    width: 100%;
+  }
+
+  .ct-deptcard:hover {
+    border-color: var(--lux-light-border-strong);
+    transform: translateY(-3px);
+  }
+
+  .ct-deptcard__icon {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--lux-light-border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lux-secondary-olive);
+    margin-bottom: 18px;
+  }
+
+  .ct-deptcard__title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+    margin: 0 0 6px;
+  }
+
+  .ct-deptcard__desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--lux-on-light-soft);
+    margin: 0 0 14px;
+  }
+
+  .ct-deptcard__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .6px;
+    color: var(--lux-on-light);
+    border-bottom: 1px solid var(--lux-accent-lime);
+    padding-bottom: 3px;
+    transition: gap .26s var(--ease), color .26s var(--ease);
+  }
+
+  .ct-deptcard:hover .ct-deptcard__link {
+    gap: 12px;
+    color: var(--lux-secondary-olive);
+  }
+
+  /* ============ BOUTIQUES GEOLOCATION MAP ============ */
+  .ct-map {
+    background: var(--lux-light-bg);
+  }
+
+  .ct-map__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: var(--section-y) var(--gutter);
+  }
+
+  .ct-map__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: clamp(24px, 3vw, 38px);
+    flex-wrap: wrap;
+  }
+
+  .ct-map__frame {
+    position: relative;
+    border: 1px solid var(--lux-light-border);
+    overflow: hidden;
+  }
+
+  .ct-map iframe {
+    width: 100%;
+    height: clamp(340px, 40vw, 480px);
+    border: 0;
+    display: block;
+    filter: grayscale(.5) sepia(.16) contrast(.94) brightness(1.02);
+  }
+
+  .ct-map__card {
+    position: absolute;
+    left: clamp(18px, 3vw, 40px);
+    bottom: clamp(18px, 3vw, 40px);
+    background: var(--lux-light-elevated);
+    border: 1px solid var(--lux-light-border);
+    padding: 26px 30px;
+    max-width: 320px;
+    box-shadow: 0 30px 70px -36px rgba(48, 56, 44, .5);
+    text-align: left;
+  }
+
+  .ct-map__eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--lux-secondary-olive);
+  }
+
+  .ct-map__title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -.4px;
+    color: var(--lux-on-light);
+    margin: 10px 0 6px;
+  }
+
+  .ct-map__addr {
+    font-size: 13px;
+    color: var(--lux-on-light-soft);
+    line-height: 1.6;
+    margin: 0 0 18px;
+  }
+
+  .ct-map__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+    border-bottom: 1px solid var(--lux-accent-lime);
+    padding-bottom: 3px;
+    transition: gap .26s var(--ease), color .26s var(--ease);
+  }
+
+  .ct-map__link:hover {
+    gap: 12px;
+    color: var(--lux-secondary-olive);
+  }
+
+  /* ============ PHYSICAL BOUTIQUES CARDS ============ */
+  .ct-bouts {
+    background: var(--lux-light-bg);
+  }
+
+  .ct-bouts__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0px var(--gutter) var(--section-y) var(--gutter);
+  }
+
+  .ct-bouts__head {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: clamp(32px, 4vw, 52px);
+  }
+
+  .ct-bouts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(18px, 2.2vw, 30px);
+  }
+
+  .ct-bout {
+    position: relative;
+    background: var(--lux-light-surface);
+    border: 1px solid var(--lux-light-border);
+    display: flex;
+    flex-direction: column;
+    transition: border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
+    text-align: left;
+  }
+
+  .ct-bout:hover {
+    border-color: var(--lux-light-border-strong);
+    transform: translateY(-4px);
+    box-shadow: 0 30px 64px -42px rgba(48, 56, 44, .5);
+  }
+
+  .ct-bout__media {
+    position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: var(--lux-light-bg);
+  }
+
+  .ct-bout__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .7s var(--ease);
+  }
+
+  .ct-bout:hover .ct-bout__media img {
+    transform: scale(1.05);
+  }
+
+  .ct-bout__badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    background: var(--lux-primary-dark);
+    color: var(--lux-accent-lime);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+  }
+
+  .ct-bout__num {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--lux-text-primary);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .4);
+  }
+
+  .ct-bout__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 18, 13, .5) 0%, rgba(15, 18, 13, 0) 45%);
+  }
+
+  .ct-bout__body {
+    padding: 24px 26px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .ct-bout__city {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+  }
+
+  .ct-bout__addr {
+    font-size: 13px;
+    color: var(--lux-on-light-soft);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .ct-bout__hours {
+    font-size: 12px;
+    color: var(--lux-secondary-olive);
+    margin: 0;
+  }
+
+  .ct-bout__link {
+    margin-top: auto;
+    padding-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+    transition: gap .26s var(--ease), color .26s var(--ease);
+  }
+
+  .ct-bout:hover .ct-bout__link {
+    gap: 12px;
+    color: var(--lux-secondary-olive);
+  }
+
+  .ct-bouts__foot {
+    text-align: center;
+    margin-top: clamp(34px, 4vw, 52px);
+  }
+
+  /* ============ FAQ2 ACCORDION ============ */
+  .faq2 {
+    background: var(--lux-light-surface);
+    border-top: 1px solid var(--lux-light-border);
+  }
+
+  .faq2__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--section-y) var(--gutter);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .faq2__head {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: clamp(24px, 3vw, 36px);
+  }
+
+  .faq2__sub {
+    font-size: clamp(14px, 1.05vw, 16px);
+    line-height: 1.7;
+    color: var(--lux-on-light-soft);
+    max-width: 58ch;
+    margin: 6px auto 0;
+  }
+
+  .faq2__cats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: clamp(30px, 3.5vw, 44px);
+  }
+
+  .faq2__cat {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    color: var(--lux-on-light-soft);
+    border: 1px solid var(--lux-light-border-strong);
+    background: transparent;
+    padding: 9px 18px;
+    cursor: pointer;
+    transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+  }
+
+  .faq2__cat:hover {
+    border-color: var(--lux-primary-dark);
+    color: var(--lux-on-light);
+  }
+
+  :global(.faq2__cat.is-active) {
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    border-color: var(--lux-primary-dark);
+  }
+
+  .faq2__list {
+    counter-reset: faq;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  .faq2__item {
+    border: 1px solid var(--lux-light-border);
+    background: var(--lux-light-elevated);
+    transition: border-color .3s var(--ease), box-shadow .3s var(--ease);
+  }
+
+  .faq2__item:hover {
+    border-color: var(--lux-light-border-strong);
+  }
+
+  :global(.faq2__item.is-open) {
+    box-shadow: 0 20px 50px -42px rgba(48, 56, 44, .5);
+  }
+
+  :global(.faq2__item.is-hidden) {
+    display: none;
+  }
+
+  .faq2__q {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-body);
+  }
+
+  .faq2__num {
+    counter-increment: faq;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--lux-secondary-olive);
+    width: 30px;
+    flex-shrink: 0;
+  }
+
+  .faq2__num::before {
+    content: counter(faq, decimal-leading-zero);
+  }
+
+  .faq2__qtext {
+    flex: 1;
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.8vw, 23px);
+    font-weight: 500;
+    letter-spacing: -.3px;
+    color: var(--lux-on-light);
+    line-height: 1.2;
+  }
+
+  .faq2__ic {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: 1px solid var(--lux-light-border-strong);
+    border-radius: 50%;
+    transition: background .3s var(--ease), border-color .3s var(--ease), transform .4s var(--ease);
+  }
+
+  .faq2__ic::before,
+  .faq2__ic::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: var(--lux-on-light);
+    transition: background .3s var(--ease);
+  }
+
+  .faq2__ic::before {
+    width: 12px;
+    height: 1.5px;
+    transform: translate(-50%, -50%);
+  }
+
+  .faq2__ic::after {
+    width: 1.5px;
+    height: 12px;
+    transform: translate(-50%, -50%);
+  }
+
+  :global(.faq2__item.is-open) .faq2__ic {
+    background: var(--lux-primary-dark);
+    border-color: var(--lux-primary-dark);
+    transform: rotate(135deg);
+  }
+
+  :global(.faq2__item.is-open) .faq2__ic::before,
+  :global(.faq2__item.is-open) .faq2__ic::after {
+    background: var(--lux-text-primary);
+  }
+
+  .faq2__a {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .42s var(--ease);
+  }
+
+  :global(.faq2__item.is-open) .faq2__a {
+    grid-template-rows: 1fr;
+  }
+
+  .faq2__a-in {
+    overflow: hidden;
+  }
+
+  .faq2__a p {
+    margin: 0;
+    padding: 0 24px 24px 72px;
+    font-size: 14px;
+    line-height: 1.78;
+    color: var(--lux-on-light-soft);
+    max-width: 70ch;
+  }
+
+  .faq2__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: clamp(34px, 4vw, 52px);
+    padding-top: clamp(28px, 3vw, 40px);
+    border-top: 1px solid var(--lux-light-border);
+    width: 100%;
+  }
+
+  .faq2__cta-text {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 500;
+    color: var(--lux-on-light);
+  }
+
+  /* ============ NEWSLETTER CTA ============ */
+  .news {
+    background: var(--lux-light-bg);
+  }
+
+  .news__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 150px var(--gutter) 150px var(--gutter);
+  }
+
+  .news__card {
+    position: relative;
+    overflow: hidden;
+    background: var(--lux-bg-dark);
+    border-radius: 0;
+    padding: clamp(40px, 5vw, 80px) clamp(28px, 5vw, 80px);
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(36px, 5vw, 72px);
+    align-items: center;
+  }
+
+  .news__card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(0deg, rgba(231, 236, 120, .04) 0, rgba(231, 236, 120, .04) 1px, transparent 1px, transparent 44px), repeating-linear-gradient(90deg, rgba(231, 236, 120, .04) 0, rgba(231, 236, 120, .04) 1px, transparent 1px, transparent 44px);
+    pointer-events: none;
+  }
+
+  .news__ghost {
+    position: absolute;
+    right: -20px;
+    bottom: -60px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(140px, 18vw, 260px);
+    color: var(--lux-accent-lime);
+    opacity: .05;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .news__left {
+    position: relative;
+    z-index: 1;
+  }
+
+  .news__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.9px;
+    text-transform: uppercase;
+    color: var(--lux-text-secondary);
+    margin-bottom: 18px;
+  }
+
+  .news__eyebrow::before {
+    content: "";
+    width: 30px;
+    height: 1px;
+    background: var(--lux-accent-lime);
+  }
+
+  .news__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(32px, 3.6vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -1.2px;
+    color: var(--lux-text-primary);
+    margin: 0;
+  }
+
+  .news__title em {
+    font-style: italic;
+    color: var(--lux-accent-lime);
+  }
+
+  .news__sub {
+    font-size: clamp(14px, 1.05vw, 16px);
+    line-height: 1.7;
+    color: var(--lux-text-secondary);
+    margin: 18px 0 0;
+    max-width: 46ch;
+  }
+
+  .news__right {
+    position: relative;
+    z-index: 1;
+  }
+
+  .news__form {
+    display: flex;
+    gap: 10px;
+    background: rgba(241, 242, 234, .06);
+    border: 1px solid var(--lux-border);
+    border-radius: 0;
+    padding: 6px 6px 6px 22px;
+  }
+
+  .news__input {
+    flex: 1;
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--lux-text-primary);
+    outline: none;
+  }
+
+  .news__input::placeholder {
+    color: var(--lux-text-secondary);
+  }
+
+  .news__btn {
+    flex-shrink: 0;
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+    border: none;
+    border-radius: 0;
+    padding: 14px 28px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    transition: background .28s var(--ease);
+  }
+
+  .news__btn:hover {
+    background: var(--lux-accent-hover);
+  }
+
+  .news__benefits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 26px;
+    margin-top: 22px;
+  }
+
+  .news__benefit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lux-text-secondary);
+  }
+
+  .news__benefit svg {
+    color: var(--lux-accent-lime);
+  }
+
+  .news__note {
+    font-size: 12px;
+    color: var(--lux-text-secondary);
+    margin: 16px 0 0;
+    opacity: .8;
+  }
+
+  /* ============ RESPONSIVE BREAKPOINTS ============ */
+  @media (max-width: 920px) {
+    .ct-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ct-info {
+      order: -1;
+    }
+
+    .ct-dept__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ct-bouts__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .news__card {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .ct-fgrid {
+      grid-template-columns: 1fr;
+    }
+
+    .ct-map__card {
+      left: 16px;
+      right: 16px;
+      max-width: none;
+    }
+
+    .ct-info__appt {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .faq2__a p {
+      padding-left: 24px;
+    }
+
+    .faq2__q {
+      gap: 14px;
+      padding: 18px 18px;
+    }
+
+    .news__form {
+      flex-direction: column;
+      border-radius: 0;
+      padding: 14px;
+    }
+
+    .news__btn {
+      padding: 14px;
+    }
+  }
+</style>

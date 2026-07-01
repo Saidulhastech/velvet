@@ -1,0 +1,106 @@
+---
+import { getLocalizationOnce } from '~/lib/shopify';
+
+const market = Astro.locals.market;
+const loc = await getLocalizationOnce(Astro.locals);
+const countries = loc?.availableCountries ?? [];
+
+const current = countries.find((c) => c.isoCode === market.country) ?? loc?.country ?? null;
+const currencyCode = current?.currency?.isoCode ?? '';
+const label = `${market.language} / ${currencyCode || market.country}`;
+
+function langFor(c: (typeof countries)[number]): string {
+  const langs = c.availableLanguages ?? [];
+  const keep = langs.find((l) => l.isoCode === market.language);
+  return (keep ?? langs[0])?.isoCode ?? market.language;
+}
+
+const redirectTo = Astro.url.pathname + Astro.url.search;
+const multi = countries.length > 1;
+---
+
+{
+  multi ? (
+    <form class="mkt" method="POST" action="/api/market">
+      <input type="hidden" name="redirect" value={redirectTo} />
+      <span class="mkt-face" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.1"></circle>
+          <path d="M1 7h12M7 1c-1.8 2-2.8 3.8-2.8 6s1 4 2.8 6M7 1c1.8 2 2.8 3.8 2.8 6s-1 4-2.8 6" stroke="currentColor" stroke-width="1.1"></path>
+        </svg>
+        <span class="mkt-cur">{label}</span>
+        <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+          <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round" stroke-width="1.3"></path>
+        </svg>
+      </span>
+      <select
+        name="market"
+        class="mkt-select"
+        aria-label="Country and currency"
+        onchange="this.form.submit()"
+      >
+        {countries.map((c) => (
+          <option value={`${c.isoCode}|${langFor(c)}`} selected={c.isoCode === market.country}>
+            {c.name} ({c.currency.isoCode})
+          </option>
+        ))}
+      </select>
+    </form>
+  ) : (
+    <span class="mkt mkt-static">
+      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.1"></circle>
+        <path d="M1 7h12M7 1c-1.8 2-2.8 3.8-2.8 6s1 4 2.8 6M7 1c1.8 2 2.8 3.8 2.8 6s-1 4-2.8 6" stroke="currentColor" stroke-width="1.1"></path>
+      </svg>
+      <span class="mkt-cur">{label}</span>
+    </span>
+  )
+}
+
+<style>
+  .mkt {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .mkt-face {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--lux-on-light-soft);
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.25s var(--ease);
+  }
+  .mkt:hover .mkt-face {
+    color: var(--lux-on-light);
+  }
+  .mkt-static {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--lux-on-light-soft);
+  }
+  .mkt-cur {
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .mkt-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    opacity: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+</style>

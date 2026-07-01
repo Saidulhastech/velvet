@@ -1,0 +1,362 @@
+---
+import { Image } from 'astro:assets';
+
+// Import images to resolve them via Astro's asset pipeline
+import imgP17 from '../../../assets/images/Product Image 17.png';
+import imgP18 from '../../../assets/images/Product Image 18.png';
+import imgP19 from '../../../assets/images/Product Image 19.png';
+import imgP20 from '../../../assets/images/Product Image 20.png';
+
+const slides = [
+  {
+    index: 0,
+    name: 'The Atelier Overshirt',
+    price: '€340',
+    image: imgP17
+  },
+  {
+    index: 1,
+    name: 'Relaxed Denim Jacket',
+    price: '€320',
+    image: imgP18
+  },
+  {
+    index: 2,
+    name: 'Sand Linen Blazer',
+    price: '€520',
+    image: imgP19
+  }
+];
+---
+
+<section class="showcase" id="showcase" aria-label="Featured film">
+  <div class="showcase__inner">
+    <div class="showcase__left reveal">
+      <div class="showcase__head">
+        <span class="showcase__head-eyebrow">The Edit</span>
+        <h2 class="showcase__head-title">Worn in <em>Motion</em></h2>
+      </div>
+      
+      <div class="showcase__slider">
+        <div class="showcase__card">
+          {slides.map((slide, idx) => (
+            <div class={`showcase__slide ${idx === 0 ? 'is-active' : ''}`} data-index={slide.index}>
+              <Image src={slide.image} alt={slide.name} width={360} height={360} loading="lazy" />
+            </div>
+          ))}
+        </div>
+        
+        <button class="showcase__nav showcase__nav--prev" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M11 3l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button class="showcase__nav showcase__nav--next" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M7 3l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="showcase__dots">
+        {slides.map((slide, idx) => (
+          <button class={`showcase__dot ${idx === 0 ? 'is-active' : ''}`} aria-label={`Slide ${idx + 1}`} data-index={slide.index}></button>
+        ))}
+      </div>
+      
+      <div class="showcase__meta">
+        <div class="showcase__name" data-sc-name>The Atelier Overshirt</div>
+        <div class="showcase__price" data-sc-price>€340</div>
+      </div>
+    </div>
+    
+    <div class="showcase__right">
+      <video src="/Showcase right video.mp4" autoplay muted loop playsinline poster={imgP20.src}></video>
+      <div class="showcase__overlay"></div>
+      <div class="showcase__content">
+        <h2 class="showcase__title">Crafted to <em>Last</em></h2>
+        <p class="showcase__text">Every piece begins in our Paris atelier — traceable fibres, hand-finishing, and a quiet patience you can feel the moment you put it on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.showcase__slide')) as HTMLElement[];
+  const dots = Array.from(document.querySelectorAll('.showcase__dot')) as HTMLElement[];
+  const nameEl = document.querySelector('[data-sc-name]') as HTMLElement;
+  const priceEl = document.querySelector('[data-sc-price]') as HTMLElement;
+  
+  const data = [
+    { n: 'The Atelier Overshirt', p: '€340' },
+    { n: 'Relaxed Denim Jacket', p: '€320' },
+    { n: 'Sand Linen Blazer', p: '€520' }
+  ];
+  
+  if (slides.length > 0) {
+    let i = 0;
+    const max = slides.length;
+    
+    function go(n: number) {
+      i = (n + max) % max;
+      slides.forEach((s, k) => s.classList.toggle('is-active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+      if (nameEl) nameEl.textContent = data[i].n;
+      if (priceEl) priceEl.textContent = data[i].p;
+    }
+    
+    const prev = document.querySelector('.showcase__nav--prev');
+    const next = document.querySelector('.showcase__nav--next');
+    
+    if (prev) prev.addEventListener('click', () => go(i - 1));
+    if (next) next.addEventListener('click', () => go(i + 1));
+    
+    dots.forEach((d, k) => d.addEventListener('click', () => go(k)));
+    
+    let auto = setInterval(() => go(i + 1), 5000);
+    const wrap = document.querySelector('.showcase__slider');
+    if (wrap) {
+      wrap.addEventListener('mouseenter', () => clearInterval(auto));
+      wrap.addEventListener('mouseleave', () => {
+        auto = setInterval(() => go(i + 1), 5000);
+      });
+    }
+  }
+</script>
+
+<style>
+  .showcase {
+    background: var(--lux-light-bg);
+  }
+
+  .showcase__inner {
+    display: grid;
+    grid-template-columns: 1fr 1.18fr;
+    min-height: clamp(380px, 46vh, 520px);
+  }
+
+  .showcase__left {
+    background: var(--lux-light-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(30px, 4vw, 64px);
+  }
+
+  .showcase__head {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+
+  .showcase__head-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+  }
+
+  .showcase__head-eyebrow::before,
+  .showcase__head-eyebrow::after {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--lux-accent-lime);
+  }
+
+  .showcase__head-title {
+    font-family: var(--font-display);
+    font-size: clamp(34px, 4.2vw, 60px);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -1.3px;
+    color: var(--lux-on-light);
+    margin: 10px 0 0;
+  }
+
+  .showcase__head-title em {
+    font-style: italic;
+    color: var(--lux-secondary-olive);
+  }
+
+  .showcase__slider {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .showcase__card {
+    position: relative;
+    background: var(--lux-light-elevated);
+    border: 1px solid var(--lux-light-border);
+    border-radius: 0;
+    overflow: hidden;
+    aspect-ratio: 1/1;
+    box-shadow: 0 30px 70px -45px rgba(48, 56, 44, .4);
+  }
+
+  .showcase__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .5s var(--ease);
+  }
+
+  .showcase__slide.is-active {
+    opacity: 1;
+  }
+
+  .showcase__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+  }
+
+  .showcase__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .25s var(--ease);
+    z-index: 3;
+  }
+
+  .showcase__nav:hover {
+    background: var(--lux-secondary-olive);
+  }
+
+  .showcase__nav--prev {
+    left: -16px;
+  }
+
+  .showcase__nav--next {
+    right: -16px;
+  }
+
+  .showcase__dots {
+    display: flex;
+    gap: 7px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .showcase__dot {
+    width: 22px;
+    height: 5px;
+    border-radius: 0;
+    border: none;
+    background: var(--lux-light-border-strong);
+    cursor: pointer;
+    transition: background .3s var(--ease), width .3s var(--ease);
+  }
+
+  .showcase__dot.is-active {
+    background: var(--lux-primary-dark);
+    width: 32px;
+  }
+
+  .showcase__meta {
+    text-align: center;
+    margin-top: 22px;
+  }
+
+  .showcase__name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+  }
+
+  .showcase__price {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--lux-secondary-olive);
+    margin-top: 6px;
+  }
+
+  .showcase__right {
+    position: relative;
+    overflow: hidden;
+    background: var(--lux-bg-dark);
+    height: 820px;
+  }
+
+  .showcase__right img,
+  .showcase__right video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .showcase__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 18, 13, .78) 0%, rgba(15, 18, 13, .2) 45%, rgba(15, 18, 13, 0) 70%);
+  }
+
+  .showcase__content {
+    position: absolute;
+    right: clamp(24px, 3vw, 56px);
+    bottom: clamp(28px, 4vw, 56px);
+    left: clamp(24px, 3vw, 56px);
+    text-align: right;
+    z-index: 2;
+  }
+
+  .showcase__title {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.6vw, 52px);
+    font-weight: 500;
+    letter-spacing: -1px;
+    color: var(--lux-text-primary);
+    margin: 0;
+  }
+
+  .showcase__title em {
+    font-style: italic;
+    color: var(--lux-accent-lime);
+  }
+
+  .showcase__text {
+    font-size: clamp(13px, 1vw, 15px);
+    line-height: 1.7;
+    color: var(--lux-text-secondary);
+    margin: 14px 0 0;
+    margin-left: auto;
+    max-width: 52ch;
+  }
+
+  @media (max-width: 860px) {
+    .showcase__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .showcase__right {
+      height: auto;
+      min-height: 60vh;
+    }
+
+    .showcase__content {
+      text-align: left;
+    }
+
+    .showcase__text {
+      margin-left: 0;
+    }
+  }
+</style>

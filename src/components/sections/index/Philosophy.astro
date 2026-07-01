@@ -1,0 +1,417 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
+const tailoringPromo = '/src/assets/images/Promo banner image 01.png';
+const knitwearPromo = '/src/assets/images/Promo banner image 02.png';
+---
+
+<div class="values" aria-label="Our promise">
+  <div class="values__marquee">
+    <div class="values__track">
+      <!-- Item 1 -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 8l9-4 9 4v8l-9 4-9-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+          <path d="M3 8l9 4 9-4M12 12v8" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+        </svg> 
+        Free Worldwide Shipping
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <!-- Item 2 -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M4 20L15 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          <path d="M13 7l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          <circle cx="18" cy="6" r="2.2" stroke="currentColor" stroke-width="1.4" />
+        </svg> 
+        Lifetime Repairs
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <!-- Item 3 -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M5 19c0-7 5-12 14-13 1 9-4 14-11 14a6 6 0 0 1-3-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+          <path d="M9 18c2-4 5-6.5 9-7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+        </svg> 
+        Ethically Sourced Fibres
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <!-- Item 4 -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="6" cy="6" r="2.2" stroke="currentColor" stroke-width="1.4" />
+          <circle cx="6" cy="18" r="2.2" stroke="currentColor" stroke-width="1.4" />
+          <path d="M8 7.5L20 18M8 16.5L20 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+        </svg> 
+        Small-Batch Atelier
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <!-- Item 5 -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 8a2 2 0 1 1 2 2c-1.2 0-2 .9-2 2.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          <path d="M12 12L4 17.5h16L12 12z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+        </svg> 
+        Hand-Finished in Europe
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+
+      <!-- Item 6 -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.4" />
+          <path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16" stroke="currentColor" stroke-width="1.4" />
+        </svg> 
+        Carbon-Neutral Delivery
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+
+      <!-- Duplicate items for seamless marquee loop -->
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 8l9-4 9 4v8l-9 4-9-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+          <path d="M3 8l9 4 9-4M12 12v8" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+        </svg> 
+        Free Worldwide Shipping
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M4 20L15 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          <path d="M13 7l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          <circle cx="18" cy="6" r="2.2" stroke="currentColor" stroke-width="1.4" />
+        </svg> 
+        Lifetime Repairs
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M5 19c0-7 5-12 14-13 1 9-4 14-11 14a6 6 0 0 1-3-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+          <path d="M9 18c2-4 5-6.5 9-7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+        </svg> 
+        Ethically Sourced Fibres
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+      
+      <span class="values__item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="6" cy="6" r="2.2" stroke="currentColor" stroke-width="1.4" />
+          <circle cx="6" cy="18" r="2.2" stroke="currentColor" stroke-width="1.4" />
+          <path d="M8 7.5L20 18M8 16.5L20 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+        </svg> 
+        Small-Batch Atelier
+      </span>
+      <span class="values__sep" aria-hidden="true"></span>
+    </div>
+  </div>
+</div>
+
+<!-- PROMO BANNERS -->
+<section class="promo2" aria-label="Promotions">
+  <div class="promo2__inner">
+    <a href="/shop?category=tailoring" class="pbanner reveal">
+      {images[tailoringPromo] && (
+        <Image 
+          src={images[tailoringPromo].default} 
+          alt="The Tailoring Edit" 
+          width={650}
+          height={450}
+          loading="lazy" 
+        />
+      )}
+      <div class="pbanner__overlay"></div>
+      <div class="pbanner__frame" aria-hidden="true"></div>
+      <div class="pbanner__content">
+        <span class="pbanner__eyebrow">New Season</span>
+        <h3 class="pbanner__title">The Tailoring Edit</h3>
+        <p class="pbanner__sub">Softly constructed suiting in natural fibres.</p>
+        <span class="pbanner__btn">
+          Shop the Edit 
+          <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+        </span>
+      </div>
+    </a>
+
+    <a href="/shop?category=knitwear" class="pbanner reveal d1">
+      {images[knitwearPromo] && (
+        <Image 
+          src={images[knitwearPromo].default} 
+          alt="Cashmere & Wool knitwear" 
+          width={650}
+          height={450}
+          loading="lazy" 
+        />
+      )}
+      <div class="pbanner__overlay"></div>
+      <div class="pbanner__frame" aria-hidden="true"></div>
+      <div class="pbanner__content">
+        <span class="pbanner__eyebrow">Limited Atelier Run</span>
+        <h3 class="pbanner__title">Cashmere &amp; Wool</h3>
+        <p class="pbanner__sub">Hand-finished knitwear, made in small batches.</p>
+        <span class="pbanner__btn">
+          Discover Knitwear 
+          <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+        </span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<style>
+  .values {
+    position: relative;
+    background: var(--lux-light-bg);
+    border-top: 1px solid var(--lux-light-border);
+    border-bottom: 1px solid var(--lux-light-border);
+    overflow: hidden;
+  }
+
+  .values::before,
+  .values::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: clamp(40px, 8vw, 120px);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .values::before {
+    left: 0;
+    background: linear-gradient(to right, var(--lux-light-bg), transparent);
+  }
+
+  .values::after {
+    right: 0;
+    background: linear-gradient(to left, var(--lux-light-bg), transparent);
+  }
+
+  .values__marquee {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .values__track {
+    display: inline-flex;
+    align-items: center;
+    animation: valScroll 42s linear infinite;
+    will-change: transform;
+  }
+
+  .values__track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes valScroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .values__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    padding: 20px clamp(24px, 3.2vw, 52px);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .5px;
+    color: var(--lux-on-light);
+    white-space: nowrap;
+  }
+
+  .values__item svg {
+    color: var(--lux-secondary-olive);
+    flex-shrink: 0;
+  }
+
+  .values__sep {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--lux-accent-lime);
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .values__track {
+      animation: none;
+    }
+  }
+
+  /* ===== PROMO BANNERS ===== */
+  .promo2 {
+    background: var(--lux-light-bg);
+  }
+
+  .promo2__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: var(--section-y) var(--gutter) 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(16px, 2vw, 28px);
+  }
+
+  .pbanner {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 16/11;
+    background: var(--lux-light-surface);
+  }
+
+  .pbanner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.92) brightness(.78);
+    transform: scale(1.03);
+    transition: transform 1.3s var(--ease), filter .5s var(--ease);
+  }
+
+  .pbanner:hover img {
+    transform: scale(1.08);
+    filter: saturate(1) brightness(.72);
+  }
+
+  .pbanner__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, rgba(15, 18, 13, .72) 0%, rgba(15, 18, 13, .4) 45%, rgba(15, 18, 13, .06) 100%);
+  }
+
+  .pbanner__frame {
+    position: absolute;
+    inset: 16px;
+    border: 1px solid rgba(231, 236, 120, .2);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .pbanner__frame::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 18px;
+    height: 18px;
+    border-top: 1px solid var(--lux-accent-lime);
+    border-left: 1px solid var(--lux-accent-lime);
+  }
+
+  .pbanner__frame::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 18px;
+    height: 18px;
+    border-bottom: 1px solid var(--lux-accent-lime);
+    border-right: 1px solid var(--lux-accent-lime);
+  }
+
+  .pbanner__content {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: clamp(26px, 3vw, 48px);
+  }
+
+  .pbanner__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--lux-accent-lime);
+    margin-bottom: 12px;
+  }
+
+  .pbanner__eyebrow::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--lux-accent-lime);
+  }
+
+  .pbanner__title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3vw, 46px);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1;
+    letter-spacing: -1px;
+    color: var(--lux-text-primary);
+    margin: 0 0 6px;
+  }
+
+  .pbanner__sub {
+    font-size: clamp(13px, 1vw, 15px);
+    color: var(--lux-text-secondary);
+    margin: 0 0 150px;
+    max-width: 30ch;
+  }
+
+  .pbanner__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 26px;
+    background: transparent;
+    color: var(--lux-text-primary);
+    border: 1px solid rgba(241, 242, 234, .55);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    transition: background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease), gap .3s var(--ease);
+  }
+
+  .pbanner__btn:hover {
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+    border-color: var(--lux-accent-lime);
+    gap: 14px;
+  }
+
+  .pbanner__btn svg {
+    transition: transform .3s var(--ease);
+  }
+
+  .pbanner:hover .pbanner__btn svg {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 720px) {
+    .promo2__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .pbanner {
+      aspect-ratio: 16/10;
+    }
+  }
+</style>

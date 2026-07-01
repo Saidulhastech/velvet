@@ -1,0 +1,307 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
+const womenHero = '/src/assets/images/Hero Image women.png';
+const menHero = '/src/assets/images/Hero Image man.png';
+---
+
+<section class="hero" aria-label="Featured collections">
+  <div class="hero__panel">
+    <div class="hero__panel-media">
+      {images[womenHero] && (
+        <Image 
+          src={images[womenHero].default} 
+          alt="Women's collection" 
+          width={952}
+          height={839}
+          loading="eager" 
+          fetchpriority="high" 
+        />
+      )}
+    </div>
+    <div class="hero__panel-overlay"></div>
+    <div class="hero__panel-content">
+      <div class="hero__panel-bottom">
+        <span class="hero__panel-eyebrow">Women's Collection</span>
+        <h1 class="hero__panel-title">The Quiet<br />Collection</h1>
+        <p class="hero__panel-desc">Refined silhouettes and considered materials for the woman who moves with intention.</p>
+        <a href="/shop?gender=women" class="hero__panel-btn">
+          Shop Women 
+          <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__panel">
+    <div class="hero__panel-media">
+      {images[menHero] && (
+        <Image 
+          src={images[menHero].default} 
+          alt="Men's collection" 
+          width={952}
+          height={839}
+          loading="eager" 
+        />
+      )}
+    </div>
+    <div class="hero__panel-overlay"></div>
+    <div class="hero__panel-content">
+      <div class="hero__panel-bottom">
+        <span class="hero__panel-eyebrow">Men's Collection</span>
+        <h2 class="hero__panel-title">Structured<br />Ease</h2>
+        <p class="hero__panel-desc">Tailored pieces with an unhurried elegance — built for daily life and lasting well beyond it.</p>
+        <a href="/shop?gender=men" class="hero__panel-btn">
+          Shop Men 
+          <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="hero__scroll">
+    <span>Scroll</span>
+    <span class="hero__scroll-line"></span>
+  </div>
+</section>
+
+<style>
+  @keyframes heroScale {
+    from {
+      transform: scale(1.06);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes heroFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 92vh;
+    min-height: 600px;
+    overflow: hidden;
+  }
+
+  .hero__panel {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__panel+.hero__panel::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(231, 236, 120, .2);
+    z-index: 4;
+  }
+
+  .hero__panel-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero__panel-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    animation: heroScale 14s var(--ease) forwards;
+    filter: saturate(.9) contrast(1.02) brightness(.84);
+    transition: transform 1.4s var(--ease);
+  }
+
+  .hero__panel:hover .hero__panel-media img {
+    transform: scale(1.04);
+  }
+
+  .hero__panel-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to top, rgba(15, 18, 13, .82) 0%, rgba(15, 18, 13, .42) 38%, rgba(15, 18, 13, .06) 70%, rgba(15, 18, 13, 0) 100%);
+  }
+
+  .hero__panel-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(34px, 4vw, 64px) clamp(28px, 3.4vw, 56px);
+  }
+
+  .hero__panel-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    max-width: 30ch;
+  }
+
+  .hero__panel-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--lux-accent-lime);
+    opacity: 0;
+    animation: heroFadeUp .6s var(--ease) .4s both;
+  }
+
+  .hero__panel-eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: var(--lux-accent-lime);
+  }
+
+  .hero__panel:nth-of-type(2) .hero__panel-eyebrow {
+    animation-delay: .55s;
+  }
+
+  .hero__panel-title {
+    font-family: var(--font-display);
+    font-size: clamp(46px, 5vw, 84px);
+    font-weight: 500;
+    font-style: italic;
+    line-height: .94;
+    letter-spacing: -1.5px;
+    color: var(--lux-text-primary);
+    margin: 0;
+    opacity: 0;
+    animation: heroFadeUp .7s var(--ease) .54s both;
+  }
+
+  .hero__panel:nth-of-type(2) .hero__panel-title {
+    animation-delay: .7s;
+  }
+
+  .hero__panel-desc {
+    font-size: clamp(13px, 1vw, 15px);
+    line-height: 1.7;
+    color: var(--lux-text-secondary);
+    margin: 0;
+    opacity: 0;
+    animation: heroFadeUp .7s var(--ease) .7s both;
+  }
+
+  .hero__panel:nth-of-type(2) .hero__panel-desc {
+    animation-delay: .85s;
+  }
+
+  .hero__panel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 26px;
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    border: 1px solid var(--lux-accent-lime);
+    margin-top: 6px;
+    opacity: 0;
+    animation: heroFadeUp .7s var(--ease) .86s both;
+    transition: background .32s var(--ease), color .32s var(--ease), border-color .32s var(--ease);
+  }
+
+  .hero__panel:nth-of-type(2) .hero__panel-btn {
+    animation-delay: 1s;
+  }
+
+  .hero__panel-btn:hover {
+    background: transparent;
+    color: var(--lux-text-primary);
+    border-color: var(--lux-text-primary);
+  }
+
+  .hero__panel-btn svg {
+    transition: transform .32s var(--ease);
+  }
+
+  .hero__panel-btn:hover svg {
+    transform: translateX(4px);
+  }
+
+  .hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--lux-text-soft);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .hero__scroll-line {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(to bottom, var(--lux-accent-lime), transparent);
+  }
+
+  @media (max-width:768px) {
+    .hero {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+
+    .hero__panel {
+      height: 64vh;
+      min-height: 420px;
+    }
+
+    .hero__panel+.hero__panel::before {
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: auto;
+      width: 100%;
+      height: 1px;
+    }
+
+    .hero__panel-title {
+      font-size: clamp(40px, 11vw, 60px);
+    }
+
+    .hero__scroll {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,708 @@
+---
+const testimonials = [
+  {
+    type: 'card',
+    label: 'Verified Client · Paris',
+    text: 'A wardrobe philosophy more than a label. The cashmere is <em>heirloom quality</em> and the silhouette never dates.',
+    avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=80&q=80',
+    name: 'Adèle Roux',
+    role: 'Stylist · Paris',
+    rating: '4.9'
+  },
+  {
+    type: 'featured',
+    label: 'Fashion Director · The Editorial',
+    text: 'Clothing that quietly outlasts every trend cycle — <em>made the way it should be made,</em> for women who already know what they want.',
+    avatar: 'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&w=88&q=80',
+    name: 'Eloise Marchand',
+    role: 'Fashion Director · The Editorial, Paris',
+    rating: '5.0'
+  },
+  {
+    type: 'card',
+    label: 'Verified Client · Geneva',
+    text: 'The Arden Tote is the only bag I have carried for three years. It softens, it doesn\'t age — it <em>deepens.</em>',
+    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=80&q=80',
+    name: 'Sophie Lambert',
+    role: 'Architect · Geneva',
+    rating: '5.0'
+  },
+  {
+    type: 'card',
+    label: 'Verified Client · London',
+    text: 'Few houses achieve what Arden does — <em>restraint that feels generous,</em> not austere. My coat is four years old and still draws compliments.',
+    avatar: 'https://images.unsplash.com/photo-1496440737103-cd596325d314?auto=format&fit=crop&w=80&q=80',
+    name: 'Hugo Bertin',
+    role: 'Editor · The Modernist',
+    rating: '5.0'
+  },
+  {
+    type: 'featured',
+    label: 'Museum Director · Paris',
+    text: 'Maison Arden understands that true luxury is not what you see — <em>it is what you feel when you put it on.</em>',
+    avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=88&q=80',
+    name: 'Isabelle Renard',
+    role: 'Director · Musée des Arts Décoratifs',
+    rating: '5.0'
+  },
+  {
+    type: 'card',
+    label: 'Verified Client · Lyon',
+    text: 'I wore my Arden coat to a gallery opening and three people asked who made it. That is the quiet power of <em>considered design.</em>',
+    avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=80&q=80',
+    name: 'Mireille Fontaine',
+    role: 'Gallerist · Lyon',
+    rating: '4.9'
+  },
+  {
+    type: 'card',
+    label: 'Verified Client · London',
+    text: 'Every piece I own has been worn weekly for years. Nothing has pilled or lost its shape. This is what <em>investment dressing</em> truly means.',
+    avatar: 'https://images.unsplash.com/photo-1488716820095-cbe80883c496?auto=format&fit=crop&w=80&q=80',
+    name: 'Clara Winthorpe',
+    role: 'Creative Consultant · London',
+    rating: '5.0'
+  },
+  {
+    type: 'featured',
+    label: 'Journalist · Le Monde',
+    text: 'A house that designs for the woman who already knows her taste. Arden does not try to dazzle — <em>it simply endures.</em>',
+    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=88&q=80',
+    name: 'Camille Dubois',
+    role: 'Fashion Journalist · Le Monde',
+    rating: '5.0'
+  },
+  {
+    type: 'card',
+    label: 'Verified Client · Warsaw',
+    text: 'The cashmere coat I bought three seasons ago has only grown more beautiful with wear. <em>This is the wardrobe I always wanted to build.</em>',
+    avatar: 'https://images.unsplash.com/photo-1496440737103-cd596325d314?auto=format&fit=crop&w=80&q=80',
+    name: 'Nathalie Kowalski',
+    role: 'Art Director · Warsaw',
+    rating: '5.0'
+  }
+];
+
+const pressLogos = [
+  'Vogue', 'Harper\'s Bazaar', 'T Magazine', 'FT How To Spend It', 'L\'Officiel', 'Vanity Fair', 'Wallpaper*', 'Monocle'
+];
+---
+
+<section class="testimonials" id="testimonials" aria-label="Testimonials and press">
+  <header class="t-header reveal">
+    <span class="t-header__eyebrow">In Their Words</span>
+    <h2 class="t-header__title">Voices on <em>the Maison.</em></h2>
+    <p class="t-header__sub">From editors and architects to gallerists — those who wear Arden rarely need to be persuaded twice.</p>
+  </header>
+  
+  <div class="t-carousel-wrap reveal" id="tCarouselWrap">
+    <div class="t-carousel" id="tCarousel">
+      {testimonials.map((item) => {
+        if (item.type === 'featured') {
+          return (
+            <article class="t-featured">
+              <span class="t-featured__qm">&#8220;</span>
+              <span class="t-featured__label">{item.label}</span>
+              <p class="t-featured__text" set:html={item.text} />
+              <footer class="t-featured__cite">
+                <img class="t-featured__avatar" src={item.avatar} alt={item.name} loading="lazy" />
+                <div class="t-featured__info">
+                  <span class="t-featured__name">{item.name}</span>
+                  <span class="t-featured__role">{item.role}</span>
+                </div>
+                <div class="t-featured__rating">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M6 1l1.2 3.1L11 4.6 8.5 7l.6 3.4L6 8.8 2.9 10.4 3.5 7 1 4.6l3.8-.5z" />
+                  </svg>
+                  <span class="t-featured__rating-num">{item.rating}</span>
+                </div>
+              </footer>
+            </article>
+          );
+        } else {
+          return (
+            <article class="t-card">
+              <span class="t-card__label">{item.label}</span>
+              <p class="t-card__text" set:html={item.text} />
+              <footer class="t-card__cite">
+                <img class="t-card__avatar" src={item.avatar} alt={item.name} loading="lazy" />
+                <div class="t-card__info">
+                  <span class="t-card__name">{item.name}</span>
+                  <span class="t-card__role">{item.role}</span>
+                </div>
+                <div class="t-card__rating">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M6 1l1.2 3.1L11 4.6 8.5 7l.6 3.4L6 8.8 2.9 10.4 3.5 7 1 4.6l3.8-.5z" />
+                  </svg>
+                  <span class="t-card__rating-num">{item.rating}</span>
+                </div>
+              </footer>
+            </article>
+          );
+        }
+      })}
+    </div>
+  </div>
+  
+  <nav class="t-nav" aria-label="Testimonial navigation">
+    <div class="t-nav__dots" id="tDots" role="tablist"></div>
+  </nav>
+  
+  <div class="press">
+    <div class="press__label-wrap">
+      <span class="press__label-line"></span>
+      <span class="press__label">As Seen In</span>
+      <span class="press__label-line"></span>
+    </div>
+    
+    <div class="press__marquee" aria-hidden="true">
+      <div class="press__track">
+        {pressLogos.map((pub) => (
+          <>
+            <span class="press__pub">{pub}</span>
+            <span class="press__sep">&#9670;</span>
+          </>
+        ))}
+        {/* Double render for seamless loop */}
+        {pressLogos.map((pub) => (
+          <>
+            <span class="press__pub">{pub}</span>
+            <span class="press__sep">&#9670;</span>
+          </>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const track = document.getElementById('tCarousel');
+  const wrap = document.getElementById('tCarouselWrap');
+  const dotsBox = document.getElementById('tDots');
+  
+  if (track && dotsBox) {
+    const cards = Array.from(track.querySelectorAll('.t-card, .t-featured')) as HTMLElement[];
+    let idx = 0;
+    let maxI = 0;
+    const gap = 16;
+    
+    function visibleCount() {
+      const w = window.innerWidth;
+      return w <= 560 ? 1 : (w <= 860 ? 2 : 3);
+    }
+    
+    function buildDots() {
+      if (!dotsBox) return;
+      dotsBox.innerHTML = '';
+      for (let k = 0; k <= maxI; k++) {
+        const b = document.createElement('button');
+        b.className = 't-nav__dot' + (k === idx ? ' is-active' : '');
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-label', 'Slide ' + (k + 1));
+        b.addEventListener('click', () => go(k));
+        dotsBox.appendChild(b);
+      }
+    }
+    
+    function step() {
+      if (cards.length === 0) return 0;
+      const cw = cards[0].getBoundingClientRect().width;
+      return cw + gap;
+    }
+    
+    function go(n: number) {
+      if (!track || !dotsBox) return;
+      maxI = Math.max(0, cards.length - visibleCount());
+      idx = Math.min(Math.max(n, 0), maxI);
+      track.style.transition = 'transform .6s cubic-bezier(.2,.7,.2,1)';
+      track.style.transform = 'translateX(' + (-idx * step()) + 'px)';
+      
+      Array.from(dotsBox.children).forEach((d, k) => {
+        d.classList.toggle('is-active', k === idx);
+      });
+    }
+    
+    function init() {
+      if (!track) return;
+      maxI = Math.max(0, cards.length - visibleCount());
+      if (idx > maxI) idx = maxI;
+      buildDots();
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(' + (-idx * step()) + 'px)';
+    }
+    
+    let auto = setInterval(() => {
+      if (idx >= maxI) go(0);
+      else go(idx + 1);
+    }, 6000);
+    
+    if (wrap) {
+      wrap.addEventListener('mouseenter', () => clearInterval(auto));
+      wrap.addEventListener('mouseleave', () => {
+        auto = setInterval(() => {
+          if (idx >= maxI) go(0);
+          else go(idx + 1);
+        }, 6000);
+      });
+    }
+    
+    // Swipe Gestures for touch devices
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    
+    track.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      track.style.transition = 'none';
+      clearInterval(auto);
+    }, { passive: true });
+    
+    track.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+      const diff = currentX - startX;
+      track.style.transform = `translateX(${-idx * step() + diff}px)`;
+    }, { passive: true });
+    
+    track.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diff = currentX - startX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          go(idx - 1);
+        } else {
+          go(idx + 1);
+        }
+      } else {
+        go(idx);
+      }
+    }, { passive: true });
+    
+    let rt: any;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(init, 150);
+    });
+    
+    init();
+  }
+</script>
+
+<style>
+  .testimonials {
+    background: var(--lux-light-surface);
+    padding: var(--section-y) 0 0;
+  }
+
+  .t-header {
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto clamp(40px, 5vw, 68px);
+    padding: 0 var(--gutter);
+  }
+
+  .t-header__eyebrow {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.8px;
+    text-transform: uppercase;
+    color: var(--lux-secondary-olive);
+    margin-bottom: 14px;
+  }
+
+  .t-header__title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 4vw, 58px);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -1.2px;
+    color: var(--lux-on-light);
+    margin: 0 0 16px;
+  }
+
+  .t-header__title em {
+    font-style: italic;
+    color: var(--lux-secondary-olive);
+  }
+
+  .t-header__sub {
+    font-size: 15px;
+    color: var(--lux-on-light-soft);
+    line-height: 1.65;
+    margin: 0 auto;
+    max-width: 46ch;
+  }
+
+  .t-carousel-wrap {
+    overflow: hidden;
+    position: relative;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .t-carousel {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .t-card,
+  .t-featured {
+    flex: 0 0 calc((100% - 32px) / 3);
+    box-sizing: border-box;
+  }
+
+  .t-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: clamp(24px, 3.5vw, 40px);
+  }
+
+  .t-nav__btn {
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--lux-light-border-strong);
+    background: var(--lux-light-elevated);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--lux-on-light);
+    transition: background .28s var(--ease), border-color .28s var(--ease), color .28s var(--ease), opacity .28s var(--ease);
+  }
+
+  .t-nav__btn:hover {
+    background: var(--lux-primary-dark);
+    border-color: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+  }
+
+  .t-nav__btn:disabled {
+    opacity: .35;
+    cursor: default;
+  }
+
+  .t-nav__btn:disabled:hover {
+    background: var(--lux-light-elevated);
+    border-color: var(--lux-light-border-strong);
+    color: var(--lux-on-light);
+  }
+
+  .t-nav__dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  :global(.t-nav__dot) {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--lux-light-border-strong);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background .3s var(--ease), width .35s var(--ease), border-radius .35s var(--ease);
+  }
+
+  :global(.t-nav__dot.is-active) {
+    width: 22px;
+    border-radius: 0;
+    background: var(--lux-primary-dark);
+  }
+
+  .t-card {
+    background: var(--lux-light-elevated);
+    border: 1px solid var(--lux-light-border);
+    padding: clamp(24px, 2.5vw, 36px);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: background .35s var(--ease), border-color .35s var(--ease);
+  }
+
+  .t-card:hover {
+    background: var(--lux-light-bg);
+    border-color: var(--lux-light-border-strong);
+  }
+
+  .t-card__label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--lux-secondary-olive);
+  }
+
+  .t-card__text {
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.6vw, 24px);
+    font-weight: 500;
+    line-height: 1.32;
+    letter-spacing: -.3px;
+    color: var(--lux-on-light);
+    margin: 0;
+    flex: 1;
+  }
+
+  .t-card__text em {
+    font-style: italic;
+    color: var(--lux-secondary-olive);
+  }
+
+  .t-card__cite {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--lux-light-border);
+  }
+
+  .t-card__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    filter: saturate(.85);
+  }
+
+  .t-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .t-card__name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .6px;
+    color: var(--lux-on-light);
+  }
+
+  .t-card__role {
+    font-size: 11px;
+    color: var(--lux-on-light-soft);
+  }
+
+  .t-card__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    color: var(--lux-secondary-olive);
+  }
+
+  .t-card__rating-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--lux-on-light);
+  }
+
+  .t-featured {
+    background: var(--lux-primary-dark);
+    padding: clamp(30px, 2.6vw, 40px) clamp(26px, 2.4vw, 36px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .t-featured::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(0deg, rgba(241, 242, 234, .035) 0, rgba(241, 242, 234, .035) 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, rgba(241, 242, 234, .035) 0, rgba(241, 242, 234, .035) 1px, transparent 1px, transparent 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .t-featured__qm {
+    font-family: var(--font-display);
+    font-size: clamp(60px, 7vw, 96px);
+    line-height: .7;
+    font-weight: 400;
+    color: var(--lux-accent-lime);
+    display: block;
+    margin-bottom: clamp(14px, 2vw, 24px);
+    position: relative;
+    z-index: 1;
+  }
+
+  .t-featured__label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--lux-accent-lime);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+  }
+
+  .t-featured__text {
+    font-family: var(--font-display);
+    font-size: clamp(19px, 1.7vw, 26px);
+    font-weight: 500;
+    line-height: 1.32;
+    letter-spacing: -.3px;
+    color: var(--lux-text-primary);
+    margin: 0;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .t-featured__text em {
+    font-style: italic;
+    color: var(--lux-text-soft);
+  }
+
+  .t-featured__cite {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: clamp(24px, 3vw, 40px);
+    padding-top: 20px;
+    border-top: 1px solid rgba(241, 242, 234, .14);
+    position: relative;
+    z-index: 1;
+  }
+
+  .t-featured__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    filter: saturate(.8);
+  }
+
+  .t-featured__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .t-featured__name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .6px;
+    color: var(--lux-text-primary);
+  }
+
+  .t-featured__role {
+    font-size: 11px;
+    color: var(--lux-text-secondary);
+  }
+
+  .t-featured__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    color: var(--lux-accent-lime);
+  }
+
+  .t-featured__rating-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--lux-text-secondary);
+  }
+
+  .press {
+    margin-top: clamp(52px, 6vw, 80px);
+    padding: clamp(18px, 2.5vw, 26px) 0;
+    background: var(--lux-primary-dark);
+    overflow: hidden;
+  }
+
+  .press__label-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: clamp(12px, 2vw, 20px);
+  }
+
+  .press__label-line {
+    width: 80px;
+    height: 1px;
+    background: rgba(231, 236, 120, .3);
+  }
+
+  .press__label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--lux-text-secondary);
+  }
+
+  .press__marquee {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .press__track {
+    display: inline-flex;
+    align-items: center;
+    animation: pressScroll 32s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes pressScroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .press__track:hover {
+    animation-play-state: paused;
+  }
+
+  .press__pub {
+    font-family: var(--font-display);
+    font-size: clamp(14px, 1.2vw, 18px);
+    font-style: italic;
+    color: var(--lux-text-secondary);
+    padding: 0 clamp(20px, 2.5vw, 40px);
+    transition: color .3s;
+    white-space: nowrap;
+  }
+
+  .press__pub:hover {
+    color: var(--lux-text-primary);
+  }
+
+  .press__sep {
+    color: var(--lux-accent-lime);
+    opacity: .45;
+    font-size: 10px;
+  }
+
+  @media (max-width:860px) {
+    .t-card,
+    .t-featured {
+      flex: 0 0 calc((100% - 16px) / 2);
+    }
+  }
+
+  @media (max-width:560px) {
+    .t-card,
+    .t-featured {
+      flex: 0 0 100%;
+    }
+  }
+</style>

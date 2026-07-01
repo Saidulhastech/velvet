@@ -1,0 +1,380 @@
+---
+// Footer component
+---
+
+<footer class="footer">
+  <div class="footer__top">
+    <div class="footer__brand">
+      <div class="footer__brand-mark">VELVET</div>
+      <div class="footer__brand-sub">EST. MMXIV · PARIS</div>
+      <p class="footer__brand-text">Quiet luxury, considered and made to last — designed in Paris, finished by hand across Europe.</p>
+      <div class="footer__contact">
+        <a href="mailto:client@maisonarden.com">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="1.5" y="3.5" width="13" height="9" stroke="currentColor" />
+            <path d="M2 4l6 4 6-4" stroke="currentColor" />
+          </svg> client@maisonarden.com
+        </a>
+        <a href="tel:+33100000000">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M5 2H3a1 1 0 0 0-1 1c0 6 5 11 11 11a1 1 0 0 0 1-1v-2l-3-1-1.5 1.5a8 8 0 0 1-4-4L7 5 6 2z" stroke="currentColor" stroke-linejoin="round" />
+          </svg> +33 1 00 00 00 00
+        </a>
+      </div>
+      <div class="footer__social">
+        <a href="#" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <rect x="2.5" y="2.5" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.3" />
+            <circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.3" />
+            <circle cx="14.5" cy="5.5" r="1" fill="currentColor" />
+          </svg>
+        </a>
+        <a href="#" aria-label="Pinterest">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" />
+            <path d="M8 15l2-7m0 0a2.5 2.5 0 1 1 2.4 1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M11 3v9.5a3 3 0 1 1-3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            <path d="M11 5.5c.6 1.5 1.8 2.4 3.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer__col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="/shop">Women</a></li>
+        <li><a href="/shop">Men</a></li>
+        <li><a href="/shop">Tailoring</a></li>
+        <li><a href="/shop">Knitwear</a></li>
+        <li><a href="/shop">New Arrivals</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h4>Maison</h4>
+      <ul>
+        <li><a href="/about">Our Story</a></li>
+        <li><a href="/about">Craftsmanship</a></li>
+        <li><a href="/about">Sustainability</a></li>
+        <li><a href="/blog">The Journal</a></li>
+        <li><a href="/contact">Careers</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h4>Client Care</h4>
+      <ul>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/contact">Shipping &amp; Returns</a></li>
+        <li><a href="/about">Lifetime Repairs</a></li>
+        <li><a href="/contact">Size Guide</a></li>
+        <li><a href="/contact">FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer__visit">
+    <div class="footer__visit-text">Visit the atelier — <span>18 Rue Saint-Honoré, Paris</span></div>
+    <a href="#appointment" class="footer__appt">
+      Book an Appointment 
+      <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+        <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+      </svg>
+    </a>
+  </div>
+  <div class="footer__wordmark" aria-hidden="true">MAISON ARDEN</div>
+  <div class="footer__bottom">
+    <div class="footer__bottom-inner">
+      <span class="footer__copy">© 2026 Maison Arden. All rights reserved.</span>
+      <div class="footer__pay">
+        <span>Visa</span><span>MC</span><span>Amex</span><span>PayPal</span>
+      </div>
+      <div class="footer__legal">
+        <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a>
+        <a href="#top" class="footer__totop">
+          Back to top 
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+            <path d="M7 12V3m0 0L3 7m4-4l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+.footer {
+  position: relative;
+  background: var(--lux-bg-dark);
+  color: var(--lux-text-secondary);
+  overflow: hidden;
+}
+
+.footer__top {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(56px, 7vw, 100px) var(--gutter) clamp(34px, 4vw, 52px);
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: clamp(28px, 4vw, 60px);
+}
+
+.footer__brand-mark {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 6px;
+  color: var(--lux-text-primary);
+}
+
+.footer__brand-sub {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--lux-text-secondary);
+  margin-top: 8px;
+}
+
+.footer__brand-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--lux-text-secondary);
+  max-width: 36ch;
+  margin: 22px 0 22px;
+}
+
+.footer__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.footer__contact a {
+  font-size: 13px;
+  color: var(--lux-text-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  transition: color .22s var(--ease);
+}
+
+.footer__contact a:hover {
+  color: var(--lux-accent-lime);
+}
+
+.footer__contact svg {
+  color: var(--lux-secondary-olive);
+  flex-shrink: 0;
+}
+
+.footer__social {
+  display: flex;
+  gap: 10px;
+}
+
+.footer__social a {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--lux-border);
+  border-radius: 50%;
+  color: var(--lux-text-soft);
+  transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
+}
+
+.footer__social a:hover {
+  background: var(--lux-accent-lime);
+  color: var(--lux-bg-dark);
+  border-color: var(--lux-accent-lime);
+  transform: translateY(-3px);
+}
+
+.footer__col h4 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--lux-text-primary);
+  margin: 0 0 18px;
+}
+
+.footer__col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer__col a {
+  font-size: 14px;
+  color: var(--lux-text-secondary);
+  transition: color .22s var(--ease), padding-left .22s var(--ease);
+}
+
+.footer__col a:hover {
+  color: var(--lux-accent-lime);
+  padding-left: 5px;
+}
+
+.footer__visit {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(22px, 2.5vw, 30px) var(--gutter);
+  border-top: 1px solid var(--lux-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer__visit-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(18px, 1.8vw, 24px);
+  color: var(--lux-text-soft);
+}
+
+.footer__visit-text span {
+  color: var(--lux-accent-lime);
+}
+
+.footer__appt {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 26px;
+  background: var(--lux-accent-hover);
+  border: 1px solid var(--lux-accent-hover);
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--lux-bg-dark);
+  transition: background .28s var(--ease), color .28s var(--ease), border-color .28s var(--ease);
+}
+
+.footer__appt:hover {
+  background: transparent;
+  color: var(--lux-text-primary);
+  border-color: var(--lux-border);
+}
+
+.footer__wordmark {
+  font-family: var(--font-display);
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(58px, 15.5vw, 236px);
+  line-height: .82;
+  letter-spacing: clamp(2px, .8vw, 10px);
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(231, 236, 120, .22);
+  margin: clamp(8px, 1.5vw, 18px) 0 clamp(-6px, -.5vw, -2px);
+  padding: 0 var(--gutter);
+  user-select: none;
+  pointer-events: none;
+}
+
+.footer__bottom {
+  border-top: 1px solid var(--lux-border);
+}
+
+.footer__bottom-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 22px var(--gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.footer__copy {
+  font-size: 12px;
+  color: var(--lux-text-secondary);
+}
+
+.footer__pay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer__pay span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--lux-text-secondary);
+  border: 1px solid var(--lux-border);
+  padding: 5px 9px;
+  border-radius: 0;
+}
+
+.footer__legal {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.footer__legal a {
+  font-size: 12px;
+  color: var(--lux-text-secondary);
+  transition: color .22s var(--ease);
+}
+
+.footer__legal a:hover {
+  color: var(--lux-text-soft);
+}
+
+.footer__totop {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--lux-text-primary);
+}
+
+.footer__totop svg {
+  transition: transform .25s var(--ease);
+}
+
+.footer__totop:hover svg {
+  transform: translateY(-3px);
+}
+
+@media (max-width: 860px) {
+  .footer__top {
+    grid-template-columns: 1fr 1fr;
+    gap: 38px 28px;
+  }
+  .footer__visit {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .footer__top {
+    grid-template-columns: 1fr;
+  }
+  .footer__bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>

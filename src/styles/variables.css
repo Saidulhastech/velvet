@@ -1,0 +1,46 @@
+:root {
+  /* ============ MAISON ARDEN — Design System Tokens ============ */
+  
+  /* Primary & Accent Palettes */
+  --lux-primary-dark: #30382C;
+  --lux-secondary-olive: #6B705E;
+  --lux-accent-lime: #E7EC78;
+  --lux-accent-hover: #D8DE62;
+  
+  /* Dark Mode & Deep Theme Colors */
+  --lux-bg-dark: #171A15;
+  --lux-surface-dark: #3E4637;
+  --lux-surface-muted: #858A76;
+  --lux-text-primary: #F1F2EA;
+  --lux-text-secondary: #B8BCA9;
+  --lux-text-soft: #E4E6DA;
+  --lux-border: #4D5646;
+  --lux-hover-dark: #252B22;
+
+  /* Light Theme / Editorial Accents */
+  --lux-light-bg: #F4F5EF;
+  --lux-light-surface: #EAEBE1;
+  --lux-light-elevated: #FCFCF8;
+  --lux-on-light: #2A3024;
+  --lux-on-light-soft: #5E6353;
+  --lux-light-border: rgba(48, 56, 44, .14);
+  --lux-light-border-strong: rgba(48, 56, 44, .24);
+  
+  /* Aliases for product page layouts */
+  --lux-olive-border: var(--lux-light-border);
+  --lux-olive-border-strong: var(--lux-light-border-strong);
+  --lux-text-muted: var(--lux-on-light-soft);
+
+  /* Typography Families */
+  --font-display: "Cormorant Garamond", "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Responsive Grid & Layout Tokens */
+  --maxw: 1440px;
+  --gutter: clamp(20px, 4vw, 56px);
+  --section-y: clamp(76px, 10vw, 150px);
+
+  /* Animation Easings */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --ease-soft: cubic-bezier(.4, 0, .2, 1);
+}

@@ -1,0 +1,355 @@
+---
+import { Image } from 'astro:assets';
+
+// Import images to resolve them through Astro's asset pipeline
+import imgP1 from '../../../assets/images/Product Image 1.png';
+import imgP2 from '../../../assets/images/Product Image 2.png';
+import imgP3 from '../../../assets/images/Product Image 3.png';
+import imgP4 from '../../../assets/images/Product Image 4.png';
+import imgP5 from '../../../assets/images/Product Image 5.png';
+import imgP6 from '../../../assets/images/Product Image 6.png';
+import imgP7 from '../../../assets/images/Product Image 7.png';
+import imgP8 from '../../../assets/images/Product Image 8.png';
+import imgP9 from '../../../assets/images/Product Image 9.png';
+import imgP10 from '../../../assets/images/Product Image 10.png';
+import imgP11 from '../../../assets/images/Product Image 11.png';
+import imgP12 from '../../../assets/images/Product Image 12.png';
+import imgP13 from '../../../assets/images/Product Image 13.png';
+import imgP14 from '../../../assets/images/Product Image 14.png';
+import imgP15 from '../../../assets/images/Product Image 15.png';
+import imgP16 from '../../../assets/images/Product Image 16.png';
+
+const categories = [
+  {
+    name: 'Tailoring',
+    count: 42,
+    filter: 'tailoring',
+    mainImage: imgP1,
+    thumbs: [imgP1, imgP2, imgP3]
+  },
+  {
+    name: 'Outerwear',
+    count: 28,
+    filter: 'outerwear',
+    mainImage: imgP2,
+    thumbs: [imgP4, imgP5, imgP6]
+  },
+  {
+    name: 'Knitwear',
+    count: 35,
+    filter: 'knitwear',
+    mainImage: imgP9,
+    thumbs: [imgP7, imgP8, imgP9]
+  },
+  {
+    name: 'Denim',
+    count: 19,
+    filter: 'denim',
+    mainImage: imgP5,
+    thumbs: [imgP10, imgP11, imgP12]
+  },
+  {
+    name: 'Accessories',
+    count: 54,
+    filter: 'accessories',
+    mainImage: imgP16,
+    thumbs: [imgP13, imgP14, imgP15]
+  }
+];
+---
+
+<section class="cats" id="categories" aria-label="Shop by category">
+  <div class="cats__inner">
+    <div class="cats__head reveal">
+      <span class="eyebrow eyebrow--center">Explore the Maison</span>
+      <h2 class="section-title">Shop by <em>Category</em></h2>
+    </div>
+    
+    <div class="catlist reveal d1">
+      <div class="catlist__preview" aria-hidden="true">
+        <img src="" alt="" id="catPreviewImg" />
+      </div>
+      
+      {categories.map((cat, idx) => (
+        <a 
+          href={`/shop?category=${cat.filter}`} 
+          class={`catrow ${idx === 2 ? 'is-active' : ''}`} 
+          data-img={cat.mainImage.src}
+        >
+          <span class="catrow__thumbs">
+            {cat.thumbs.map((thumb) => (
+              <Image src={thumb} alt="" width={58} height={58} />
+            ))}
+          </span>
+          <span class="catrow__name">{cat.name}<sup>{cat.count}</sup></span>
+          <span class="catrow__view">
+            View Products 
+            <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+              <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  const list = document.querySelector('.catlist');
+  if (list) {
+    const rows = Array.from(list.querySelectorAll('.catrow')) as HTMLElement[];
+    const preview = list.querySelector('.catlist__preview') as HTMLElement;
+    const pImg = preview ? preview.querySelector('img') : null;
+    
+    if (preview && pImg) {
+      let tx = 0, ty = 0, x = 0, y = 0, vis = false;
+      
+      // Set initial image from the active row
+      const activeRow = list.querySelector('.catrow.is-active');
+      if (activeRow) {
+        const src = activeRow.getAttribute('data-img');
+        if (src) pImg.src = src;
+      }
+      
+      rows.forEach(r => {
+        r.addEventListener('mouseenter', () => {
+          const src = r.getAttribute('data-img');
+          if (src && pImg.getAttribute('src') !== src) {
+            pImg.src = src;
+          }
+          rows.forEach(o => o.classList.remove('is-active'));
+          r.classList.add('is-active');
+          vis = true;
+          preview.classList.add('is-visible');
+        });
+      });
+      
+      list.addEventListener('mousemove', (e: any) => {
+        const rc = list.getBoundingClientRect();
+        tx = e.clientX - rc.left;
+        ty = e.clientY - rc.top;
+      });
+      
+      list.addEventListener('mouseleave', () => {
+        vis = false;
+        preview.classList.remove('is-visible');
+      });
+      
+      const loop = () => {
+        x += (tx - x) * 0.14;
+        y += (ty - y) * 0.14;
+        preview.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${vis ? 1 : 0.85})`;
+        requestAnimationFrame(loop);
+      };
+      loop();
+    }
+  }
+</script>
+
+<style>
+  .cats {
+    background: var(--lux-light-surface);
+    margin: clamp(48px, 7vw, 110px) 0;
+  }
+
+  .cats__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: var(--section-y) var(--gutter);
+  }
+
+  .cats__head {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: clamp(36px, 4vw, 60px);
+  }
+
+  .catlist {
+    position: relative;
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .catlist__preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    width: clamp(170px, 15vw, 232px);
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform;
+    transition: opacity .45s var(--ease);
+    box-shadow: 0 34px 70px -34px rgba(48, 56, 44, .55);
+  }
+
+  .catlist__preview.is-visible {
+    opacity: 1;
+  }
+
+  .catlist__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .catrow__thumbs {
+    grid-column: 1;
+    justify-self: start;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transform: translateX(-16px);
+    transition: opacity .5s var(--ease), transform .5s var(--ease);
+    pointer-events: none;
+  }
+
+  .catrow__thumbs img {
+    width: clamp(40px, 4vw, 58px);
+    height: clamp(40px, 4vw, 58px);
+    object-fit: cover;
+    border: 1px solid var(--lux-light-border);
+    background: var(--lux-light-elevated);
+    transition: transform .55s var(--ease);
+  }
+
+  .catrow:hover .catrow__thumbs,
+  .catrow.is-active .catrow__thumbs {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .catrow:hover .catrow__thumbs img:nth-of-type(1),
+  .catrow.is-active .catrow__thumbs img:nth-of-type(1) {
+    transform: rotate(-5deg) translateY(-2px);
+  }
+
+  .catrow:hover .catrow__thumbs img:nth-of-type(3),
+  .catrow.is-active .catrow__thumbs img:nth-of-type(3) {
+    transform: rotate(5deg) translateY(-2px);
+  }
+
+  .catrow {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding: clamp(14px, 2vw, 28px) 8px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    transition: border-color .5s var(--ease), background .5s var(--ease);
+  }
+
+  .catrow:hover,
+  .catrow.is-active {
+    border-top-color: var(--lux-light-border-strong);
+    border-bottom-color: var(--lux-light-border-strong);
+    background: linear-gradient(90deg, transparent 0%, rgba(48, 56, 44, .04) 50%, transparent 100%);
+  }
+
+  .catrow__name {
+    grid-column: 2;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(30px, 5.4vw, 72px);
+    line-height: 1.04;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--lux-surface-muted);
+    transition: color .45s var(--ease), letter-spacing .45s var(--ease);
+    white-space: nowrap;
+  }
+
+  .catrow:hover .catrow__name,
+  .catrow.is-active .catrow__name {
+    color: var(--lux-on-light);
+    letter-spacing: 1.6px;
+  }
+
+  .catrow__name sup {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: .3em;
+    letter-spacing: 0;
+    color: var(--lux-secondary-olive);
+    margin-left: 8px;
+    display: inline-block;
+    transform: translateY(-.7em);
+  }
+
+  .catrow__view {
+    grid-column: 3;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity .5s var(--ease), transform .5s var(--ease);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .catrow:hover .catrow__view,
+  .catrow.is-active .catrow__view {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .catrow__view svg {
+    transition: transform .3s var(--ease);
+  }
+
+  .catrow:hover .catrow__view svg {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 820px) {
+    .catlist__preview {
+      display: none;
+    }
+
+    .catrow__thumbs {
+      display: none;
+    }
+
+    .catrow {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      text-align: center;
+      padding: 18px 8px;
+      border-top-color: var(--lux-light-border);
+    }
+
+    .catrow__name {
+      grid-column: 1;
+      font-size: clamp(28px, 8vw, 42px);
+    }
+
+    .catrow__view {
+      grid-column: 1;
+      justify-self: center;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      margin-top: 4px;
+    }
+  }
+</style>

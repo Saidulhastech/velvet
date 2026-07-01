@@ -1,0 +1,341 @@
+---
+// ============================================================
+//  /account (OMNIX) — authenticated customer dashboard (profile +
+//  orders). Redirects to login when there is no valid session.
+// ============================================================
+import BaseLayout from '../../components/layout/BaseLayout.astro';
+import {
+  createCustomerClient,
+  CUSTOMER_OVERVIEW_QUERY,
+  getPublicOrigin,
+  NotAuthenticatedError,
+} from '~/lib/shopify/customer';
+import type { CustomerOverview } from '~/lib/shopify/customer';
+
+export const prerender = false;
+
+const client = createCustomerClient(Astro.cookies, getPublicOrigin(Astro.request, Astro.url));
+
+if (!client.isLoggedIn()) {
+  return Astro.redirect('/account/login?return_to=/account');
+}
+
+let customer: CustomerOverview['customer'] = null;
+let error: string | null = null;
+
+try {
+  const data = await client.query<CustomerOverview>(CUSTOMER_OVERVIEW_QUERY, { first: 10 });
+  customer = data.customer;
+} catch (err) {
+  if (err instanceof NotAuthenticatedError) {
+    return Astro.redirect('/account/login?return_to=/account');
+  }
+  console.error('[account] load failed:', (err as Error).message);
+  error = (err as Error).message;
+}
+
+const fullName = [customer?.firstName, customer?.lastName].filter(Boolean).join(' ');
+const greeting = fullName || customer?.emailAddress?.emailAddress || 'there';
+const orders = customer?.orders?.nodes ?? [];
+
+const fmtMoney = (m: { amount: string; currencyCode: string } | null) =>
+  m
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: m.currencyCode }).format(
+        Number(m.amount),
+      )
+    : '—';
+
+const fmtDate = (iso: string) =>
+  new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(
+    new Date(iso),
+  );
+---
+
+<BaseLayout title="My Account" description="Manage your account, orders, and details.">
+  <!-- HERO -->
+  <section class="shop-hero">
+    <div class="shop-hero__inner">
+      <div class="shop-hero__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Account</span></div>
+      <h1 class="shop-hero__title">My <em>Account</em></h1>
+      <p class="shop-hero__sub">Manage your profile, shipping addresses, and order history.</p>
+    </div>
+  </section>
+
+  <!-- ACCOUNT CONTENT -->
+  <section class="account-sec">
+    <div class="account-container">
+      <header class="acc-head">
+        <div class="acc-welcome">
+          <span class="acc-welcome__eyebrow">Welcome Back</span>
+          <h2 class="acc-welcome__title">Hi, {greeting}</h2>
+        </div>
+        <a href="/account/logout" class="btn-pager">Sign out</a>
+      </header>
+
+      {
+        error && (
+          <div class="acc-alert">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"></circle>
+              <path d="M8 5v4M8 11.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+            </svg>
+            Couldn't load account details: {error}
+          </div>
+        )
+      }
+
+      <div class="acc-grid">
+        <!-- LEFT: ORDERS LIST -->
+        <div class="acc-main">
+          <h3 class="acc-section-title">Order History</h3>
+          {
+            orders.length === 0 ? (
+              <div class="acc-empty-orders">
+                <p>You haven't placed any orders yet.</p>
+                <a href="/shop" class="btn-dark" style="margin-top: 16px; display: inline-block;">Start Shopping</a>
+              </div>
+            ) : (
+              <div class="acc-orders-table">
+                <div class="table-header">
+                  <span>Order</span>
+                  <span>Date</span>
+                  <span>Payment</span>
+                  <span>Fulfillment</span>
+                  <span>Total</span>
+                </div>
+                <div class="table-body">
+                  {orders.map((order) => (
+                    <div class="table-row">
+                      <span class="order-name">{order.name}</span>
+                      <span class="order-date">{fmtDate(order.processedAt)}</span>
+                      <span class="order-status">{order.financialStatus || 'Paid'}</span>
+                      <span class="order-status">{order.fulfillmentStatus || 'Unfulfilled'}</span>
+                      <span class="order-total">{fmtMoney(order.totalPrice)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- RIGHT: PROFILE DETAILS -->
+        <aside class="acc-sidebar">
+          <div class="acc-sidebar-card">
+            <h3 class="acc-section-title">Profile Details</h3>
+            <div class="profile-info">
+              <div class="profile-field">
+                <span class="profile-label">Full Name</span>
+                <span class="profile-value">{fullName || '—'}</span>
+              </div>
+              <div class="profile-field">
+                <span class="profile-label">Email Address</span>
+                <span class="profile-value">{customer?.emailAddress?.emailAddress || '—'}</span>
+              </div>
+              <div class="profile-field">
+                <span class="profile-label">Default Address</span>
+                {customer?.defaultAddress ? (
+                  <span class="profile-value address-block">
+                    {customer.defaultAddress.address1}<br />
+                    {customer.defaultAddress.address2 && <>{customer.defaultAddress.address2}<br /></>}
+                    {customer.defaultAddress.city}, {customer.defaultAddress.provinceCode || ''} {customer.defaultAddress.zip}<br />
+                    {customer.defaultAddress.country}
+                  </span>
+                ) : (
+                  <span class="profile-value text-muted">No address on file</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .account-sec {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 60px var(--gutter) var(--section-y);
+  }
+  .account-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .acc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--lux-light-border);
+    padding-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .acc-welcome__eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .acc-welcome__title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+    margin: 0;
+  }
+  .btn-pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+    border: 1px solid var(--lux-light-border-strong);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.3s var(--ease), color 0.3s var(--ease);
+  }
+  .btn-pager:hover {
+    background: var(--lux-on-light);
+    color: var(--lux-text-primary);
+  }
+  .acc-alert {
+    display: flex;
+    align-items: center;
+    background: #FFF5F5;
+    border: 1px solid #FEB2B2;
+    color: #C53030;
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+  .acc-grid {
+    display: grid;
+    grid-template-columns: 2.2fr 1fr;
+    gap: 48px;
+  }
+  .acc-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--lux-on-light);
+    margin: 0 0 20px;
+    font-family: var(--font-body);
+    border-bottom: 1px solid var(--lux-light-border-strong);
+    padding-bottom: 10px;
+  }
+  .acc-empty-orders {
+    padding: 40px;
+    text-align: center;
+    border: 1px dashed var(--lux-light-border-strong);
+    background: var(--lux-light-surface);
+    color: var(--lux-on-light-soft);
+    font-size: 13px;
+  }
+  .acc-orders-table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--lux-light-border);
+  }
+  .table-header {
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 1fr 1fr 1fr;
+    background: var(--lux-light-elevated);
+    padding: 14px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+    border-bottom: 1px solid var(--lux-light-border-strong);
+  }
+  .table-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 1fr 1fr 1fr;
+    padding: 18px 20px;
+    font-size: 12px;
+    color: var(--lux-on-light);
+    border-bottom: 1px solid var(--lux-light-border);
+    align-items: center;
+  }
+  .table-row:last-child {
+    border-bottom: none;
+  }
+  .order-name {
+    font-weight: 600;
+  }
+  .order-date {
+    color: var(--lux-on-light-soft);
+  }
+  .order-status {
+    text-transform: capitalize;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .order-total {
+    font-weight: 600;
+    text-align: right;
+  }
+  .acc-sidebar-card {
+    background: var(--lux-light-surface);
+    border: 1px solid var(--lux-light-border);
+    padding: 28px;
+  }
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .profile-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--lux-on-light-soft);
+  }
+  .profile-value {
+    font-size: 13px;
+    color: var(--lux-on-light);
+  }
+  .address-block {
+    line-height: 1.5;
+  }
+  .text-muted {
+    font-style: italic;
+    color: var(--lux-on-light-soft);
+  }
+
+  @media (max-width: 900px) {
+    .acc-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+  @media (max-width: 600px) {
+    .table-header {
+      display: none;
+    }
+    .table-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 16px;
+    }
+    .order-total {
+      text-align: left;
+    }
+  }
+</style>

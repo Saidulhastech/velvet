@@ -1,0 +1,518 @@
+---
+import { Image } from 'astro:assets';
+import { getShopifyProductByHandle } from '../../../lib/shopify/client';
+
+// Import images to resolve them via Astro's asset pipeline
+import imgStage from '../../../assets/images/Shop the look section left image.png';
+import imgP1 from '../../../assets/images/Product Image 1.png';
+import imgP3 from '../../../assets/images/Product Image 3.png';
+import imgP9 from '../../../assets/images/Product Image 9.png';
+
+const lookItems = await Promise.all([
+  {
+    index: 0,
+    handle: 'sand-linen-blazer',
+    name: 'Sand Linen Blazer',
+    price: 520,
+    formattedPrice: '€520',
+    color: 'Sand',
+    image: imgP1,
+    dotStyle: 'top:28%; left:46%;',
+    tipStyle: 'top:30%; left:52%;'
+  },
+  {
+    index: 1,
+    handle: 'pleated-wide-trouser',
+    name: 'Pleated Wide Trouser',
+    price: 280,
+    formattedPrice: '€280',
+    color: 'Olive',
+    image: imgP3,
+    dotStyle: 'top:55%; left:38%;',
+    tipStyle: 'top:57%; left:44%;'
+  },
+  {
+    index: 2,
+    handle: 'wide-leg-linen-trouser',
+    name: 'Cashmere Crew Knit',
+    price: 260,
+    formattedPrice: '€260',
+    originalPrice: '€310',
+    color: 'Ecru',
+    image: imgP9,
+    dotStyle: 'top:74%; left:56%;',
+    tipStyle: 'top:62%; left:56%;'
+  }
+].map(async (item) => {
+  try {
+    const shopifyProduct = await getShopifyProductByHandle(item.handle);
+    if (shopifyProduct) {
+      return {
+        ...item,
+        id: shopifyProduct.id,
+        name: shopifyProduct.name,
+        price: shopifyProduct.price,
+        formattedPrice: shopifyProduct.formattedPrice,
+      };
+    }
+  } catch (err) {
+    console.error(`Failed to load Shopify product for ShopTheLook: ${item.handle}`, err);
+  }
+  return item;
+}));
+---
+
+<section class="look" id="lookbook" aria-label="Shop the look">
+  <div class="look__inner">
+    <div class="look__stage reveal">
+      <Image src={imgStage} alt="The Riviera Set" width={560} height={560} loading="lazy" />
+      
+      {lookItems.map((item, idx) => (
+        <>
+          <button 
+            class={`look__dot ${idx === 0 ? 'is-active' : ''}`} 
+            style={item.dotStyle} 
+            data-index={item.index} 
+            aria-label={item.name}
+          />
+          <div 
+            class={`look__tip ${idx === 0 ? 'is-active' : ''}`} 
+            style={item.tipStyle} 
+            data-index={item.index}
+          >
+            <Image src={item.image} alt={item.name} width={42} height={42} />
+            <div>
+              <div class="look__tip-name">{item.name}</div>
+              <div class="look__tip-price">{item.formattedPrice}</div>
+            </div>
+          </div>
+        </>
+      ))}
+    </div>
+    
+    <div class="look__panel reveal d1">
+      <div class="look__panel-head">
+        <div class="look__panel-eyebrow">Curated Edit</div>
+        <h2 class="look__panel-title">The Riviera Set</h2>
+      </div>
+      
+      <div class="look__set">
+        {lookItems.map((item, idx) => (
+          <div 
+            class={`look__row ${idx !== 0 ? 'is-dim' : ''}`} 
+            data-index={item.index}
+            data-id={item.id}
+            data-name={item.name}
+            data-price={item.price}
+            data-img={typeof item.image === 'string' ? item.image : item.image.src}
+            data-color={item.color}
+            data-handle={item.handle}
+          >
+            <div class="look__row-thumb">
+              <Image src={item.image} alt={item.name} width={66} height={66} />
+            </div>
+            <div>
+              <div class="look__row-name">{item.name}</div>
+              <span class="look__row-opt">
+                Colour: {item.color} 
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                  <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-linecap="round" />
+                </svg>
+              </span>
+              <br />
+              <button class="look__row-add" data-add-bag data-id={item.id}>Add to Bag</button>
+            </div>
+            <div class="look__row-price">
+              {item.originalPrice ? (
+                <>
+                  <span class="sale">{item.formattedPrice}</span> 
+                  <s>{item.originalPrice}</s>
+                </>
+              ) : (
+                item.formattedPrice
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <button class="look__total" data-add-bag data-ids={lookItems.map(item => item.id).join(',')}>
+        Add All to Bag — €1,060 
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+          <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { addToCart } from '../../../stores/cart';
+  import { products } from '../../../lib/mockData';
+
+  const dots = Array.from(document.querySelectorAll('.look__dot')) as HTMLElement[];
+  const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
+  const tips = Array.from(document.querySelectorAll('.look__tip')) as HTMLElement[];
+
+  function setLook(indexStr: string) {
+    dots.forEach(d => d.classList.toggle('is-active', d.dataset.index === indexStr));
+    tips.forEach(t => t.classList.toggle('is-active', t.dataset.index === indexStr));
+    rows.forEach(r => r.classList.toggle('is-dim', r.dataset.index !== indexStr));
+  }
+
+  dots.forEach(d => d.addEventListener('click', () => {
+    if (d.dataset.index) setLook(d.dataset.index);
+  }));
+  
+  rows.forEach(r => r.addEventListener('mouseenter', () => {
+    if (r.dataset.index) setLook(r.dataset.index);
+  }));
+
+  // Single hotspot add to bag
+  document.querySelectorAll('.look__row-add').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const rowEl = btn.closest('.look__row') as HTMLElement | null;
+      if (rowEl) {
+        const dataset = rowEl.dataset;
+        const id = dataset.id || '';
+        const name = dataset.name || '';
+        const price = parseFloat(dataset.price || '0');
+        const image = dataset.img || '';
+        const color = dataset.color || '';
+        const handle = dataset.handle || '';
+        
+        addToCart({
+          id,
+          name,
+          price,
+          image,
+          color: color || undefined,
+          size: undefined,
+          description: handle
+        }, 1);
+      }
+    });
+  });
+
+  // Add entire lookbook edit to bag
+  const addAllBtn = document.querySelector('.look__total');
+  addAllBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
+    rows.forEach((rowEl) => {
+      const dataset = rowEl.dataset;
+      const id = dataset.id || '';
+      const name = dataset.name || '';
+      const price = parseFloat(dataset.price || '0');
+      const image = dataset.img || '';
+      const color = dataset.color || '';
+      const handle = dataset.handle || '';
+
+      addToCart({
+        id,
+        name,
+        price,
+        image,
+        color: color || undefined,
+        size: undefined,
+        description: handle
+      }, 1);
+    });
+  });
+</script>
+
+<style>
+  @keyframes hsPulse {
+    0% {
+      transform: scale(.8);
+      opacity: .9;
+    }
+    100% {
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+
+  .look {
+    background: var(--lux-light-surface);
+  }
+
+  .look__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: var(--section-y) var(--gutter);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+
+  .look__stage {
+    position: relative;
+    overflow: hidden;
+    background: var(--lux-light-bg);
+    aspect-ratio: 1/1;
+  }
+
+  .look__stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .look__dot {
+    position: absolute;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: rgba(252, 252, 248, .94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px -3px rgba(23, 26, 21, .45);
+    transition: transform .3s var(--ease), background .3s var(--ease);
+  }
+
+  .look__dot::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lux-on-light);
+    transition: background .3s var(--ease);
+  }
+
+  .look__dot::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: 50%;
+    border: 1px solid rgba(48, 56, 44, .28);
+    animation: hsPulse 2.6s var(--ease) infinite;
+  }
+
+  .look__dot:hover,
+  .look__dot.is-active {
+    transform: scale(1.12);
+    background: var(--lux-primary-dark);
+  }
+
+  .look__dot.is-active::after,
+  .look__dot:hover::after {
+    background: var(--lux-accent-lime);
+  }
+
+  .look__tip {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px 9px 9px;
+    background: var(--lux-light-elevated);
+    border-radius: 0;
+    box-shadow: 0 14px 34px -12px rgba(23, 26, 21, .4);
+    opacity: 0;
+    transform: translateY(8px) scale(.96);
+    pointer-events: none;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+    white-space: nowrap;
+  }
+
+  .look__tip.is-active {
+    opacity: 1;
+    transform: none;
+  }
+
+  .look__tip img {
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 0;
+  }
+
+  .look__tip-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--lux-on-light);
+  }
+
+  .look__tip-price {
+    font-size: 13px;
+    color: var(--lux-on-light-soft);
+  }
+
+  .look__panel-head {
+    text-align: center;
+    margin-bottom: clamp(20px, 2.5vw, 30px);
+  }
+
+  .look__panel-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+  }
+
+  .look__panel-title {
+    position: relative;
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: clamp(34px, 4.2vw, 60px);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -1.3px;
+    color: var(--lux-on-light);
+    margin: 8px 0 40px;
+  }
+
+  .look__panel-title::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -8px;
+    height: 3px;
+    border-radius: 0;
+  }
+
+  .look__set {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .look__row {
+    display: grid;
+    grid-template-columns: 66px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 18px 0;
+    border-top: 1px solid var(--lux-light-border);
+    cursor: pointer;
+    transition: opacity .35s var(--ease);
+  }
+
+  .look__row:last-of-type {
+    border-bottom: 1px solid var(--lux-light-border);
+  }
+
+  .look__row.is-dim {
+    opacity: .45;
+  }
+
+  .look__row-thumb {
+    width: 66px;
+    height: 66px;
+    overflow: hidden;
+    background: var(--lux-light-bg);
+  }
+
+  .look__row-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .look__row-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--lux-on-light);
+  }
+
+  .look__row-opt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--lux-on-light-soft);
+    margin-top: 5px;
+  }
+
+  .look__row-add {
+    display: inline-block;
+    margin-top: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--lux-on-light);
+    border-bottom: 1px solid var(--lux-on-light);
+    padding-bottom: 1px;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .look__row-add:hover {
+    color: var(--lux-secondary-olive);
+    border-color: var(--lux-secondary-olive);
+  }
+
+  .look__row-price {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--lux-on-light);
+    white-space: nowrap;
+  }
+
+  .look__row-price s {
+    color: var(--lux-on-light-soft);
+    font-weight: 400;
+    margin-left: 6px;
+  }
+
+  .look__row-price .sale {
+    color: #B0492F;
+  }
+
+  .look__total {
+    width: 100%;
+    justify-content: center;
+    margin-top: 28px;
+    padding: 18px;
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    border: 1px solid var(--lux-primary-dark);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: background .28s var(--ease), color .28s var(--ease), border-color .28s var(--ease);
+  }
+
+  .look__total:hover {
+    background: var(--lux-accent-hover);
+    color: var(--lux-bg-dark);
+    border-color: var(--lux-accent-hover);
+  }
+
+  .look__guide {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--lux-on-light);
+  }
+
+  .look__guide span {
+    border-bottom: 1px solid var(--lux-on-light);
+    padding-bottom: 2px;
+  }
+
+  @media (max-width: 860px) {
+    .look__inner {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>

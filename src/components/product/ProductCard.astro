@@ -1,0 +1,363 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { Product } from '../../lib/mockData';
+
+interface Props {
+  product: Product;
+  class?: string;
+  delayClass?: string;
+}
+
+const { product, class: className = '', delayClass = '' } = Astro.props;
+
+// Dynamically import all images under src/assets/images
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
+const isRemoteImage = product.image && (product.image.startsWith('http://') || product.image.startsWith('https://'));
+const imagePath = `/src/assets/images/${product.image}`;
+
+// Resolve local image or fall back gracefully
+let resolvedLocalImage: ImageMetadata | null = null;
+if (!isRemoteImage && product.image && images[imagePath]) {
+  resolvedLocalImage = images[imagePath].default;
+}
+---
+
+<article 
+  class={`pc reveal ${delayClass} ${className}`} 
+  data-id={product.id}
+  data-handle={product.handle}
+  data-name={product.name} 
+  data-cat={product.category} 
+  data-price={product.formattedPrice} 
+  data-img={isRemoteImage ? product.image : imagePath}
+  data-desc={product.description}
+  data-rating={product.rating}
+  data-fcat={product.filterCategory}
+  data-color={product.filterColors?.join(' ')}
+  data-size={product.filterSizes?.join(' ')}
+  data-material={product.filterMaterials?.join(' ')}
+  data-stock={product.stock}
+  data-pnum={product.price}
+>
+  <div class="pc__media">
+    {product.badge && (
+      <span class={`pc__badge ${product.badgeStyle === 'olive' ? 'pc__badge--olive' : ''}`}>
+        {product.badge}
+      </span>
+    )}
+    
+    <div class="pc__actions">
+      <button class="pc__act pc__act--wish" data-wish-add aria-label="Add to wishlist" aria-pressed="false">
+        <svg width="16" height="16" viewBox="0 0 22 22" fill="none">
+          <path
+            d="M11 19S3 14 3 8.3C3 5.5 5.2 3.5 8 3.5c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.8 0 5 2 5 4.8C21 14 13 19 11 19z"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      
+      <button class="pc__act pc__act--compare" aria-label="Add to compare" aria-pressed="false">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path 
+            d="M4 7h9m0 0l-3-3m3 3l-3 3M16 13H7m0 0l3-3m-3 3l3 3" 
+            stroke="currentColor" 
+            stroke-width="1.3"
+            stroke-linecap="round" 
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      
+      <button class="pc__act pc__act--qv" data-qv aria-label="Quick view">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path 
+            d="M1.5 10s3-5.5 8.5-5.5S18.5 10 18.5 10 15.5 15.5 10 15.5 1.5 10 1.5 10z"
+            stroke="currentColor" 
+            stroke-width="1.3" 
+          />
+          <circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.3" />
+        </svg>
+      </button>
+    </div>
+
+    <a href={`/products/${product.handle}`} class="pc__link" aria-label={product.name}>
+      {isRemoteImage ? (
+        <img 
+          src={product.image} 
+          alt={product.name} 
+          width="340" 
+          height="450" 
+          loading="lazy"
+          style="object-fit: cover; width: 100%; height: 100%;"
+        />
+      ) : resolvedLocalImage ? (
+        <Image 
+          src={resolvedLocalImage} 
+          alt={product.name} 
+          width={340} 
+          height={450} 
+          loading="lazy" 
+        />
+      ) : (
+        <div style="width:340px;height:450px;background:var(--lux-light-border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--lux-on-light-soft);">No Image</div>
+      )}
+    </a>
+
+    <button class="pc__add" data-add-bag data-id={product.id}>Add to Bag</button>
+  </div>
+  
+  <div class="pc__body">
+    {product.swatches && product.swatches.length > 0 && (
+      <div class="pc__swatches">
+        {product.swatches.map((swatch, idx) => (
+          <span 
+            class={`pc__sw ${idx === 0 ? 'is-active' : ''}`} 
+            style={`background: ${swatch.hex}`}
+            title={swatch.color}
+            data-color={swatch.color}
+            data-img={swatch.img || ''}
+            data-variant-id={swatch.variantId || ''}
+          />
+        ))}
+      </div>
+    )}
+    
+    <span class="pc__cat">{product.category}</span>
+    <h3 class="pc__name">
+      <a href={`/products/${product.handle}`}>{product.name}</a>
+    </h3>
+    
+    <div class="pc__meta">
+      <span class="pc__price">{product.formattedPrice}</span>
+      <span class="pc__rating">&#9733; {product.rating}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .pc {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .pc__media {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--lux-light-surface);
+  }
+
+  .pc__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.1s var(--ease);
+  }
+
+  .pc:hover .pc__media img {
+    transform: scale(1.06);
+  }
+
+  .pc__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+    padding: 5px 11px;
+    background: var(--lux-light-elevated);
+    color: var(--lux-on-light);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  .pc__badge--olive {
+    background: var(--lux-primary-dark);
+    color: var(--lux-accent-lime);
+  }
+
+  .pc__actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pc__act {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgba(252, 252, 248, .9);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: var(--lux-on-light);
+    opacity: 0;
+    transform: translateX(12px);
+    transition: opacity .35s var(--ease), transform .35s var(--ease), background .25s var(--ease), color .25s var(--ease);
+    box-shadow: 0 4px 14px -6px rgba(48, 56, 44, .4);
+    padding: 0;
+  }
+
+  .pc:hover .pc__act {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pc:hover .pc__act:nth-child(1) {
+    transition-delay: .02s;
+  }
+
+  .pc:hover .pc__act:nth-child(2) {
+    transition-delay: .08s;
+  }
+
+  .pc:hover .pc__act:nth-child(3) {
+    transition-delay: .14s;
+  }
+
+  .pc__act:hover {
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+  }
+
+  .pc__act[aria-pressed="true"] {
+    background: var(--lux-primary-dark);
+    color: var(--lux-accent-lime);
+  }
+
+  .pc__act--wish[aria-pressed="true"] {
+    color: #E08A6E;
+  }
+
+  .pc__act--wish[aria-pressed="true"] svg {
+    fill: currentColor;
+  }
+
+  .pc__add {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 3;
+    padding: 13px;
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    border: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .35s var(--ease), transform .35s var(--ease), background .25s var(--ease), color .25s var(--ease);
+  }
+
+  .pc__add:hover {
+    background: var(--lux-accent-lime);
+    color: var(--lux-bg-dark);
+  }
+
+  .pc:hover .pc__add {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pc__body {
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pc__swatches {
+    display: flex;
+    gap: 7px;
+  }
+
+  .pc__sw {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--lux-light-border-strong);
+    cursor: pointer;
+    transition: box-shadow .2s var(--ease);
+  }
+
+  .pc__sw.is-active {
+    box-shadow: 0 0 0 1px var(--lux-light-bg), 0 0 0 2px var(--lux-primary-dark);
+  }
+
+  .pc__cat {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: var(--lux-on-light-soft);
+  }
+
+  .pc__name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+    margin: 0;
+  }
+
+  .pc__name a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.25s var(--ease);
+  }
+
+  .pc__name a:hover {
+    color: var(--lux-secondary-olive);
+  }
+
+  .pc__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pc__price {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--lux-on-light);
+  }
+
+  .pc__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--lux-secondary-olive);
+  }
+
+  /* Ensure link wrapper fills pc__media */
+  .pc__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width:900px) {
+    .pc__act,
+    .pc__add {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

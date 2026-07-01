@@ -1,0 +1,397 @@
+- generic [active] [ref=f8e1]:
+  - paragraph [ref=f8e5]: Complimentary shipping & returns worldwide — Resort 2026 has arrived
+  - banner [ref=f8e7]:
+    - generic [ref=f8e8]:
+      - navigation "Primary" [ref=f8e9]:
+        - list [ref=f8e10]:
+          - listitem [ref=f8e11]:
+            - link "Women" [ref=f8e12] [cursor=pointer]:
+              - /url: /shop?gender=women
+          - listitem [ref=f8e13]:
+            - link "Men" [ref=f8e14] [cursor=pointer]:
+              - /url: /shop?gender=men
+          - listitem [ref=f8e15]:
+            - link "Bags" [ref=f8e16] [cursor=pointer]:
+              - /url: /shop?category=bags
+          - listitem [ref=f8e17]:
+            - link "Accessories" [ref=f8e18] [cursor=pointer]:
+              - /url: /shop?category=accessories
+          - listitem [ref=f8e19]:
+            - link "Journal" [ref=f8e20] [cursor=pointer]:
+              - /url: /blog
+      - link "Maison Arden — Home" [ref=f8e21] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f8e22]: VELVET
+      - generic [ref=f8e23]:
+        - generic [ref=f8e24]:
+          - searchbox "Search"
+          - button "Search" [ref=f8e25] [cursor=pointer]:
+            - img [ref=f8e26]
+        - button "Wishlist" [ref=f8e29] [cursor=pointer]:
+          - img [ref=f8e30]
+          - generic [ref=f8e32]: "0"
+        - button "Cart" [ref=f8e33] [cursor=pointer]:
+          - img [ref=f8e34]
+          - generic [ref=f8e37]: "0"
+        - button "Menu" [ref=f8e38] [cursor=pointer]
+  - main [ref=f8e42]:
+    - generic [ref=f8e44]:
+      - generic [ref=f8e45]:
+        - link "Home" [ref=f8e46] [cursor=pointer]:
+          - /url: /
+        - text: / About
+      - heading "Our Maison" [level=1] [ref=f8e47]:
+        - text: Our
+        - emphasis [ref=f8e48]: Maison
+      - paragraph [ref=f8e49]: A Paris house built on restraint, craft and longevity — designing fewer pieces, and making them to be kept.
+    - generic [ref=f8e51]:
+      - generic [ref=f8e53]: Our Philosophy
+      - paragraph [ref=f8e54]:
+        - text: We design for the wardrobe that lasts — pieces meant to be worn for years,
+        - emphasis [ref=f8e55]: not seasons.
+      - paragraph [ref=f8e56]: "Maison Arden began with a simple frustration: that true quality had quietly disappeared behind logos and fast turnover. We make considered garments — in small numbers, from honest materials, by people we know by name."
+      - generic [ref=f8e57]:
+        - text: Hélène Arden
+        - generic [ref=f8e58]: Founder & Creative Director
+      - generic [ref=f8e59]:
+        - generic [ref=f8e60]: Fewer, finer
+        - generic [ref=f8e62]: Made to be kept
+        - generic [ref=f8e64]: Honest by default
+    - generic [ref=f8e67]:
+      - generic [ref=f8e69]:
+        - img "An Atelier Arden coat" [ref=f8e70]
+        - generic [ref=f8e71]: The Atelier · Paris VIᵉ
+      - generic [ref=f8e72]:
+        - generic [ref=f8e73]:
+          - generic [ref=f8e74]: Our Beginning
+          - heading "From a single coat." [level=2] [ref=f8e75]
+        - paragraph [ref=f8e76]: In 2014, founder Hélène Arden returned to Paris with a single cashmere coat she'd spent two years perfecting. There was no marketing, no sale — just a waiting list of people who understood what they were holding.
+        - paragraph [ref=f8e77]: A decade later, that same principle guides everything we make. Every piece begins as a problem worth solving, refined until nothing more can be removed, then made in runs small enough to keep our standards uncompromised.
+        - generic [ref=f8e78]:
+          - text: Hélène Arden
+          - generic [ref=f8e79]: Founder & Creative Director
+        - link "Explore the Collection" [ref=f8e80] [cursor=pointer]:
+          - /url: /shop
+          - text: Explore the Collection
+          - img [ref=f8e81]
+    - generic [ref=f8e83]:
+      - generic [ref=f8e84]:
+        - generic [ref=f8e85]: What we stand for
+        - heading "Four quiet principles." [level=2] [ref=f8e86]:
+          - text: Four quiet
+          - emphasis [ref=f8e87]: principles.
+        - paragraph [ref=f8e88]: They sound simple. Holding to them is the hard part — and the point.
+      - generic [ref=f8e89]:
+        - generic [ref=f8e90]:
+          - generic: "01"
+          - img [ref=f8e92]
+          - heading "Sourcing" [level=3] [ref=f8e96]
+          - paragraph [ref=f8e98]: We partner directly with family-run mills in northern Italy, Belgium, and Scotland, where centuries of textile heritage inform every thread. Each fibre is chosen for its provenance, resilience, and tactile quality — not convenience or cost.
+          - generic [ref=f8e99]: Tracing Origin
+        - generic [ref=f8e100]:
+          - generic: "02"
+          - img [ref=f8e102]
+          - heading "Craft" [level=3] [ref=f8e105]
+          - paragraph [ref=f8e107]: Every garment passes through the hands of no fewer than twelve artisans in our Paris atelier. We deliberately slow the process — sewing, pressing, and finishing by hand — because we believe the quality of attention is visible in the final garment.
+          - generic [ref=f8e108]: Made By Hand
+        - generic [ref=f8e109]:
+          - generic: "03"
+          - img [ref=f8e111]
+          - heading "Longevity" [level=3] [ref=f8e113]
+          - paragraph [ref=f8e115]: We design against obsolescence. Our silhouettes are considered across seasons; our cuts calibrated to outlive trend cycles. When you invest in a Maison Arden piece, you enter a lifetime relationship — including complimentary repairs for the life of the garment.
+          - generic [ref=f8e116]: Designed to Last
+        - generic [ref=f8e117]:
+          - generic: "04"
+          - img [ref=f8e119]
+          - heading "Responsibility" [level=3] [ref=f8e121]
+          - paragraph [ref=f8e123]: Small-batch production means we never overproduce. We offset our carbon footprint through certified reforestation, use natural dyeing processes wherever possible, and publish an annual transparency report — because quiet luxury should extend to the planet.
+          - generic [ref=f8e124]: Measured Impact
+    - region "Maison Arden in numbers" [ref=f8e125]:
+      - generic [ref=f8e126]:
+        - generic [ref=f8e127]:
+          - generic [ref=f8e128]: By the numbers
+          - heading "A decade of restraint." [level=2] [ref=f8e129]:
+            - text: A decade of
+            - emphasis [ref=f8e130]: restraint.
+        - generic [ref=f8e131]:
+          - generic [ref=f8e132]:
+            - generic [ref=f8e134]: "2014"
+            - generic [ref=f8e135]: Founded in Paris
+            - generic [ref=f8e136]: The year it began
+          - generic [ref=f8e137]:
+            - generic [ref=f8e139]: "0"
+            - generic [ref=f8e140]: Atelier artisans
+            - generic [ref=f8e141]: Across two ateliers
+          - generic [ref=f8e142]:
+            - generic [ref=f8e144]: "0"
+            - generic [ref=f8e145]: Countries served
+            - generic [ref=f8e146]: Shipped worldwide
+          - generic [ref=f8e147]:
+            - generic [ref=f8e149]: "0"
+            - generic [ref=f8e150]: Traceable materials
+            - generic [ref=f8e151]: Mill to garment
+    - generic [ref=f8e153]:
+      - generic [ref=f8e155]:
+        - img "Cashmere being finished by hand" [ref=f8e156]
+        - generic [ref=f8e157]: By Hand · Not by Machine
+      - generic [ref=f8e158]:
+        - generic [ref=f8e159]:
+          - generic [ref=f8e160]: How it's made
+          - heading "The slow way, on purpose." [level=2] [ref=f8e161]
+        - paragraph [ref=f8e162]: A single Atelier coat passes through eleven pairs of hands over three weeks. Nothing about it is fast, because nothing good ever is — and we keep production within a day's travel of Paris, so we can stand in the room where our clothes are made.
+        - generic [ref=f8e163]:
+          - generic [ref=f8e164]:
+            - generic [ref=f8e165]: "01"
+            - generic [ref=f8e166]:
+              - heading "Drafted & rested" [level=4] [ref=f8e167]
+              - paragraph [ref=f8e168]: Patterns drawn by hand; fabric relaxed a full 48 hours before a single cut.
+          - generic [ref=f8e169]:
+            - generic [ref=f8e170]: "02"
+            - generic [ref=f8e171]:
+              - heading "Cut individually" [level=4] [ref=f8e172]
+              - paragraph [ref=f8e173]: Every panel cut one at a time, matched grain to grain — never stacked.
+          - generic [ref=f8e174]:
+            - generic [ref=f8e175]: "03"
+            - generic [ref=f8e176]:
+              - heading "Pressed & re-pressed" [level=4] [ref=f8e177]
+              - paragraph [ref=f8e178]: Seams shaped with heat and patience until the line falls exactly right.
+          - generic [ref=f8e179]:
+            - generic [ref=f8e180]: "04"
+            - generic [ref=f8e181]:
+              - heading "Signed & numbered" [level=4] [ref=f8e182]
+              - paragraph [ref=f8e183]: Inspected, numbered, and recorded before it ever leaves the atelier.
+        - link "Shop New Arrivals" [ref=f8e184] [cursor=pointer]:
+          - /url: /shop
+          - text: Shop New Arrivals
+          - img [ref=f8e185]
+    - generic [ref=f8e187]:
+      - generic [ref=f8e188]:
+        - generic [ref=f8e189]: The journey
+        - heading "A decade, in five chapters." [level=2] [ref=f8e190]:
+          - text: A decade, in
+          - emphasis [ref=f8e191]: five chapters.
+      - generic [ref=f8e192]:
+        - article [ref=f8e193]:
+          - generic [ref=f8e194]: "2014"
+          - generic [ref=f8e195]:
+            - generic [ref=f8e196]: Chapter I
+            - heading "A maison is born" [level=3] [ref=f8e197]
+            - paragraph [ref=f8e198]: Hélène Arden founds the house in Paris VIᵉ with a single made-to-order cashmere coat and a short, word-of-mouth waiting list.
+        - article [ref=f8e199]:
+          - generic [ref=f8e200]: "2017"
+          - generic [ref=f8e201]:
+            - generic [ref=f8e202]: Chapter II
+            - heading "The first boutique" [level=3] [ref=f8e203]
+            - paragraph [ref=f8e204]: Our flagship opens on Rue de Sèvres — part shop, part atelier, with the workroom kept in full view of the floor.
+        - article [ref=f8e205]:
+          - generic [ref=f8e206]: "2020"
+          - generic [ref=f8e207]:
+            - generic [ref=f8e208]: Chapter III
+            - heading "Numbered runs" [level=3] [ref=f8e209]
+            - paragraph [ref=f8e210]: Small-batch production is formalised — every piece numbered, and seasonal markdowns ended for good.
+        - article [ref=f8e211]:
+          - generic [ref=f8e212]: "2023"
+          - generic [ref=f8e213]:
+            - generic [ref=f8e214]: Chapter IV
+            - heading "Fully traceable" [level=3] [ref=f8e215]
+            - paragraph [ref=f8e216]: Every material is mapped to its mill and farm, and our lifetime repair service launches across all boutiques.
+        - article [ref=f8e217]:
+          - generic [ref=f8e218]: "2026"
+          - generic [ref=f8e219]:
+            - generic [ref=f8e220]: Chapter V · Today
+            - heading "The same belief" [level=3] [ref=f8e221]
+            - paragraph [ref=f8e222]: Three boutiques, thirty-four countries, and the principle we began with — fewer, finer things, made to be kept.
+    - generic [ref=f8e224]:
+      - generic [ref=f8e225]:
+        - generic [ref=f8e226]: The Hands Behind It
+        - heading "Our People" [level=2] [ref=f8e227]:
+          - text: Our
+          - emphasis [ref=f8e228]: People
+      - generic [ref=f8e229]:
+        - generic [ref=f8e230]:
+          - img "Hélène Arden" [ref=f8e232]
+          - generic [ref=f8e233]: Hélène Arden
+          - generic [ref=f8e234]: Founder & Creative Director
+        - generic [ref=f8e235]:
+          - img "Lucien Marchetti" [ref=f8e237]
+          - generic [ref=f8e238]: Lucien Marchetti
+          - generic [ref=f8e239]: Head of Tailoring
+        - generic [ref=f8e240]:
+          - img "Inès Lavigne" [ref=f8e242]
+          - generic [ref=f8e243]: Inès Lavigne
+          - generic [ref=f8e244]: Atelier Director
+        - generic [ref=f8e245]:
+          - img "Théo Brunet" [ref=f8e247]
+          - generic [ref=f8e248]: Théo Brunet
+          - generic [ref=f8e249]: Sustainability Lead
+    - region "Newsletter" [ref=f8e250]:
+      - generic [ref=f8e252]:
+        - generic: Arden
+        - generic [ref=f8e253]:
+          - generic [ref=f8e254]: The Maison Letter
+          - heading "Considered style, in your inbox." [level=2] [ref=f8e255]:
+            - text: Considered style,
+            - emphasis [ref=f8e256]: in your inbox.
+          - paragraph [ref=f8e257]: Be first to see new collections, atelier stories and seasonal lookbooks — thoughtfully sent, never noisy.
+        - generic [ref=f8e258]:
+          - generic [ref=f8e259]:
+            - textbox "Email" [ref=f8e260]:
+              - /placeholder: Your email address
+            - button "Subscribe" [ref=f8e261] [cursor=pointer]
+          - generic [ref=f8e262]:
+            - generic [ref=f8e263]:
+              - img [ref=f8e264]
+              - text: Early Access
+            - generic [ref=f8e266]:
+              - img [ref=f8e267]
+              - text: Member Events
+            - generic [ref=f8e269]:
+              - img [ref=f8e270]
+              - text: Seasonal Lookbooks
+          - paragraph [ref=f8e272]: By subscribing you agree to our Privacy Policy. Unsubscribe anytime.
+  - contentinfo [ref=f8e273]:
+    - generic [ref=f8e274]:
+      - generic [ref=f8e275]:
+        - generic [ref=f8e276]: VELVET
+        - generic [ref=f8e277]: EST. MMXIV · PARIS
+        - paragraph [ref=f8e278]: Quiet luxury, considered and made to last — designed in Paris, finished by hand across Europe.
+        - generic [ref=f8e279]:
+          - link "client@maisonarden.com" [ref=f8e280] [cursor=pointer]:
+            - /url: mailto:client@maisonarden.com
+            - img [ref=f8e281]
+            - text: client@maisonarden.com
+          - link "+33 1 00 00 00 00" [ref=f8e284] [cursor=pointer]:
+            - /url: tel:+33100000000
+            - img [ref=f8e285]
+            - text: +33 1 00 00 00 00
+        - generic [ref=f8e287]:
+          - link "Instagram" [ref=f8e288] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f8e289]
+          - link "Pinterest" [ref=f8e293] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f8e294]
+          - link "TikTok" [ref=f8e297] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=f8e298]
+      - generic [ref=f8e301]:
+        - heading "Shop" [level=4] [ref=f8e302]
+        - list [ref=f8e303]:
+          - listitem [ref=f8e304]:
+            - link "Women" [ref=f8e305] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e306]:
+            - link "Men" [ref=f8e307] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e308]:
+            - link "Tailoring" [ref=f8e309] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e310]:
+            - link "Knitwear" [ref=f8e311] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=f8e312]:
+            - link "New Arrivals" [ref=f8e313] [cursor=pointer]:
+              - /url: /shop
+      - generic [ref=f8e314]:
+        - heading "Maison" [level=4] [ref=f8e315]
+        - list [ref=f8e316]:
+          - listitem [ref=f8e317]:
+            - link "Our Story" [ref=f8e318] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e319]:
+            - link "Craftsmanship" [ref=f8e320] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e321]:
+            - link "Sustainability" [ref=f8e322] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e323]:
+            - link "The Journal" [ref=f8e324] [cursor=pointer]:
+              - /url: /blog
+          - listitem [ref=f8e325]:
+            - link "Careers" [ref=f8e326] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=f8e327]:
+        - heading "Client Care" [level=4] [ref=f8e328]
+        - list [ref=f8e329]:
+          - listitem [ref=f8e330]:
+            - link "Contact" [ref=f8e331] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e332]:
+            - link "Shipping & Returns" [ref=f8e333] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e334]:
+            - link "Lifetime Repairs" [ref=f8e335] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f8e336]:
+            - link "Size Guide" [ref=f8e337] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e338]:
+            - link "FAQ" [ref=f8e339] [cursor=pointer]:
+              - /url: /contact
+    - generic [ref=f8e340]:
+      - generic [ref=f8e341]: Visit the atelier — 18 Rue Saint-Honoré, Paris
+      - link "Book an Appointment" [ref=f8e342] [cursor=pointer]:
+        - /url: "#appointment"
+        - text: Book an Appointment
+        - img [ref=f8e343]
+    - generic: MAISON ARDEN
+    - generic [ref=f8e346]:
+      - generic [ref=f8e347]: © 2026 Maison Arden. All rights reserved.
+      - generic [ref=f8e348]:
+        - generic [ref=f8e349]: Visa
+        - generic [ref=f8e350]: MC
+        - generic [ref=f8e351]: Amex
+        - generic [ref=f8e352]: PayPal
+      - generic [ref=f8e353]:
+        - link "Privacy" [ref=f8e354] [cursor=pointer]:
+          - /url: "#"
+        - link "Terms" [ref=f8e355] [cursor=pointer]:
+          - /url: "#"
+        - link "Cookies" [ref=f8e356] [cursor=pointer]:
+          - /url: "#"
+        - link "Back to top" [ref=f8e357] [cursor=pointer]:
+          - /url: "#top"
+          - text: Back to top
+          - img [ref=f8e358]
+  - dialog [ref=f8e360]:
+    - generic [ref=f8e361]:
+      - generic [ref=f8e362]:
+        - generic [ref=f8e363]: Your Selection
+        - heading [level=2] [ref=f8e364]: Shopping Bag 0
+      - button [ref=f8e365] [cursor=pointer]:
+        - img [ref=f8e366]
+    - generic [ref=f8e369]:
+      - img [ref=f8e370]
+      - text: You are
+      - strong [ref=f8e373]: €1,180
+      - text: away from complimentary shipping
+    - generic [ref=f8e375]:
+      - paragraph [ref=f8e376]: Your shopping bag is currently empty.
+      - link [ref=f8e377] [cursor=pointer]:
+        - /url: /shop
+        - text: Explore The Collection
+  - dialog [ref=f8e378]:
+    - generic [ref=f8e379]:
+      - generic [ref=f8e380]:
+        - generic [ref=f8e381]: Saved Pieces
+        - heading [level=2] [ref=f8e382]: Wishlist 0
+      - button [ref=f8e383] [cursor=pointer]:
+        - img [ref=f8e384]
+    - generic [ref=f8e386]:
+      - paragraph [ref=f8e387]: Your wishlist is currently empty.
+      - link [ref=f8e388] [cursor=pointer]:
+        - /url: /shop
+        - text: Explore The Collection
+  - generic [ref=f8e391]:
+    - button "Menu" [ref=f8e392]:
+      - img [ref=f8e394]
+      - generic: Menu
+    - button "Inspect" [ref=f8e398]:
+      - img [ref=f8e400]
+      - generic: Inspect
+    - button "Audit" [ref=f8e402]:
+      - img [ref=f8e404]
+      - generic: Audit
+    - button "Settings" [ref=f8e407]:
+      - img [ref=f8e409]
+      - generic: Settings
