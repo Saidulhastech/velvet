@@ -51,7 +51,9 @@ export function resolveMarket(cookies: AstroCookies, request: Request): Market {
     const [c, l] = saved.split('|');
     return normalizeMarket(c, l);
   }
-  const geo = request.headers.get('cf-ipcountry');
+  const geo = request.headers.get('cf-ipcountry')
+    || request.headers.get('x-vercel-ip-country')
+    || request.headers.get('x-country');
   // CF sends "XX"/"T1" for unknown/Tor — normalizeMarket drops those to default.
   return normalizeMarket(geo, DEFAULT_MARKET.language);
 }
