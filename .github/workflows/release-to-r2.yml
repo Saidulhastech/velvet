@@ -1,13 +1,11 @@
 name: Release to Cloudflare R2
-
 on:
   push:
     tags: ["*.*.*"]
   workflow_dispatch:
-
 jobs:
   release:
     uses: Brandbes-Astro-Themes/.github/.github/workflows/release-to-r2.yml@main
     with:
-      slug: tailored
+      slug: velvet
     secrets: inherit
