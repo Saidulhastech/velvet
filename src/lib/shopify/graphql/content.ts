@@ -86,7 +86,8 @@ export const LOCALIZATION_QUERY = /* GraphQL */ `
 
 /** A CMS page by handle (about, shipping, etc.). */
 export const PAGE_QUERY = /* GraphQL */ `
-  query Page($handle: String!) {
+  query Page($handle: String!, $country: CountryCode, $language: LanguageCode)
+  @inContext(country: $country, language: $language) {
     page(handle: $handle) {
       id
       title

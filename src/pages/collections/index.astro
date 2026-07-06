@@ -3,7 +3,7 @@
 import BaseLayout from '../../components/layout/BaseLayout.astro';
 import { getShopifyCollections } from '../../lib/shopify/client';
 
-const collections = await getShopifyCollections();
+const collections = await getShopifyCollections(Astro.locals.market);
 ---
 
 <BaseLayout title="Collections" description="Explore Maison Arden by collection — curated edits of considered pieces.">

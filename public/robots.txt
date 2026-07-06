@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Private / non-indexable routes
+Disallow: /account
+Disallow: /cart
+Disallow: /search
+Disallow: /api/
+
+# Update the host below to your production domain (matches `site` in astro.config.mjs)
+Sitemap: https://maisonarden.com/sitemap-index.xml

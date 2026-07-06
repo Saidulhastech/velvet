@@ -1,10 +1,10 @@
 ---
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
-import type { Product } from '../../lib/mockData';
+import type { LegacyProduct } from '../../lib/shopify/types';
 
 interface Props {
-  product: Product;
+  product: LegacyProduct;
   class?: string;
   delayClass?: string;
 }
@@ -34,9 +34,9 @@ if (!isRemoteImage && product.image && images[imagePath]) {
   data-desc={product.description}
   data-rating={product.rating}
   data-fcat={product.filterCategory}
-  data-color={product.filterColors?.join(' ')}
-  data-size={product.filterSizes?.join(' ')}
-  data-material={product.filterMaterials?.join(' ')}
+  data-color={product.filterColors?.join('|')}
+  data-size={product.filterSizes?.join('|')}
+  data-material={product.filterMaterials?.join('|')}
   data-stock={product.stock}
   data-pnum={product.price}
   data-needs-picker={product.needsPicker ? 'true' : 'false'}
@@ -109,7 +109,14 @@ if (!isRemoteImage && product.image && images[imagePath]) {
       )}
     </a>
 
-    <button class="pc__add" data-add-bag data-id={product.id}>Add to Bag</button>
+    <button
+      class="pc__add"
+      data-add-bag
+      data-id={product.id}
+      aria-label={product.needsPicker ? `Select options for ${product.name}` : `Add ${product.name} to bag`}
+    >
+      {product.needsPicker ? 'Select Options' : 'Add to Bag'}
+    </button>
   </div>
   
   <div class="pc__body">

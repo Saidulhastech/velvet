@@ -22,7 +22,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/
         const imagePath = `/src/assets/images/${post.data.image}`;
         return (
           <article class="bcard reveal">
-            <a href="/blog/building-a-wardrobe-that-lasts-a-decade" class="bcard__media">
+            <a href={`/blog/${post.id}`} class="bcard__media">
               <span class="bcard__tag">{post.data.category}</span>
               {images[imagePath] && (
                 <Image 
@@ -38,7 +38,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/
               <div class="bcard__meta">{post.data.category} · {post.data.readTime}</div>
               <h3 class="bcard__title">{post.data.title}</h3>
               <p class="bcard__excerpt">{post.data.excerpt}</p>
-              <a href="/blog/building-a-wardrobe-that-lasts-a-decade" class="bcard__btn">
+              <a href={`/blog/${post.id}`} class="bcard__btn">
                 Read Article 
                 <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
                   <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />

@@ -1,7 +1,28 @@
 {
   "name": "velvet",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Maison Arden — a luxury-fashion Shopify headless storefront theme built with Astro SSR. Multi-market, localized pricing, cart/wishlist/compare, and a graceful mock-data mode.",
+  "author": "Brandbes <hi@brandbes.com>",
+  "license": "MIT",
+  "homepage": "https://maisonarden.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Brandbes-Astro-Themes/velvet.git"
+  },
+  "keywords": [
+    "astro",
+    "astro-theme",
+    "astro-template",
+    "shopify",
+    "headless-commerce",
+    "ecommerce",
+    "storefront",
+    "luxury",
+    "fashion",
+    "ssr",
+    "cloudflare"
+  ],
   "engines": {
     "node": ">=22.12.0"
   },
@@ -23,6 +44,7 @@
     "@astrojs/cloudflare": "14.0.0",
     "@astrojs/netlify": "^8.1.1",
     "@astrojs/node": "^11.0.2",
+    "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vercel": "^11.0.2",
     "@nanostores/persistent": "^1.3.4",
     "@shopify/storefront-api-client": "^1.0.10",
@@ -32,5 +54,9 @@
   },
   "overrides": {
     "bare-fs": "4.7.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^6.0.3"
   }
 }

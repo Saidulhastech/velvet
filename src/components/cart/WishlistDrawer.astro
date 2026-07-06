@@ -40,12 +40,13 @@
 </aside>
 
 <script>
-  import { 
-    isWishOpen, 
-    persistedWishItems, 
+  import {
+    isWishOpen,
+    persistedWishItems,
     wishCount,
+    cartCurrency,
     removeFromWishlist,
-    addToCart 
+    addToCart
   } from '../../stores/cart';
 
   const wishDrawer = document.getElementById('wishDrawer');
@@ -57,8 +58,19 @@
   const footer = document.getElementById('wishDrawerFoot');
   const addAllBtn = document.getElementById('addAllToCartBtn');
 
+  let currencyCode = cartCurrency.get();
+  cartCurrency.subscribe((code) => { currencyCode = code || 'EUR'; });
   function euro(n: number) {
-    return '€' + n.toLocaleString('en-US');
+    try {
+      return new Intl.NumberFormat('en', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+        maximumFractionDigits: 2,
+      }).format(n);
+    } catch {
+      return String(n);
+    }
   }
 
   // Subscribe to Drawer Open/Close State
@@ -114,7 +126,7 @@
 
       return `
         <li class="ditem" data-id="${item.id}">
-          <a href="/products/${item.id}" class="ditem__media">
+          <a href="/products/${item.description || item.id}" class="ditem__media">
             <img src="${imgUrl}" alt="${item.name}" loading="lazy" />
           </a>
           <div class="ditem__body">

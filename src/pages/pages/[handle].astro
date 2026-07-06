@@ -5,9 +5,9 @@ import BaseLayout from '../../components/layout/BaseLayout.astro';
 import { getPage } from '../../lib/shopify';
 
 const { handle } = Astro.params;
-const page = handle ? await getPage(handle) : null;
+const page = handle ? await getPage(handle, Astro.locals.market) : null;
 if (!page) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/404');
 }
 
 const crumbTitle = page.title;

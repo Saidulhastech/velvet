@@ -1,51 +1,17 @@
-// High-fidelity mock product catalog matching Luxury-Website-html catalog
-// Used during development before Shopify API is connected
+// ============================================================
+//  Demo catalogue — sample products in the legacy template shape.
+//
+//  Served by the Shopify layer ONLY as a graceful fallback: when Shopify
+//  credentials are missing (fresh clone / preview / CI) or the Storefront API
+//  is unreachable, the store still renders from this data instead of an empty
+//  catalogue. With valid `SHOPIFY_*` env vars set, live Shopify data is used on
+//  every request and this file is never read — see `isShopifyConnected()` in
+//  `src/lib/shopify/client.ts`. The `LegacyProduct` type lives in
+//  `src/lib/shopify/types.ts`.
+// ============================================================
+import type { LegacyProduct } from './shopify/types';
 
-export interface Product {
-  id: string;
-  handle: string;
-  name: string;
-  category: string;
-  gender: string;
-  price: number;
-  formattedPrice: string;
-  rating: number;
-  image: string;
-  hoverImage?: string;
-  badge?: string;
-  badgeStyle?: 'olive' | 'default';
-  swatches: { color: string; hex: string; img?: string | null; variantId?: string | null }[];
-  sizes: string[];
-  materials: string[];
-  stock: 'in' | 'pre';
-  filterCategory: string;
-  filterColors: string[];
-  filterSizes: string[];
-  filterMaterials: string[];
-  description: string;
-  isFeatured?: boolean;
-  isNew?: boolean;
-  isBestSeller?: boolean;
-  /** Full Shopify variant matrix (size×colour → real variant). Absent for mock
-   *  entries; populated by the legacy bridge so grids/quick-view can resolve a
-   *  specific variant the same way the PDP does. */
-  variants?: {
-    id: string;
-    opts: Record<string, string>;
-    price: number;
-    compareAt: number | null;
-    available: boolean;
-    qty: number | null;
-    img: string | null;
-  }[];
-  /** Product options (name + values, colour values carry a hex). */
-  options?: { name: string; values: { name: string; color?: string | null }[] }[];
-  /** True when the product has ≥2 real options (e.g. Colour+Size) and >1 variant,
-   *  so a size/colour must be chosen (via Quick View) before adding to cart. */
-  needsPicker?: boolean;
-}
-
-export const products: Product[] = [
+export const demoProducts: LegacyProduct[] = [
   {
     id: 'p1',
     handle: 'sand-linen-blazer',
@@ -547,11 +513,3 @@ export const products: Product[] = [
     isBestSeller: true,
   },
 ];
-
-export const featuredProducts = products.filter(p => p.isFeatured).slice(0, 4);
-export const newArrivals = products.filter(p => p.isNew).slice(0, 4);
-export const bestSellers = products.filter(p => p.isBestSeller).slice(0, 4);
-
-export function getProductByHandle(handle: string): Product | undefined {
-  return products.find(p => p.handle === handle);
-}

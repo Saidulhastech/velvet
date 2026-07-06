@@ -301,12 +301,13 @@
     lastFocused?.focus();
   }
 
-  // Bind Open Trigger globally across the DOM (for product cards)
+  // Bind Open Trigger globally across the DOM. Data source is the product card
+  // (`.pc`) or any element flagged `data-qv-source` (e.g. Shop the Look rows).
   document.addEventListener('click', (e) => {
     const trigger = (e.target as HTMLElement).closest('[data-qv]');
     if (trigger) {
       e.preventDefault();
-      const card = trigger.closest('.pc') as HTMLElement | null;
+      const card = trigger.closest('.pc, [data-qv-source]') as HTMLElement | null;
       if (card) openQV(card);
     }
   });

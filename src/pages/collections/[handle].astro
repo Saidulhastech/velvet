@@ -8,7 +8,7 @@ import { getShopifyCollection } from '../../lib/shopify/client';
 const { handle } = Astro.params;
 const collection = handle ? await getShopifyCollection(handle, Astro.locals.market) : null;
 if (!collection) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/404');
 }
 const products = collection.products;
 ---

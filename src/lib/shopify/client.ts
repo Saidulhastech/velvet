@@ -181,7 +181,8 @@ export const shopifyConfig = {
 // ============================================================
 //  Legacy Bridge Mapper (Maison Arden local templates format)
 // ============================================================
-import { products as mockProducts, type Product as LegacyProduct } from '../mockData';
+import { demoProducts as mockProducts } from '../demoCatalog';
+import type { LegacyProduct } from './types';
 import { getProducts as getShopifyProductsNew, getProduct as getShopifyProductNew, getProductRecommendations as getShopifyRecommendations } from './services/products';
 import { getCollection as getCollectionNew, getCollectionsWithCounts as getCollectionsWithCountsNew } from './services/collections';
 import type { Market } from '../market';
@@ -198,10 +199,23 @@ const HEX_MAP: Record<string, string> = {
   white: '#FFFFFF',
 };
 
+/** Locale-correct currency label for any market (£, $, ¥, €, …). */
+export function formatMoney(amount: number, currencyCode: string): string {
+  try {
+    return new Intl.NumberFormat('en', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${amount}`;
+  }
+}
+
 export function mapToLegacyProduct(p: any): LegacyProduct {
   const price = parseFloat(p.priceRange?.minVariantPrice?.amount || '0');
   const currencyCode = p.priceRange?.minVariantPrice?.currencyCode || 'EUR';
-  const currency = currencyCode === 'USD' ? '$' : '€';
 
   const swatches: { color: string; hex: string }[] = [];
   const sizes: string[] = [];
@@ -226,6 +240,16 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
   const colorOpt = p.options?.find((o: any) => /colou?r/i.test(o.name) || o.optionValues?.some((v: any) => v.swatch?.color));
   const colorName = colorOpt?.name || null;
 
+  // Prefer the merchant's real swatch hex from Shopify; fall back to HEX_MAP
+  // then a neutral grey. Without this, any colour outside the 9-entry map
+  // rendered grey even when the store had an exact swatch configured.
+  const swatchHexByColor = new Map<string, string>();
+  (colorOpt?.optionValues ?? []).forEach((ov: any) => {
+    const nm = (ov.name ?? ov.value ?? '').toLowerCase();
+    const hex = ov.swatch?.color;
+    if (nm && hex) swatchHexByColor.set(nm, hex);
+  });
+
   optionColors.forEach(color => {
     const lower = color.toLowerCase();
     const variant = colorName
@@ -233,7 +257,7 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
       : undefined;
     swatches.push({
       color: lower,
-      hex: HEX_MAP[lower] || '#858A76',
+      hex: swatchHexByColor.get(lower) || HEX_MAP[lower] || '#858A76',
       img: variant?.image?.url || null,
       variantId: variant?.id || null,
     });
@@ -262,6 +286,11 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
   const rating = p.rating || parseFloat(tags.find((t: string) => t.startsWith('rating:'))?.split(':')[1] || '4.8');
   const image = p.featuredImage?.url || p.images?.[0]?.url || '';
   const hoverImage = p.images?.[1]?.url || undefined;
+  // Full gallery: featured first, then the rest, de-duped — drives the real
+  // PDP thumbnail strip instead of faking 5 filtered copies of one image.
+  const gallery = Array.from(
+    new Set([image, ...((p.images ?? []).map((im: any) => im?.url))].filter(Boolean)),
+  );
 
   const badge = tags.includes('new') ? 'New' : tags.includes('atelier') ? 'Atelier' : undefined;
 
@@ -287,7 +316,14 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
   const realOptions = optionList.filter(
     (o: any) => !(o.values.length === 1 && /^title$/i.test(o.name) && /^default title$/i.test(o.values[0]?.name || '')),
   );
-  const needsPicker = variantMatrix.length > 1 && realOptions.length >= 2;
+  // A card needs the Quick View picker when a choice can't be made inline.
+  // Colour IS pickable on the card (swatches), so only a non-colour option with
+  // >1 value forces the picker — this covers size-only products that would
+  // otherwise silently add the first size.
+  const nonColourMultiOptions = realOptions.filter(
+    (o: any) => !/colou?r/i.test(o.name) && o.values.length > 1,
+  );
+  const needsPicker = variantMatrix.length > 1 && nonColourMultiOptions.length >= 1;
 
   return {
     id: p.variants?.[0]?.id || p.id,
@@ -296,10 +332,11 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
     category,
     gender,
     price,
-    formattedPrice: `${currency}${price}`,
+    formattedPrice: formatMoney(price, currencyCode),
     rating,
     image,
     hoverImage,
+    images: gallery,
     badge,
     badgeStyle: badge === 'New' ? 'olive' : 'default',
     swatches,
@@ -328,8 +365,21 @@ const isShopifyConnected = () => {
   }
 };
 
+// Warn once if a PRODUCTION deploy is silently serving the demo catalogue —
+// almost always a missing/typo'd SHOPIFY_* env var rather than an intended demo.
+let warnedDemo = false;
+function warnIfDemoInProd() {
+  if (warnedDemo || !import.meta.env.PROD || isShopifyConnected()) return;
+  warnedDemo = true;
+  console.warn(
+    '[shopify] No Shopify credentials detected in production — serving the demo catalogue. ' +
+    'Set SHOPIFY_SHOP_DOMAIN and SHOPIFY_STOREFRONT_PRIVATE_TOKEN to use live data.',
+  );
+}
+
 export async function getShopifyProducts(market?: Market): Promise<LegacyProduct[]> {
   if (!isShopifyConnected()) {
+    warnIfDemoInProd();
     return mockProducts;
   }
   try {
@@ -378,10 +428,9 @@ export async function getShopifyProductWithVariants(handle: string, market?: Mar
   /** Real Shopify product GID — drives server-side "related products" via recommendations. */
   productId: string | null;
 }> {
-  const legacyProduct = await getShopifyProductByHandle(handle, market);
-
   if (!isShopifyConnected()) {
     // Build variant data from mock product
+    const legacyProduct = mockProducts.find(p => p.handle === handle);
     if (!legacyProduct) return { product: undefined, variants: [], currency: 'EUR', singleVariant: true, productId: null };
     const mockVariants: VariantData[] = legacyProduct.sizes.map((size) => ({
       id: legacyProduct.id,
@@ -402,8 +451,15 @@ export async function getShopifyProductWithVariants(handle: string, market?: Mar
   }
 
   try {
+    // Fetch the raw product ONCE and derive the legacy shape from it — avoids
+    // the previous double Storefront query (getShopifyProductByHandle also
+    // fetched the same product) on every PDP render.
     const rawProduct = await getShopifyProductNew(handle, market);
-    if (!rawProduct) return { product: legacyProduct, variants: [], currency: 'EUR', singleVariant: true, productId: null };
+    if (!rawProduct) {
+      const fallback = mockProducts.find(p => p.handle === handle);
+      return { product: fallback, variants: [], currency: 'EUR', singleVariant: true, productId: null };
+    }
+    const legacyProduct = mapToLegacyProduct(rawProduct);
 
     const rawVariants: any[] = rawProduct.variants ?? [];
     const currency = rawProduct.priceRange?.minVariantPrice?.currencyCode ?? 'EUR';
@@ -434,7 +490,8 @@ export async function getShopifyProductWithVariants(handle: string, market?: Mar
     };
   } catch (error) {
     console.error(`Failed to fetch variant data for "${handle}":`, error);
-    return { product: legacyProduct, variants: [], currency: 'EUR', singleVariant: true, productId: null };
+    const fallback = mockProducts.find(p => p.handle === handle);
+    return { product: fallback, variants: [], currency: 'EUR', singleVariant: true, productId: null };
   }
 }
 
@@ -468,10 +525,10 @@ export interface LegacyCollection {
 }
 
 /** All collections (title/handle/image/count) for the /collections index. */
-export async function getShopifyCollections(): Promise<LegacyCollection[]> {
+export async function getShopifyCollections(market?: Market): Promise<LegacyCollection[]> {
   if (!isShopifyConnected()) return [];
   try {
-    const cols = await getCollectionsWithCountsNew(50, 250);
+    const cols = await getCollectionsWithCountsNew(50, 250, market);
     return cols.map((c: any) => ({
       handle: c.handle,
       title: c.title,

@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../components/layout/BaseLayout.astro';
+
+// Real 404 status, whether hit directly or via Astro.rewrite('/404') from a
+// dynamic route whose entry was not found.
+Astro.response.status = 404;
 ---
 
 <BaseLayout

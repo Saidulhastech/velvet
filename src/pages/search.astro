@@ -43,7 +43,7 @@ if (q) {
 const countLabel = q ? `${total} result${total === 1 ? '' : 's'} for “${q}”` : 'Enter a search term';
 ---
 
-<BaseLayout title={q ? `Search · ${q}` : 'Search'} description="Search the Maison Arden collection.">
+<BaseLayout title={q ? `Search · ${q}` : 'Search'} description="Search the Maison Arden collection." noindex>
   <!-- SEARCH HERO -->
   <section class="shop-hero">
     <div class="shop-hero__inner">

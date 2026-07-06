@@ -1,64 +1,110 @@
 ---
 import '../../styles/global.css';
+import { Font } from 'astro:assets';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
 import CartDrawer from '../cart/CartDrawer.astro';
 import WishlistDrawer from '../cart/WishlistDrawer.astro';
 import QuickViewModal from '../cart/QuickViewModal.astro';
+import { BRAND } from '../../config/velvet';
 
 interface Props {
   title: string;
   description?: string;
   ogImage?: string;
   canonicalUrl?: string;
+  /** Keep the page out of search indexes (account, cart, search). */
+  noindex?: boolean;
+  /** Extra JSON-LD schema.org objects to embed (Product, BreadcrumbList, …). */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   title,
   description = "Maison Arden — Quiet luxury fashion. Considered wardrobe, refined materials, small-batch craftsmanship.",
   ogImage = "/og-image.jpg",
-  canonicalUrl = Astro.url.href
+  canonicalUrl = Astro.url.href,
+  noindex = false,
+  jsonLd,
 } = Astro.props;
+
+// Localize the document language + og:locale from the active market.
+const market = Astro.locals.market ?? { country: 'US', language: 'EN' };
+const htmlLang = market.language.toLowerCase();
+const ogLocale = `${market.language.toLowerCase()}_${market.country.toUpperCase()}`;
+
+const fullTitle = `${title} — MAISON ARDEN`;
+const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
+
+// Site-wide Organization + WebSite schema; pages may add more via `jsonLd`.
+const baseSchema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: BRAND.name,
+    url: (Astro.site ?? Astro.url).toString(),
+    logo: ogImageUrl,
+    sameAs: Object.values(BRAND.social),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: BRAND.name,
+    url: (Astro.site ?? Astro.url).toString(),
+  },
+];
+const schemas = [...baseSchema, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [])];
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang={htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- Title and Metas -->
-    <title>{title} — MAISON ARDEN</title>
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    
+    {noindex
+      ? <meta name="robots" content="noindex, nofollow" />
+      : <meta name="robots" content="index, follow" />}
+
     <!-- Open Graph / SEO -->
-    <meta property="og:title" content={`${title} — MAISON ARDEN`} />
+    <meta property="og:site_name" content={BRAND.name} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:image" content={new URL(ogImage, Astro.url).toString()} />
-    
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={`${title} — MAISON ARDEN`} />
+    <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
-    
+    <meta name="twitter:image" content={ogImageUrl} />
+
     <!-- Canonical Link -->
     <link rel="canonical" href={canonicalUrl} />
-    
-    <!-- Preconnect Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    
-    <!-- Favicon -->
+
+    <!-- Self-hosted fonts (no external render-blocking request) -->
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-cormorant" preload />
+
+    <!-- Icons + theme -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/og-image.jpg" />
+    <meta name="theme-color" content="#30382C" />
+
+    <!-- Structured data -->
+    {schemas.map((s) => <script type="application/ld+json" is:inline set:html={JSON.stringify(s)} />)}
   </head>
-  
+
   <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <!-- Cart Overlay Backdrop -->
     <div class="drawer-overlay" data-drawer-overlay aria-hidden="true"></div>
     
@@ -275,6 +321,27 @@ const {
     </script>
     
     <style is:global>
+      /* Skip-to-content link — visible on keyboard focus */
+      .skip-link {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        z-index: 200;
+        transform: translateY(-150%);
+        background: var(--lux-primary-dark, #30382C);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+        outline: 2px solid var(--lux-accent-lime, #E7EC78);
+      }
+
       /* Drawer Overlay Backdrop Styling */
       .drawer-overlay {
         position: fixed;

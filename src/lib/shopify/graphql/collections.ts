@@ -75,7 +75,12 @@ export const COLLECTION_BY_HANDLE_QUERY = /* GraphQL */ `
  */
 export const COLLECTIONS_WITH_COUNTS_QUERY = /* GraphQL */ `
   ${IMAGE_FRAGMENT}
-  query CollectionsWithCounts($first: Int = 8, $countTo: Int = 250) {
+  query CollectionsWithCounts(
+    $first: Int = 8
+    $countTo: Int = 250
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
     collections(first: $first, sortKey: TITLE) {
       edges {
         node {

@@ -63,14 +63,17 @@
 </aside>
 
 <script>
-  import { 
-    isCartOpen, 
-    persistedCartItems, 
-    cartSubtotal, 
+  import {
+    isCartOpen,
+    persistedCartItems,
+    cartSubtotal,
     cartCount,
+    cartCurrency,
+    checkout,
     updateCartQuantity,
-    removeFromCart 
+    removeFromCart
   } from '../../stores/cart';
+  import { BRAND } from '../../config/velvet';
 
   const cartDrawer = document.getElementById('cartDrawer');
   const overlay = document.querySelector('[data-drawer-overlay]');
@@ -82,10 +85,22 @@
   const progressBar = document.getElementById('cartProgressBar');
   const progressText = document.getElementById('cartProgressText');
 
-  const SHIPPING_THRESHOLD = 1180;
+  const SHIPPING_THRESHOLD = BRAND.freeShippingThreshold ?? 0;
 
-  function euro(n: number) {
-    return '€' + n.toLocaleString('en-US');
+  // Money is formatted in the cart's authoritative currency (from Shopify), so
+  // a US/GBP shopper no longer sees a hardcoded € on localized prices.
+  let currencyCode = cartCurrency.get();
+  function money(n: number) {
+    try {
+      return new Intl.NumberFormat('en', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+        maximumFractionDigits: 2,
+      }).format(n);
+    } catch {
+      return String(n);
+    }
   }
 
   // Subscribe to Drawer Open/Close State
@@ -118,12 +133,20 @@
   const drawerCheckoutBtn = document.getElementById('cartCheckoutBtn');
   drawerCheckoutBtn?.addEventListener('click', (e) => {
     e.preventDefault();
-    const url = window.sessionStorage.getItem('ma_checkout_url');
-    if (url) {
-      window.location.href = url;
-    } else {
-      window.location.href = '/cart';
-    }
+    // Use the shared checkout(): re-fetches the cart first so we never redirect
+    // to a stale/expired checkoutUrl (dead Shopify checkout).
+    checkout();
+  });
+
+  // Keep the money formatter on the cart's authoritative currency, and re-paint
+  // the visible amounts if it changes after first render.
+  cartCurrency.subscribe((code) => {
+    currencyCode = code || 'EUR';
+    const subEl = document.getElementById('cartSubtotalValue');
+    const totEl = document.getElementById('cartTotalValue');
+    const sub = cartSubtotal.get();
+    if (subEl) subEl.textContent = money(sub);
+    if (totEl) totEl.textContent = money(sub);
   });
 
   // Render Cart Items
@@ -183,7 +206,7 @@
                   </svg>
                 </button>
               </div>
-              <span class="ditem__price">${euro(item.price * item.quantity)}</span>
+              <span class="ditem__price">${money(item.price * item.quantity)}</span>
             </div>
           </div>
         </li>
@@ -227,8 +250,8 @@
   cartSubtotal.subscribe((subtotal) => {
     const subEl = document.getElementById('cartSubtotalValue');
     const totEl = document.getElementById('cartTotalValue');
-    if (subEl) subEl.textContent = euro(subtotal);
-    if (totEl) totEl.textContent = euro(subtotal);
+    if (subEl) subEl.textContent = money(subtotal);
+    if (totEl) totEl.textContent = money(subtotal);
 
     // Compute progress bar
     if (progressBar && progressText) {
@@ -239,7 +262,7 @@
       if (rem <= 0) {
         progressText.innerHTML = `<svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M2 6l3 3 7-7" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> You qualify for <strong>complimentary shipping</strong>`;
       } else {
-        progressText.innerHTML = `<svg width="14" height="12" viewBox="0 0 14 12" fill="none"><rect x="0.5" y="2.5" width="9" height="6" stroke="currentColor" stroke-width="0.8"/><path d="M9.5 4h2l2 2v2.5h-4z" stroke="currentColor" stroke-width="0.8"/></svg> You are <strong>${euro(rem)}</strong> away from complimentary shipping`;
+        progressText.innerHTML = `<svg width="14" height="12" viewBox="0 0 14 12" fill="none"><rect x="0.5" y="2.5" width="9" height="6" stroke="currentColor" stroke-width="0.8"/><path d="M9.5 4h2l2 2v2.5h-4z" stroke="currentColor" stroke-width="0.8"/></svg> You are <strong>${money(rem)}</strong> away from complimentary shipping`;
       }
     }
   });

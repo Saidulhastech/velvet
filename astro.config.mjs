@@ -1,9 +1,10 @@
 // @ts-check
-import { defineConfig, envField, sessionDrivers } from 'astro/config';
+import { defineConfig, envField, fontProviders, sessionDrivers } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import node from '@astrojs/node';
 import vercel from '@astrojs/vercel';
 import netlify from '@astrojs/netlify';
+import sitemap from '@astrojs/sitemap';
 
 function getAdapter() {
   const target = process.env.ASTRO_ADAPTER;
@@ -25,8 +26,35 @@ function getAdapter() {
 
 // https://astro.build/config
 export default defineConfig({
+  // Set this to your production domain — drives canonical URLs + sitemap.
+  site: 'https://maisonarden.com',
   output: 'server',
   adapter: getAdapter(),
+  integrations: [
+    sitemap({
+      // Keep private/functional routes out of the sitemap.
+      filter: (page) =>
+        !/\/(account|cart|search)(\/|$|\?)/.test(page) && !page.includes('/api/'),
+    }),
+  ],
+  // Self-hosted fonts (no render-blocking Google Fonts request, GDPR-friendly).
+  // Family names match the CSS in variables.css, so no style changes needed.
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      weights: [300, 400, 500, 600, 700],
+      styles: ['normal'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Cormorant Garamond',
+      cssVariable: '--font-cormorant',
+      weights: [400, 500, 600],
+      styles: ['normal', 'italic'],
+    },
+  ],
   session: {
     driver: sessionDrivers.lruCache(),
   },

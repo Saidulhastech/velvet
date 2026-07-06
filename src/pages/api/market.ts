@@ -4,17 +4,11 @@
 // choice in a cookie, re-pins the active cart to the new currency, then 303s
 // back so the SSR page re-renders with localized prices.
 import type { APIRoute } from 'astro';
-import { normalizeMarket, setMarketCookie } from '~/lib/market';
+import { normalizeMarket, safePath, setMarketCookie } from '~/lib/market';
 import { buyerIpFrom, repinCartMarket } from '~/lib/cart-server';
 import { getLocalization } from '~/lib/shopify';
 
 export const prerender = false;
-
-/** Only allow same-origin path redirects (no protocol-relative // or absolute URLs). */
-function safePath(input: string): string {
-  if (!input.startsWith('/') || input.startsWith('//')) return '/';
-  return input;
-}
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const form = await request.formData();

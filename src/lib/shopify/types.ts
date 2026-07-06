@@ -361,3 +361,55 @@ export interface SortOption {
   sortKey: string;
   reverse: boolean;
 }
+
+// ── Legacy template shape ───────────────────────────────────
+// The `.astro` templates were built against a pre-Shopify "Maison Arden local
+// templates" data shape. `mapToLegacyProduct()` (in client.ts) converts modern
+// Shopify products into this, and the demo catalogue (demoCatalog.ts) is authored
+// directly in it. Templates + ProductCard consume `LegacyProduct`.
+export interface LegacyProduct {
+  id: string;
+  handle: string;
+  name: string;
+  category: string;
+  gender: string;
+  price: number;
+  formattedPrice: string;
+  rating: number;
+  image: string;
+  hoverImage?: string;
+  /** Full gallery image set (featured first). Populated from Shopify; absent
+   *  for demo entries, where the single `image` is used. */
+  images?: string[];
+  badge?: string;
+  badgeStyle?: 'olive' | 'default';
+  swatches: { color: string; hex: string; img?: string | null; variantId?: string | null }[];
+  sizes: string[];
+  materials: string[];
+  stock: 'in' | 'pre';
+  filterCategory: string;
+  filterColors: string[];
+  filterSizes: string[];
+  filterMaterials: string[];
+  description: string;
+  isFeatured?: boolean;
+  isNew?: boolean;
+  isBestSeller?: boolean;
+  /** Full Shopify variant matrix (size×colour → real variant). Absent for demo
+   *  entries; populated by the legacy bridge so grids/quick-view can resolve a
+   *  specific variant the same way the PDP does. */
+  variants?: {
+    id: string;
+    opts: Record<string, string>;
+    price: number;
+    compareAt: number | null;
+    available: boolean;
+    qty: number | null;
+    img: string | null;
+  }[];
+  /** Product options (name + values, colour values carry a hex). */
+  options?: { name: string; values: { name: string; color?: string | null }[] }[];
+  /** True when the product has ≥2 real options (e.g. Colour+Size) and >1 variant,
+   *  so a size/colour must be chosen (via Quick View) before adding to cart. */
+  needsPicker?: boolean;
+}

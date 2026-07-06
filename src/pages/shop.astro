@@ -16,10 +16,13 @@ const materialCounts = allMaterials.reduce((acc, mat) => {
   return acc;
 }, {} as Record<string, number>);
 
-const maxPrice = Math.max(...products.map(p => p.price));
+// Guard against an empty catalogue (Shopify down + no mocks) → Math.max() of an
+// empty list is -Infinity, which breaks the range slider.
+const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) : 1000;
 ---
 
-<BaseLayout title="Shop the Collection">
+<BaseLayout title="Shop the Collection" description="Shop the full Maison Arden collection — tailoring, outerwear, knitwear, denim and accessories in natural fibres. Filter by category, colour, size and material.">
+
   <!-- SHOP HERO -->
   <section class="shop-hero">
     <div class="shop-hero__inner">
@@ -337,7 +340,8 @@ const maxPrice = Math.max(...products.map(p => p.price));
     // Helper: check intersection between filter set and space-separated list
     function inter(setObj: Set<string>, listStr: string) {
       if (!listStr) return false;
-      const list = listStr.split(' ');
+      // Values are '|'-joined so multi-word colours ("light blue") stay intact.
+      const list = listStr.split('|');
       return Array.from(setObj).some(x => list.includes(x));
     }
 

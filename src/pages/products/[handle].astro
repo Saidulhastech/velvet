@@ -4,12 +4,11 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../components/layout/BaseLayout.astro';
 import ProductCard from '../../components/product/ProductCard.astro';
 import { getShopifyProductWithVariants, getShopifyProducts, getShopifyRelatedProducts } from '../../lib/shopify/client';
-import type { Product } from '../../lib/mockData';
 
 const { handle } = Astro.params;
 const { product, variants: shopifyVariants, currency, singleVariant, productId } = await getShopifyProductWithVariants(handle || '', Astro.locals.market);
 if (!product) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/404');
 }
 
 // Boot data for client-side variant controller
@@ -22,37 +21,37 @@ const categoryName = categoryParts[1] || product.category;
 
 // Dynamically import all images under src/assets/images for gallery
 const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
-const isRemoteImage = product.image && (product.image.startsWith('http://') || product.image.startsWith('https://'));
-const imagePath = `/src/assets/images/${product.image}`;
 
-const isCamelWool = product.handle === 'camel-wool-overcoat';
-let productImages: any[] = [];
-if (isCamelWool) {
-  const paths = [
-    '/src/assets/images/pdp-main Image (by default).png',
-    '/src/assets/images/pdp-main Image 02.png',
-    '/src/assets/images/pdp-main Image 03.png',
-    '/src/assets/images/pdp-main Image 04.png',
-    '/src/assets/images/pdp-main Image 05.png'
-  ];
-  productImages = paths
-    .filter(p => images[p])
-    .map(p => images[p].default);
-} else {
-  if (isRemoteImage) {
-    productImages = [product.image];
-  } else if (images[imagePath]) {
-    productImages = [images[imagePath].default];
-  } else {
-    // Fallback — no image available
-    productImages = [product.image || ''];
-  }
-}
+// Resolve one image ref: remote URLs pass through, local filenames resolve via
+// the assets glob to an optimizable ImageMetadata.
+const resolveImg = (img: string): any => {
+  if (!img) return '';
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  const path = `/src/assets/images/${img}`;
+  return images[path]?.default ?? img;
+};
+
+// Real gallery: the product's full image set when available, else its single
+// image. No more per-handle hardcoding or faked filtered duplicates.
+const sourceImages = (product.images && product.images.length > 0)
+  ? product.images
+  : [product.image].filter(Boolean);
+let productImages: any[] = sourceImages.map(resolveImg).filter(Boolean);
+if (productImages.length === 0) productImages = [product.image || ''];
 
 const getSrcString = (img: any) => {
   if (typeof img === 'string') return img;
   return img?.src || '';
 };
+
+// Sizes still available for this product, from the real variant matrix. When
+// there's no variant data (mock/single-variant) nothing is force-disabled.
+const availableSizes = new Set(
+  (product.variants ?? [])
+    .filter((v) => v.available)
+    .map((v) => String(v.opts?.Size ?? v.opts?.size ?? '').toLowerCase())
+    .filter(Boolean),
+);
 
 const productsList = await getShopifyProducts(Astro.locals.market);
 
@@ -132,11 +131,46 @@ const initialReviews = [
     helpfulCount: 4,
   }
 ];
+
+// --- SEO: Product + Breadcrumb structured data -------------------------------
+const productImageUrl = getSrcString(productImages[0]);
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  description: product.description,
+  image: productImageUrl ? [new URL(productImageUrl, Astro.site ?? Astro.url).toString()] : undefined,
+  sku: product.id,
+  brand: { '@type': 'Brand', name: 'Maison Arden' },
+  ...(product.rating
+    ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating, reviewCount: initialReviews.length } }
+    : {}),
+  offers: {
+    '@type': 'Offer',
+    price: product.price,
+    priceCurrency: currency,
+    availability: product.stock === 'in'
+      ? 'https://schema.org/InStock'
+      : 'https://schema.org/PreOrder',
+    url: Astro.url.href,
+  },
+};
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', Astro.site ?? Astro.url).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Shop', item: new URL('/shop', Astro.site ?? Astro.url).toString() },
+    { '@type': 'ListItem', position: 3, name: product.name, item: Astro.url.href },
+  ],
+};
 ---
 
-<BaseLayout 
-  title={product.name} 
+<BaseLayout
+  title={product.name}
   description={`${product.name} from Maison Arden. ${product.description}`}
+  ogImage={productImageUrl || '/og-image.jpg'}
+  jsonLd={[productSchema, breadcrumbSchema]}
 >
   <!-- BREADCRUMB -->
   <section class="shop-hero">
@@ -156,31 +190,11 @@ const initialReviews = [
   <section class="pdp" aria-label="Product detail">
     <div class="pdp-gallery">
       <div class="pdp-thumbs" id="pdpThumbs">
-        {productImages.length === 5 ? (
-          productImages.map((img, idx) => (
-            <button class={`pdp-thumb ${idx === 0 ? 'is-active' : ''}`} data-index={idx} data-src={getSrcString(img)} aria-label={`View image ${idx + 1}`}>
-              <Image src={img} alt="" width={78} height={104} />
-            </button>
-          ))
-        ) : (
-          <>
-            <button class="pdp-thumb is-active" data-index="0" data-src={getSrcString(productImages[0])} data-filter="normal" data-position="center center" aria-label="View image 1">
-              <Image src={productImages[0]} alt="" width={78} height={104} />
-            </button>
-            <button class="pdp-thumb" data-index="1" data-src={getSrcString(productImages[0])} data-filter="zoom-top" data-position="center top" aria-label="View image 2">
-              <Image src={productImages[0]} alt="" width={78} height={104} style="object-position: center top; object-fit: cover;" />
-            </button>
-            <button class="pdp-thumb" data-index="2" data-src={getSrcString(productImages[0])} data-filter="atelier" data-position="center center" aria-label="View image 3">
-              <Image src={productImages[0]} alt="" width={78} height={104} style="filter: sepia(0.2) contrast(1.05);" />
-            </button>
-            <button class="pdp-thumb" data-index="3" data-src={getSrcString(productImages[0])} data-filter="zoom-bottom" data-position="center bottom" aria-label="View image 4">
-              <Image src={productImages[0]} alt="" width={78} height={104} style="object-position: center bottom; object-fit: cover;" />
-            </button>
-            <button class="pdp-thumb" data-index="4" data-src={getSrcString(productImages[0])} data-filter="monochrome" data-position="center center" aria-label="View image 5">
-              <Image src={productImages[0]} alt="" width={78} height={104} style="filter: grayscale(1);" />
-            </button>
-          </>
-        )}
+        {productImages.map((img, idx) => (
+          <button class={`pdp-thumb ${idx === 0 ? 'is-active' : ''}`} data-index={idx} data-src={getSrcString(img)} data-position="center center" aria-label={`View image ${idx + 1}`}>
+            <Image src={img} alt="" width={78} height={104} />
+          </button>
+        ))}
       </div>
       <div class="pdp-main" id="pdpMain">
         {product.badge && <span class="pdp-badge">{product.badge}</span>}
@@ -193,7 +207,7 @@ const initialReviews = [
           class="pdp-main-img" 
           loading="eager"
         />
-        <span class="pdp-counter"><span id="pdpCur">1</span> / {productImages.length === 5 ? 5 : 5}</span>
+        <span class="pdp-counter"><span id="pdpCur">1</span> / {productImages.length}</span>
         <button class="pdp-arrow pdp-arrow--prev" id="pdpPrev" aria-label="Previous">
           <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
             <path d="M11 3l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -211,16 +225,15 @@ const initialReviews = [
       <div class="pdp-info__eyebrow">{product.category}</div>
       <h1 class="pdp-info__name">{product.name}</h1>
       <div class="pdp-info__rating">
-        <span class="pdp-info__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 
+        <span class="pdp-info__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
         <span data-rv-avg>4.8</span> · <a href="#reviews" style="color:inherit;text-decoration:underline"><span data-rv-count>5</span> reviews</a>
       </div>
       <div class="pdp-info__price">
-        {product.handle === 'camel-wool-overcoat' ? (
-          <>€690 <s>€820</s> <span class="pdp-info__save">Save €130</span></>
-        ) : (
-          product.formattedPrice
-        )}
+        <span id="pdpPrice">{product.formattedPrice}</span>
+        <s id="pdpComparePrice" style="display:none"></s>
+        <span class="pdp-info__save" id="pdpSaveBadge" style="display:none"></span>
       </div>
+      <div class="pdp-stock" id="pdpStockBadge" data-stock="in"></div>
       <div class="pdp-rule"></div>
       <p class="pdp-info__desc">{product.description}</p>
       
@@ -274,7 +287,9 @@ const initialReviews = [
           </div>
           <div class="pdp-sizes" id="pdpSizes">
             {product.sizes.map((sz, idx) => {
-              const isOOS = sz.toLowerCase() === 'xl';
+              // Out of stock driven by the real variant matrix, not a hardcoded
+              // size. With no variant data, nothing is force-disabled.
+              const isOOS = availableSizes.size > 0 && !availableSizes.has(sz.toLowerCase());
               return (
                 <button 
                   class={`pdp-size ${!isOOS && idx === 0 ? 'is-active' : ''} ${isOOS ? 'is-oos' : ''}`}
@@ -505,7 +520,7 @@ const initialReviews = [
                 <p class="ritem__body">{rev.comment}</p>
                 <div class="ritem__foot">
                   <span class="ritem__foot-q">Was this helpful?</span>
-                  <button class="ritem__helpful" data-helpful>
+                  <button class="ritem__helpful" data-helpful={rev.helpfulCount}>
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
                       <path d="M5 7l3-4c.9 0 1.5.8 1.3 1.7L9 6h3.2c.8 0 1.4.8 1.2 1.6l-1 4c-.1.7-.8 1.2-1.5 1.2H5V7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
                       <rect x="2" y="7" width="3" height="6" stroke="currentColor" stroke-width="1.2" />
@@ -898,14 +913,14 @@ const initialReviews = [
       const total = items.length;
       const ratings = items.map((i: any) => +(i as HTMLElement).dataset.rating || 5);
       const avg = total ? ratings.reduce((a: number, b: number) => a + b, 0) / total : 0;
-      const avgEl = $('[data-rv-avg]');
       const avgstarsEl = $('[data-rv-avgstars]');
-      const countEl = $('[data-rv-count]');
       const recEl = $('[data-rv-rec]');
       const barsEl = $('[data-rv-bars]');
-      if (avgEl) avgEl.textContent = avg.toFixed(1);
+      // Both the info-rating line and the review-summary card carry
+      // data-rv-avg / data-rv-count — update ALL, not just the first.
+      $$('[data-rv-avg]').forEach((e: any) => (e.textContent = avg.toFixed(1)));
+      $$('[data-rv-count]').forEach((e: any) => (e.textContent = String(total)));
       if (avgstarsEl) avgstarsEl.textContent = starStr(Math.round(avg));
-      if (countEl) countEl.textContent = String(total);
       const rec = total ? Math.round(ratings.filter((r: number) => r >= 4).length / total * 100) : 0;
       if (recEl) recEl.textContent = rec + '%';
       if (barsEl) {
@@ -1251,6 +1266,26 @@ const initialReviews = [
     letter-spacing: .6px;
     text-transform: uppercase;
     color: #B0492F;
+  }
+
+  .pdp-stock {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    color: var(--lux-secondary-olive);
+  }
+
+  .pdp-stock:empty {
+    display: none;
+  }
+
+  .pdp-stock[data-stock="low"] {
+    color: #B0492F;
+  }
+
+  .pdp-stock[data-stock="out"] {
+    color: var(--lux-on-light-soft);
   }
 
   .pdp-rule {

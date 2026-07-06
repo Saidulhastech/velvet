@@ -1,66 +1,85 @@
 ---
 import { Image } from 'astro:assets';
-import { getShopifyProductByHandle } from '../../../lib/shopify/client';
+import type { ImageMetadata } from 'astro';
+import {
+  formatMoney,
+  getShopifyCollection,
+  getShopifyProducts,
+  getShopifyProductWithVariants,
+} from '../../../lib/shopify/client';
+import { SHOP_THE_LOOK_HANDLE } from '../../../config/velvet';
 
-// Import images to resolve them via Astro's asset pipeline
+const market = Astro.locals.market;
+
+// Static stage backdrop.
 import imgStage from '../../../assets/images/Shop the look section left image.png';
-import imgP1 from '../../../assets/images/Product Image 1.png';
-import imgP3 from '../../../assets/images/Product Image 3.png';
-import imgP9 from '../../../assets/images/Product Image 9.png';
 
-const lookItems = await Promise.all([
-  {
-    index: 0,
-    handle: 'sand-linen-blazer',
-    name: 'Sand Linen Blazer',
-    price: 520,
-    formattedPrice: '€520',
-    color: 'Sand',
-    image: imgP1,
-    dotStyle: 'top:28%; left:46%;',
-    tipStyle: 'top:30%; left:52%;'
-  },
-  {
-    index: 1,
-    handle: 'pleated-wide-trouser',
-    name: 'Pleated Wide Trouser',
-    price: 280,
-    formattedPrice: '€280',
-    color: 'Olive',
-    image: imgP3,
-    dotStyle: 'top:55%; left:38%;',
-    tipStyle: 'top:57%; left:44%;'
-  },
-  {
-    index: 2,
-    handle: 'wide-leg-linen-trouser',
-    name: 'Cashmere Crew Knit',
-    price: 260,
-    formattedPrice: '€260',
-    originalPrice: '€310',
-    color: 'Ecru',
-    image: imgP9,
-    dotStyle: 'top:74%; left:56%;',
-    tipStyle: 'top:62%; left:56%;'
-  }
-].map(async (item) => {
-  try {
-    const shopifyProduct = await getShopifyProductByHandle(item.handle);
-    if (shopifyProduct) {
-      return {
-        ...item,
-        id: shopifyProduct.id,
-        name: shopifyProduct.name,
-        price: shopifyProduct.price,
-        formattedPrice: shopifyProduct.formattedPrice,
-        needsPicker: shopifyProduct.needsPicker ?? false,
-      };
-    }
-  } catch (err) {
-    console.error(`Failed to load Shopify product for ShopTheLook: ${item.handle}`, err);
-  }
-  return item;
-}));
+// Resolve a product image ref: Shopify CDN URLs pass through; a bare demo
+// filename resolves via the local assets glob to an optimizable URL.
+const localImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
+const resolveImg = (img: string) => {
+  if (!img) return '';
+  if (/^https?:\/\//.test(img)) return img;
+  return localImages[`/src/assets/images/${img}`]?.default.src ?? img;
+};
+
+// Preset hotspot coordinates. Product ORDER in the `shop-the-look` collection
+// maps to these slots (1st product → slot 1, …) — curate order in Shopify admin.
+const POSITIONS = [
+  { dotStyle: 'top:28%; left:46%;', tipStyle: 'top:30%; left:52%;' },
+  { dotStyle: 'top:55%; left:38%;', tipStyle: 'top:57%; left:44%;' },
+  { dotStyle: 'top:74%; left:56%;', tipStyle: 'top:62%; left:56%;' },
+];
+
+// The `shop-the-look` collection decides WHICH products + their order. Each is
+// then fetched in full (getShopifyProductWithVariants) so the real variant matrix
+// drives the inline Quick View. If the collection is missing/empty, fall back to
+// the first few store (or demo) products so the section never blanks.
+const curated = await getShopifyCollection(SHOP_THE_LOOK_HANDLE, market);
+let handles = (curated?.products ?? []).map((p) => p.handle);
+if (handles.length === 0) {
+  const all = await getShopifyProducts(market);
+  handles = all.map((p) => p.handle);
+}
+handles = handles.slice(0, POSITIONS.length);
+
+const resolved = await Promise.all(
+  handles.map((h) => getShopifyProductWithVariants(h, market)),
+);
+
+const lookItems = resolved
+  .map((r, i) => {
+    const p = r.product;
+    if (!p) return null;
+    return {
+      index: i,
+      handle: p.handle,
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      formattedPrice: p.formattedPrice,
+      originalPrice: undefined as string | undefined,
+      color: p.swatches?.[0]?.color ?? '',
+      image: resolveImg(p.image),
+      needsPicker: p.needsPicker ?? false,
+      currency: r.currency,
+      // Data the Quick View needs to build its variant picker inline.
+      variants: p.variants ?? [],
+      options: p.options ?? [],
+      category: p.category,
+      rating: p.rating,
+      description: p.description,
+      sizes: p.filterSizes ?? [],
+      stock: p.stock,
+      ...POSITIONS[i],
+    };
+  })
+  .filter((x): x is NonNullable<typeof x> => x !== null);
+
+// Bundle total computed + formatted in the active currency.
+const bundleCurrency = lookItems.find((i) => i.currency)?.currency || 'EUR';
+const bundleTotal = lookItems.reduce((sum, i) => sum + (i.price || 0), 0);
+const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
 ---
 
 <section class="look" id="lookbook" aria-label="Shop the look">
@@ -81,7 +100,7 @@ const lookItems = await Promise.all([
             style={item.tipStyle} 
             data-index={item.index}
           >
-            <Image src={item.image} alt={item.name} width={42} height={42} />
+            <img src={item.image} alt={item.name} width={42} height={42} loading="lazy" />
             <div>
               <div class="look__tip-name">{item.name}</div>
               <div class="look__tip-price">{item.formattedPrice}</div>
@@ -99,19 +118,27 @@ const lookItems = await Promise.all([
       
       <div class="look__set">
         {lookItems.map((item, idx) => (
-          <div 
-            class={`look__row ${idx !== 0 ? 'is-dim' : ''}`} 
+          <div
+            class={`look__row ${idx !== 0 ? 'is-dim' : ''}`}
+            data-qv-source
             data-index={item.index}
             data-id={item.id}
             data-name={item.name}
-            data-price={item.price}
-            data-img={typeof item.image === 'string' ? item.image : item.image.src}
+            data-price={item.formattedPrice}
+            data-img={item.image}
             data-color={item.color}
             data-handle={item.handle}
-            data-needs-picker={(item as any).needsPicker ? 'true' : 'false'}
+            data-cat={item.category ?? ''}
+            data-rating={item.rating ?? ''}
+            data-desc={item.description ?? ''}
+            data-size={(item.sizes ?? []).join(' ')}
+            data-stock={item.stock ?? 'in'}
+            data-variants={item.variants?.length ? JSON.stringify(item.variants) : ''}
+            data-options={item.options?.length ? JSON.stringify(item.options) : ''}
+            data-needs-picker={item.needsPicker ? 'true' : 'false'}
           >
             <div class="look__row-thumb">
-              <Image src={item.image} alt={item.name} width={66} height={66} />
+              <img src={item.image} alt={item.name} width={66} height={66} loading="lazy" />
             </div>
             <div>
               <div class="look__row-name">{item.name}</div>
@@ -122,7 +149,13 @@ const lookItems = await Promise.all([
                 </svg>
               </span>
               <br />
-              <button class="look__row-add" data-add-bag data-id={item.id}>Add to Bag</button>
+              <button
+                class="look__row-add"
+                data-add-bag
+                data-id={item.id}
+                data-qv={(item as any).needsPicker ? '' : undefined}
+                aria-label={(item as any).needsPicker ? `Select options for ${item.name}` : `Add ${item.name} to bag`}
+              >{(item as any).needsPicker ? 'Select Options' : 'Add to Bag'}</button>
             </div>
             <div class="look__row-price">
               {item.originalPrice ? (
@@ -139,7 +172,7 @@ const lookItems = await Promise.all([
       </div>
       
       <button class="look__total" data-add-bag data-ids={lookItems.map(item => item.id).join(',')}>
-        Add All to Bag — €1,060 
+        Add All to Bag — {bundleTotalFormatted}
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
           <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
         </svg>
@@ -150,7 +183,6 @@ const lookItems = await Promise.all([
 
 <script>
   import { addToCart } from '../../../stores/cart';
-  import { products } from '../../../lib/mockData';
 
   const dots = Array.from(document.querySelectorAll('.look__dot')) as HTMLElement[];
   const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
@@ -170,51 +202,51 @@ const lookItems = await Promise.all([
     if (r.dataset.index) setLook(r.dataset.index);
   }));
 
-  // Single hotspot add to bag
+  // Add one directly-resolvable row to the bag (strips the currency symbol from
+  // the localized data-price before parsing).
+  function addRowDirect(dataset: DOMStringMap) {
+    addToCart({
+      id: dataset.id || '',
+      name: dataset.name || '',
+      price: parseFloat((dataset.price || '').replace(/[^0-9.]/g, '')) || 0,
+      image: dataset.img || '',
+      color: dataset.color || undefined,
+      size: undefined,
+      description: dataset.handle || '',
+    }, 1);
+  }
+
+  // Single hotspot add to bag. Variant rows carry `data-qv` and are opened by
+  // the Quick View's global listener (pick a size inline) — so here we only
+  // handle the directly-addable ones and let QV take the rest.
   document.querySelectorAll('.look__row-add').forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      e.preventDefault();
       const rowEl = btn.closest('.look__row') as HTMLElement | null;
-      if (rowEl) {
-        const dataset = rowEl.dataset;
-        const handle = dataset.handle || '';
-        // Multi-option piece → choose a size on the PDP instead of guessing.
-        if (dataset.needsPicker === 'true') {
-          window.location.href = `/products/${handle || dataset.id}`;
-          return;
-        }
-        addToCart({
-          id: dataset.id || '',
-          name: dataset.name || '',
-          price: parseFloat(dataset.price || '0'),
-          image: dataset.img || '',
-          color: dataset.color || undefined,
-          size: undefined,
-          description: handle
-        }, 1);
-      }
+      if (!rowEl) return;
+      if (rowEl.dataset.needsPicker === 'true') return; // → Quick View
+      e.preventDefault();
+      addRowDirect(rowEl.dataset);
     });
   });
 
-  // Add entire lookbook edit to bag
+  // Add entire lookbook edit to bag. Add every directly-addable piece, then open
+  // the Quick View for the first piece that still needs a size/option chosen so
+  // the shopper can complete the set (no more silent skips / total mismatch).
   const addAllBtn = document.querySelector('.look__total');
   addAllBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
+    let firstPending: HTMLElement | null = null;
     rows.forEach((rowEl) => {
-      const dataset = rowEl.dataset;
-      // Skip multi-option pieces in a bulk add — they need a size chosen on the PDP.
-      if (dataset.needsPicker === 'true') return;
-      addToCart({
-        id: dataset.id || '',
-        name: dataset.name || '',
-        price: parseFloat(dataset.price || '0'),
-        image: dataset.img || '',
-        color: dataset.color || undefined,
-        size: undefined,
-        description: dataset.handle || ''
-      }, 1);
+      if (rowEl.dataset.needsPicker === 'true') {
+        if (!firstPending) firstPending = rowEl;
+        return;
+      }
+      addRowDirect(rowEl.dataset);
     });
+    if (firstPending) {
+      (firstPending as HTMLElement).querySelector<HTMLElement>('.look__row-add[data-qv]')?.click();
+    }
   });
 </script>
 

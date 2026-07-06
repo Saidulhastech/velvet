@@ -10,12 +10,13 @@ const sortedPosts = allPosts.sort((a, b) => (a.data.order || 99) - (b.data.order
 
 // Separate featured post and grid posts
 const featuredPost = sortedPosts.find(p => p.id === 'building-a-wardrobe-that-lasts-a-decade') || sortedPosts[0];
-const gridPosts = sortedPosts.filter(p => p.id !== featuredPost.id);
+// Guard the empty-collection case so the derived vars don't throw.
+const gridPosts = featuredPost ? sortedPosts.filter(p => p.id !== featuredPost.id) : [];
 
 // Dynamic glob for resolving images
 const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
 
-const featuredImgPath = `/src/assets/images/${featuredPost.data.image}`;
+const featuredImgPath = featuredPost ? `/src/assets/images/${featuredPost.data.image}` : '';
 ---
 
 <BaseLayout title="The Journal" description="Style notes, care guides and stories from the atelier — a slower way to think about what we wear.">

@@ -58,11 +58,12 @@ export async function getAllCollections(first = 50): Promise<Collection[]> {
  * Collections with a capped product count — for the home category grid.
  * `countTo` bounds the per-collection products fetched purely to count them.
  */
-export async function getCollectionsWithCounts(first = 8, countTo = 250): Promise<Collection[]> {
-  const data = await shopifyFetch<{ collections: any }>(COLLECTIONS_WITH_COUNTS_QUERY, {
-    first,
-    countTo,
-  });
+export async function getCollectionsWithCounts(first = 8, countTo = 250, market?: Market): Promise<Collection[]> {
+  const data = await shopifyFetch<{ collections: any }>(
+    COLLECTIONS_WITH_COUNTS_QUERY,
+    { first, countTo },
+    { inContext: market },
+  );
   return (data.collections?.edges ?? []).map((e: any) => mapCollection(e.node));
 }
 

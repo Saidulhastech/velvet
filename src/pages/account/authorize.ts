@@ -8,8 +8,10 @@ import {
   exchangeCodeForTokens,
   getAuthState,
   getPublicOrigin,
+  readIdTokenNonce,
   setTokens,
 } from '~/lib/shopify/customer';
+import { safePath } from '~/lib/market';
 
 export const prerender = false;
 
@@ -18,7 +20,7 @@ export const GET: APIRoute = async ({ cookies, url, request, redirect }) => {
 
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
-  const { verifier, state: savedState, returnTo } = getAuthState(cookies);
+  const { verifier, state: savedState, nonce: savedNonce, returnTo } = getAuthState(cookies);
   clearAuthState(cookies); // single-use
 
   // CSRF + integrity check before we trust the code.
@@ -34,6 +36,12 @@ export const GET: APIRoute = async ({ cookies, url, request, redirect }) => {
       redirectUri: new URL(CALLBACK_PATH, origin).toString(),
       origin,
     });
+    // OIDC replay guard: if the id_token carries a nonce, it must match the
+    // one we generated at /account/login. Skip only when either side is absent.
+    const returnedNonce = readIdTokenNonce(tokens.idToken);
+    if (savedNonce && returnedNonce && returnedNonce !== savedNonce) {
+      return redirect('/account/login?error=nonce', 302);
+    }
     setTokens(cookies, tokens);
   } catch (err) {
     const message = (err as Error).message;
@@ -43,6 +51,5 @@ export const GET: APIRoute = async ({ cookies, url, request, redirect }) => {
     return redirect(`/account/login?error=token&reason=${encodeURIComponent(message)}`, 302);
   }
 
-  const dest = returnTo && returnTo.startsWith('/') ? returnTo : '/account';
-  return redirect(dest, 302);
+  return redirect(safePath(returnTo, '/account'), 302);
 };

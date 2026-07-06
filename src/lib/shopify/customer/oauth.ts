@@ -114,6 +114,25 @@ export async function refreshTokens(args: {
   };
 }
 
+/**
+ * Read the `nonce` claim from an id_token payload (base64url JWT middle
+ * segment). Not a signature verification — used only to match the value we
+ * generated at /account/login and detect id_token replay. Returns undefined
+ * if the token is absent/malformed or carries no nonce.
+ */
+export function readIdTokenNonce(idToken?: string): string | undefined {
+  if (!idToken) return undefined;
+  const seg = idToken.split('.')[1];
+  if (!seg) return undefined;
+  try {
+    const json = atob(seg.replace(/-/g, '+').replace(/_/g, '/'));
+    const payload = JSON.parse(json) as { nonce?: unknown };
+    return typeof payload.nonce === 'string' ? payload.nonce : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Build the Shopify logout URL that ends the session and returns home. */
 export function buildLogoutUrl(args: { idToken?: string; postLogoutRedirectUri: string }): string {
   const url = new URL(getLogoutEndpoint());

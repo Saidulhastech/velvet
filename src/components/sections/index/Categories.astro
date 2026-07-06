@@ -67,7 +67,7 @@ const categories = [
     
     <div class="catlist reveal d1">
       <div class="catlist__preview" aria-hidden="true">
-        <img src="" alt="" id="catPreviewImg" />
+        <img src={categories[2]?.mainImage.src ?? categories[0]?.mainImage.src} alt="" id="catPreviewImg" />
       </div>
       
       {categories.map((cat, idx) => (

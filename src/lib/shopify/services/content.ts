@@ -4,6 +4,7 @@
 import { shopifyFetch } from '../client';
 import { LOCALIZATION_QUERY, MENU_QUERY, SHOP_QUERY, PAGE_QUERY } from '../graphql/content';
 import type { Localization, Menu, Shop } from '../types';
+import type { Market } from '~/lib/market';
 
 export interface ShopifyPage {
   id: string;
@@ -14,9 +15,13 @@ export interface ShopifyPage {
   seo?: { title?: string | null; description?: string | null };
 }
 
-/** A CMS page by handle, or null if it doesn't exist. */
-export async function getPage(handle: string): Promise<ShopifyPage | null> {
-  const data = await shopifyFetch<{ page: ShopifyPage | null }>(PAGE_QUERY, { handle });
+/** A CMS page by handle, or null if it doesn't exist. Market-aware (localized). */
+export async function getPage(handle: string, market?: Market): Promise<ShopifyPage | null> {
+  const data = await shopifyFetch<{ page: ShopifyPage | null }>(
+    PAGE_QUERY,
+    { handle },
+    { inContext: market },
+  );
   return data.page ?? null;
 }
 

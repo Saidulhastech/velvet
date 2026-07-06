@@ -11,6 +11,7 @@ import {
   getPublicOrigin,
   setAuthState,
 } from '~/lib/shopify/customer';
+import { safePath } from '~/lib/market';
 
 export const prerender = false;
 
@@ -53,10 +54,10 @@ often the <strong>JavaScript origin</strong> not being registered as
   const nonce = generateRandom();
 
   // Only honour same-site relative return paths (avoid open-redirects).
-  const rawReturn = url.searchParams.get('return_to') ?? '/account';
-  const returnTo = rawReturn.startsWith('/') ? rawReturn : '/account';
+  // safePath rejects `//host` / `/\host` protocol-relative tricks too.
+  const returnTo = safePath(url.searchParams.get('return_to'), '/account');
 
-  setAuthState(cookies, { verifier, state, returnTo });
+  setAuthState(cookies, { verifier, state, nonce, returnTo });
 
   const redirectUri = new URL(CALLBACK_PATH, getPublicOrigin(request, url)).toString();
   const authorizeUrl = buildAuthorizeUrl({

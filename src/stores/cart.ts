@@ -30,7 +30,8 @@ export interface WishItem {
 }
 
 // Persistent Atoms
-export const cartId = persistentAtom<string | null>('ma_cart_id', null);
+// Empty string = no cart yet (persistentAtom's value type must be string-based).
+export const cartId = persistentAtom<string>('ma_cart_id', '');
 export const persistedCartItems = persistentAtom<CartItem[]>('ma_cart_items', [], {
   encode: JSON.stringify,
   decode: JSON.parse
@@ -267,8 +268,10 @@ export async function initCart() {
 
 // Actions
 export async function addToCart(product: Omit<CartItem, 'quantity'>, quantity = 1) {
-  // Optimistic UI updates
-  const currentItems = [...persistedCartItems.get()];
+  // Deep snapshot so we can roll back if Shopify rejects the add (the
+  // existing-item branch mutates a shared object, hence the per-item clone).
+  const snapshot = persistedCartItems.get().map((i) => ({ ...i }));
+  const currentItems = [...persistedCartItems.get()].map((i) => ({ ...i }));
   const existingIndex = currentItems.findIndex(
     item => item.id === product.id && item.color === product.color && item.size === product.size
   );
@@ -286,7 +289,14 @@ export async function addToCart(product: Omit<CartItem, 'quantity'>, quantity = 
   // Background Shopify sync
   // Verify if it is a Shopify Variant GID before posting
   if (product.id.startsWith('gid://shopify/ProductVariant/')) {
-    await postToApi('/api/cart/add', { merchandiseId: product.id, quantity });
+    const resp = await postToApi('/api/cart/add', { merchandiseId: product.id, quantity });
+    // Server rejected (sold out / unpublished / network): a successful add
+    // returns `cart` and re-syncs. No cart = roll back the optimistic push so
+    // a phantom line can't linger in the bag + subtotal but miss checkout.
+    if (!resp.cart) {
+      persistedCartItems.set(snapshot);
+      updateCartTotals();
+    }
   }
 }
 

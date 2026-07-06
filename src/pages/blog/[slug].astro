@@ -9,7 +9,7 @@ import authorAvatar from '../../assets/images/Product Image 17.png';
 const { slug } = Astro.params;
 const entry = await getEntry('blog', slug || '');
 if (!entry) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/404');
 }
 const { Content } = await render(entry);
 

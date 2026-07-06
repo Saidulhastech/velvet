@@ -27,6 +27,17 @@ const LANGUAGE_RE = /^[A-Z]{2}(_[A-Z]{2})?$/;
 
 const DEFAULT_MARKET: Market = { country: DEFAULT_COUNTRY, language: DEFAULT_LANGUAGE };
 
+/**
+ * Only allow same-origin path redirects. Rejects absolute URLs and the
+ * protocol-relative `//host` / `/\host` tricks browsers treat as off-site.
+ */
+export function safePath(input: string | null | undefined, fallback = '/'): string {
+  const s = input ?? '';
+  if (!s.startsWith('/')) return fallback;
+  if (s.startsWith('//') || s.startsWith('/\\')) return fallback;
+  return s;
+}
+
 /** Coerce arbitrary input into a valid Market, falling back to the defaults. */
 export function normalizeMarket(country?: string | null, language?: string | null): Market {
   const c = (country ?? '').trim().toUpperCase();

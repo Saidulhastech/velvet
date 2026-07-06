@@ -6,6 +6,11 @@ export const DEFAULT_COUNTRY = "US";
 export const DEFAULT_LANGUAGE = "EN";
 export const MARKET_COUNTRY = DEFAULT_COUNTRY;
 
+// Shopify collection handle powering the homepage "Shop the Look" section.
+// Create a manual collection with this handle in Shopify admin; its product
+// order maps to the on-image hotspots. Falls back to demo/store products if absent.
+export const SHOP_THE_LOOK_HANDLE = "shop-the-look";
+
 export const BRAND = {
   name: "Maison Arden",
   legalName: "Maison Arden Paris",

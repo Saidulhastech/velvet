@@ -13,6 +13,7 @@ const EXP = 'cust_exp'; // access-token expiry (epoch ms)
 // Transient values, only needed between /account/login and /account/authorize.
 const VERIFIER = 'cust_pkce'; // PKCE code_verifier
 const STATE = 'cust_state'; // CSRF state
+const NONCE = 'cust_nonce'; // OIDC nonce (id_token replay guard)
 const RETURN_TO = 'cust_return'; // where to send the user after login
 
 const TEN_MINUTES = 60 * 10;
@@ -53,23 +54,25 @@ export function clearTokens(cookies: AstroCookies): void {
 // --- Transient auth params ------------------------------------------
 export function setAuthState(
   cookies: AstroCookies,
-  data: { verifier: string; state: string; returnTo: string },
+  data: { verifier: string; state: string; nonce: string; returnTo: string },
 ): void {
   cookies.set(VERIFIER, data.verifier, { ...base(), maxAge: TEN_MINUTES });
   cookies.set(STATE, data.state, { ...base(), maxAge: TEN_MINUTES });
+  cookies.set(NONCE, data.nonce, { ...base(), maxAge: TEN_MINUTES });
   cookies.set(RETURN_TO, data.returnTo, { ...base(), maxAge: TEN_MINUTES });
 }
 
 export function getAuthState(
   cookies: AstroCookies,
-): { verifier?: string; state?: string; returnTo?: string } {
+): { verifier?: string; state?: string; nonce?: string; returnTo?: string } {
   return {
     verifier: cookies.get(VERIFIER)?.value,
     state: cookies.get(STATE)?.value,
+    nonce: cookies.get(NONCE)?.value,
     returnTo: cookies.get(RETURN_TO)?.value,
   };
 }
 
 export function clearAuthState(cookies: AstroCookies): void {
-  for (const k of [VERIFIER, STATE, RETURN_TO]) cookies.delete(k, { path: '/' });
+  for (const k of [VERIFIER, STATE, NONCE, RETURN_TO]) cookies.delete(k, { path: '/' });
 }
