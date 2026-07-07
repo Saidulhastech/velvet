@@ -277,8 +277,13 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
       // .header is a stacking-context ancestor (position:sticky + z-index), so
       // nav--left's own z-index can't lift it above the overlay/drawers on its
       // own — bump the ancestor's z-index only while the menu is open.
-      document.getElementById('siteHeader')?.classList.toggle('menu-open', open);
+      const siteHeader = document.getElementById('siteHeader');
+      siteHeader?.classList.toggle('menu-open', open);
       if (open) {
+        // Header's visual bottom edge shifts with scroll (announcement bar
+        // pushes it down until the sticky header pins to y:0), so the panel's
+        // top has to be measured at open-time rather than hardcoded.
+        if (siteHeader) navLeft.style.top = `${siteHeader.getBoundingClientRect().bottom}px`;
         menuOverlay?.classList.add('is-open');
         document.body.classList.add('no-scroll');
       } else {
@@ -455,6 +460,12 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
   .header.menu-open {
     z-index: 101;
+    /* backdrop-filter establishes a containing block for fixed descendants
+       (same as transform/filter), which was scoping .nav--left's top/bottom
+       insets to the header's own box instead of the viewport. Drop it while
+       the panel is open — the header's own background covers it anyway. */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   .header__inner {
@@ -814,12 +825,12 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
     .nav--left {
       position: fixed;
-      top: 0;
+      top: 65px;
       left: 0;
       right: 0;
       bottom: 0;
       background: var(--lux-light-bg);
-      padding: 84px 28px 40px;
+      padding: 28px 28px 40px;
       overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
