@@ -375,7 +375,8 @@ export interface LegacyProduct {
   gender: string;
   price: number;
   formattedPrice: string;
-  rating: number;
+  /** Review rating from Shopify (`reviews.rating` metafield or a `rating:` tag). Null when the store has neither. */
+  rating: number | null;
   image: string;
   hoverImage?: string;
   /** Full gallery image set (featured first). Populated from Shopify; absent
@@ -412,4 +413,12 @@ export interface LegacyProduct {
   /** True when the product has ≥2 real options (e.g. Colour+Size) and >1 variant,
    *  so a size/colour must be chosen (via Quick View) before adding to cart. */
   needsPicker?: boolean;
+  /** Real individual reviews from the `reviews.reviews` metafield. Empty when the store has none — never fabricated. */
+  reviews?: { author: string; rating: number; title?: string; body?: string; date?: string }[];
+  /** Total review count from the `reviews.rating_count` metafield; null if untracked. */
+  ratingCount?: number | null;
+  /** Care instructions from the `custom.materials_care` metafield (one entry per line/bullet). Absent when the store hasn't set it. */
+  materialsCare?: string[];
+  /** Shipping/returns policy from the `custom.shipping_returns` metafield. Absent when the store hasn't set it. */
+  shippingReturns?: string[];
 }

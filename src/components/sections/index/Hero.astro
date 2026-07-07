@@ -65,11 +65,24 @@ const menHero = '/src/assets/images/Hero Image man.png';
     </div>
   </div>
   
-  <div class="hero__scroll">
+  <button type="button" class="hero__scroll" aria-label="Scroll to next section">
     <span>Scroll</span>
     <span class="hero__scroll-line"></span>
-  </div>
+  </button>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.hero__scroll').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const hero = btn.closest('.hero');
+      let next = hero?.nextElementSibling;
+      while (next && (next.tagName === 'SCRIPT' || next.tagName === 'STYLE')) {
+        next = next.nextElementSibling;
+      }
+      next?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
 
 <style>
   @keyframes heroScale {
@@ -268,6 +281,11 @@ const menHero = '/src/assets/images/Hero Image man.png';
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
   }
 
   .hero__scroll-line {

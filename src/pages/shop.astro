@@ -8,7 +8,13 @@ const products = await getShopifyProducts(Astro.locals.market);
 // Fetch all categories, colors, sizes, materials from catalog
 const allMaterials = Array.from(new Set(products.flatMap(p => p.materials)));
 const allColors = Array.from(new Set(products.flatMap(p => p.swatches.map(s => s.color))));
-const allSizes = ['xs', 's', 'm', 'l', 'xl'];
+// Real per-colour hex, same source ProductCard/Quick View already use — no
+// second guessed dictionary, so the filter dot always matches the product's own swatch.
+const colorHexMap: Record<string, string> = Object.fromEntries(
+  products.flatMap(p => p.swatches.map(s => [s.color, s.hex]))
+);
+const allSizes = Array.from(new Set(products.flatMap(p => p.filterSizes)));
+const allCategories = Array.from(new Set(products.map(p => p.filterCategory).filter(Boolean)));
 
 // Count products per material for filter counts
 const materialCounts = allMaterials.reduce((acc, mat) => {
@@ -16,9 +22,18 @@ const materialCounts = allMaterials.reduce((acc, mat) => {
   return acc;
 }, {} as Record<string, number>);
 
-// Guard against an empty catalogue (Shopify down + no mocks) → Math.max() of an
-// empty list is -Infinity, which breaks the range slider.
-const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) : 1000;
+// Real min/max from the catalog — a hardcoded 100 floor previously collided
+// with a hardcoded min="100" on the slider whenever every real price was under
+// 100 (e.g. a catalog of ~$1 test products), making min === max and leaving
+// the slider with zero travel distance (undraggable). Guard against an empty
+// catalogue (Shopify down + no mocks) → Math.max()/min() of an empty list is
+// ±Infinity, which also breaks the range slider.
+const prices = products.map(p => p.price);
+const minPrice = prices.length ? Math.floor(Math.min(...prices)) : 0;
+const rawMaxPrice = prices.length ? Math.ceil(Math.max(...prices)) : 1000;
+// Always leave real travel room even for a very cheap catalog.
+const maxPrice = Math.max(rawMaxPrice, minPrice + 20);
+const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
 ---
 
 <BaseLayout title="Shop the Collection" description="Shop the full Maison Arden collection — tailoring, outerwear, knitwear, denim and accessories in natural fibres. Filter by category, colour, size and material.">
@@ -54,26 +69,26 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
         </button>
       </div>
 
-      <!-- Category Filter -->
-      <div class="fgroup is-open">
-        <button class="fgroup__toggle">
-          Category 
-          <svg class="fgroup__icon" width="11" height="7" viewBox="0 0 11 7" fill="none">
-            <path d="M1 1l4.5 4.5L10 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-          </svg>
-        </button>
-        <div class="fgroup__body">
-          <div class="fpills">
-            <button class="fpill is-active" data-group="cat" data-value="all">All</button>
-            <button class="fpill" data-group="cat" data-value="tailoring">Tailoring</button>
-            <button class="fpill" data-group="cat" data-value="outerwear">Outerwear</button>
-            <button class="fpill" data-group="cat" data-value="knitwear">Knitwear</button>
-            <button class="fpill" data-group="cat" data-value="denim">Denim</button>
-            <button class="fpill" data-group="cat" data-value="accessories">Accessories</button>
-            <button class="fpill" data-group="cat" data-value="shoes">Shoes</button>
+      <!-- Category Filter — only shown when the catalog actually has real
+           category data (Shopify's `productType` field set on products) -->
+      {allCategories.length > 0 && (
+        <div class="fgroup is-open">
+          <button class="fgroup__toggle">
+            Category
+            <svg class="fgroup__icon" width="11" height="7" viewBox="0 0 11 7" fill="none">
+              <path d="M1 1l4.5 4.5L10 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </button>
+          <div class="fgroup__body">
+            <div class="fpills">
+              <button class="fpill is-active" data-group="cat" data-value="all">All</button>
+              {allCategories.map(cat => (
+                <button class="fpill" data-group="cat" data-value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <!-- Color Swatches Filter -->
       <div class="fgroup is-open">
@@ -85,29 +100,12 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
         </button>
         <div class="fgroup__body">
           <div class="fswatches">
-            {allColors.map(color => {
-              const hexMap: Record<string, string> = {
-                // fabric tones
-                sand: '#C2AE8E', stone: '#858A76', olive: '#6B705E',
-                charcoal: '#30382C', sage: '#B8BCA9', ecru: '#E4E6DA',
-                // common colours
-                black: '#1A1A1A', white: '#F4F4EF', grey: '#9A9A93', gray: '#9A9A93',
-                blue: '#3E5C7E', navy: '#26344A', 'light blue': '#9BB6CE',
-                red: '#9E3B34', burgundy: '#5C2A2A', pink: '#D8A7AE',
-                yellow: '#D9B44A', gold: '#C6A15B', green: '#4F6146',
-                brown: '#6B4E36', 'bronze orange': '#A6683C', orange: '#C77B3E',
-                beige: '#D9CDB6', cream: '#EDE7D6', tan: '#C6A985', camel: '#B48A5E',
-                purple: '#5D4B6E', teal: '#3E6B66', silver: '#C3C6C4',
-              };
-              const key = color.trim().toLowerCase();
-              const hex = hexMap[key] || '#858A76';
-              return (
-                <div class="fswatch" data-group="color" data-value={color}>
-                  <span class="fswatch__dot" style={`background: ${hex}`}></span>
-                  <span class="fswatch__name">{color.charAt(0).toUpperCase() + color.slice(1)}</span>
-                </div>
-              );
-            })}
+            {allColors.map((color) => (
+              <div class="fswatch" data-group="color" data-value={color}>
+                <span class="fswatch__dot" style={`background: ${colorHexMap[color.trim().toLowerCase()] || '#858A76'}`}></span>
+                <span class="fswatch__name">{color.charAt(0).toUpperCase() + color.slice(1)}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -130,60 +128,29 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
       </div>
 
       <!-- Material Checkbox Filter -->
-      <div class="fgroup is-open">
-        <button class="fgroup__toggle">
-          Material 
-          <svg class="fgroup__icon" width="11" height="7" viewBox="0 0 11 7" fill="none">
-            <path d="M1 1l4.5 4.5L10 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-          </svg>
-        </button>
-        <div class="fgroup__body">
-          <div class="fchecks">
-            <label class="fcheck">
-              <input type="checkbox" data-group="material" data-value="linen" />
-              <span class="fcheck__label">
-                Linen
-                <span class="fcheck__count">{materialCounts['linen'] || 0}</span>
-              </span>
-            </label>
-            <label class="fcheck">
-              <input type="checkbox" data-group="material" data-value="wool" />
-              <span class="fcheck__label">
-                Wool
-                <span class="fcheck__count">{materialCounts['wool'] || 0}</span>
-              </span>
-            </label>
-            <label class="fcheck">
-              <input type="checkbox" data-group="material" data-value="cashmere" />
-              <span class="fcheck__label">
-                Cashmere
-                <span class="fcheck__count">{materialCounts['cashmere'] || 0}</span>
-              </span>
-            </label>
-            <label class="fcheck">
-              <input type="checkbox" data-group="material" data-value="cotton" />
-              <span class="fcheck__label">
-                Cotton
-                <span class="fcheck__count">{materialCounts['cotton'] || 0}</span>
-              </span>
-            </label>
-            <label class="fcheck">
-              <input type="checkbox" data-group="material" data-value="denim" />
-              <span class="fcheck__label">
-                Denim
-                <span class="fcheck__count">{materialCounts['denim'] || 0}</span>
-              </span>
-            </label>
-            <label class="fcheck">
-              <input type="checkbox" data-group="material" data-value="leather" />
-              <span class="fcheck__label">
-                Leather
-                <span class="fcheck__count">{materialCounts['leather'] || 0}</span>
-              </span>
-            </label>
+      {allMaterials.length > 0 && (
+        <div class="fgroup is-open">
+          <button class="fgroup__toggle">
+            Material
+            <svg class="fgroup__icon" width="11" height="7" viewBox="0 0 11 7" fill="none">
+              <path d="M1 1l4.5 4.5L10 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </button>
+          <div class="fgroup__body">
+            <div class="fchecks">
+              {allMaterials.map((mat) => (
+                <label class="fcheck">
+                  <input type="checkbox" data-group="material" data-value={mat} />
+                  <span class="fcheck__label">
+                    {mat.charAt(0).toUpperCase() + mat.slice(1)}
+                    <span class="fcheck__count">{materialCounts[mat] || 0}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <!-- Stock Status Filter -->
       <div class="fgroup is-open">
@@ -212,7 +179,7 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
         <div class="fgroup__body">
           <div class="fprice">
             <div class="fprice__readout">Up to <strong data-price-readout>{`€${maxPrice}`}</strong></div>
-            <input class="fprice__range" type="range" min="100" max={maxPrice} value={maxPrice} step="20" data-price-range aria-label="Maximum price" />
+            <input class="fprice__range" type="range" min={minPrice} max={maxPrice} value={maxPrice} step={priceStep} data-price-range aria-label="Maximum price" />
           </div>
         </div>
       </div>
@@ -222,7 +189,7 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
     <div class="shop-main">
       <div class="shop-toolbar">
         <div class="shop-toolbar__count">
-          <strong data-shop-shown>16</strong> of <span data-shop-total>20</span> pieces
+          <strong data-shop-shown>{Math.min(16, products.length)}</strong> of <span data-shop-total>{products.length}</span> pieces
         </div>
         <div class="shop-toolbar__right">
           <button class="filter-toggle" data-filter-open>
@@ -267,7 +234,7 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
           <div class="shop-more__fill" data-more-fill style="width: 80%"></div>
         </div>
         <div class="shop-more__text">
-          Showing <strong data-shop-shown>16</strong> of <span data-shop-total>20</span> pieces
+          Showing <strong data-shop-shown>{Math.min(16, products.length)}</strong> of <span data-shop-total>{products.length}</span> pieces
         </div>
         <button class="btn-dark shop-more__btn" data-load-more>Load More Pieces</button>
       </div>
@@ -908,7 +875,6 @@ const maxPrice = products.length ? Math.max(100, ...products.map(p => p.price)) 
   }
 
   .fgroup__body {
-    overflow: hidden;
     max-height: 0;
     transition: max-height .4s var(--ease);
   }

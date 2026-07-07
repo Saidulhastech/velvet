@@ -187,6 +187,9 @@ import { getProducts as getShopifyProductsNew, getProduct as getShopifyProductNe
 import { getCollection as getCollectionNew, getCollectionsWithCounts as getCollectionsWithCountsNew } from './services/collections';
 import type { Market } from '../market';
 
+// Curated Maison Arden palette first, then the everyday colour names real
+// Shopify catalogues actually use (merchants rarely configure the native
+// swatch metafield — see resolveSwatchHex()). Kept flat/lowercase-keyed.
 const HEX_MAP: Record<string, string> = {
   olive: '#6B705E',
   sage: '#B8BCA9',
@@ -197,7 +200,51 @@ const HEX_MAP: Record<string, string> = {
   oat: '#E2D3C1',
   black: '#000000',
   white: '#FFFFFF',
+  red: '#C0392B',
+  blue: '#2E4A6B',
+  navy: '#1F2A44',
+  yellow: '#E1B84B',
+  mustard: '#C9A227',
+  gold: '#C9A63C',
+  orange: '#CC6E3A',
+  bronze: '#8C5A32',
+  rust: '#A6543A',
+  green: '#4B6B4E',
+  teal: '#2F6B65',
+  turquoise: '#3FA5A0',
+  purple: '#6B4E71',
+  lavender: '#9B8DB3',
+  pink: '#D98FA3',
+  rose: '#C97B8B',
+  maroon: '#6E2A32',
+  burgundy: '#5E2330',
+  brown: '#6B4A34',
+  tan: '#C9A876',
+  beige: '#D8CBB4',
+  cream: '#EDE4D3',
+  ivory: '#F2ECDD',
+  camel: '#C19A6B',
+  taupe: '#8B7D6B',
+  khaki: '#8B8A5C',
+  denim: '#3E5C76',
+  indigo: '#3B3F6B',
+  grey: '#8A8D85',
+  gray: '#8A8D85',
+  silver: '#B8BAB6',
+  mint: '#A6C6B0',
+  coral: '#D97B63',
+  plum: '#5C3A52',
 };
+
+// Some catalogues name a colour with a modifier ("Bronze orange", "Dusty pink").
+// Try the full name first, then fall back to any known word inside it, so a
+// merchant-specific compound name still resolves to something distinct
+// instead of collapsing into the same neutral grey as every other miss.
+function resolveSwatchHex(name: string): string | undefined {
+  if (HEX_MAP[name]) return HEX_MAP[name];
+  const word = name.split(/\s+/).find((w) => HEX_MAP[w]);
+  return word ? HEX_MAP[word] : undefined;
+}
 
 /** Locale-correct currency label for any market (£, $, ¥, €, …). */
 export function formatMoney(amount: number, currencyCode: string): string {
@@ -257,7 +304,7 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
       : undefined;
     swatches.push({
       color: lower,
-      hex: swatchHexByColor.get(lower) || HEX_MAP[lower] || '#858A76',
+      hex: swatchHexByColor.get(lower) || resolveSwatchHex(lower) || '#858A76',
       img: variant?.image?.url || null,
       variantId: variant?.id || null,
     });
@@ -274,16 +321,21 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
       materials.push(mat);
     }
   });
-  if (materials.length === 0) materials.push('linen');
+  // No hardcoded "linen" default — if the store hasn't tagged a material and
+  // none is mentioned in the description, the product genuinely has none.
 
   let gender = 'unisex';
   if (tags.includes('men') || tags.includes('mens')) gender = 'men';
   else if (tags.includes('women') || tags.includes('womens')) gender = 'women';
 
-  const categoryLabel = p.productType || 'Essentials';
-  const category = `${gender.charAt(0).toUpperCase() + gender.slice(1)} · ${categoryLabel}`;
+  // Shopify's `productType` field is frequently left blank by merchants —
+  // don't invent a fake sub-category ("Essentials") when it's empty.
+  const categoryLabel = p.productType || '';
+  const genderLabel = gender.charAt(0).toUpperCase() + gender.slice(1);
+  const category = categoryLabel ? `${genderLabel} · ${categoryLabel}` : genderLabel;
 
-  const rating = p.rating || parseFloat(tags.find((t: string) => t.startsWith('rating:'))?.split(':')[1] || '4.8');
+  const ratingTag = tags.find((t: string) => t.startsWith('rating:'));
+  const rating = p.rating ?? (ratingTag ? parseFloat(ratingTag.split(':')[1]) : null);
   const image = p.featuredImage?.url || p.images?.[0]?.url || '';
   const hoverImage = p.images?.[1]?.url || undefined;
   // Full gallery: featured first, then the rest, de-duped — drives the real
@@ -340,7 +392,7 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
     badge,
     badgeStyle: badge === 'New' ? 'olive' : 'default',
     swatches,
-    sizes: sizes.length > 0 ? sizes : ['s', 'm', 'l'],
+    sizes,
     materials,
     stock: p.availableForSale ? 'in' : 'pre',
     filterCategory: categoryLabel.toLowerCase(),
@@ -354,6 +406,12 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
     variants: variantMatrix,
     options: optionList,
     needsPicker,
+    // Real metafield-backed content only — absent/empty means the store
+    // hasn't set it, never a fabricated fallback (see mapProduct in transforms.ts).
+    reviews: p.reviews ?? [],
+    ratingCount: p.ratingCount ?? null,
+    materialsCare: p.materialsCare ?? [],
+    shippingReturns: p.shippingReturns ?? [],
   };
 }
 

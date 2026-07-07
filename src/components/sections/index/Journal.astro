@@ -36,7 +36,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/
             </a>
             <div class="bcard__body">
               <div class="bcard__meta">{post.data.category} · {post.data.readTime}</div>
-              <h3 class="bcard__title">{post.data.title}</h3>
+              <h3 class="bcard__title"><a href={`/blog/${post.id}`}>{post.data.title}</a></h3>
               <p class="bcard__excerpt">{post.data.excerpt}</p>
               <a href={`/blog/${post.id}`} class="bcard__btn">
                 Read Article 
@@ -152,6 +152,15 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/
     line-height: 1.18;
     letter-spacing: -.4px;
     color: var(--lux-on-light);
+  }
+
+  .bcard__title a {
+    color: inherit;
+    transition: color .3s var(--ease);
+  }
+
+  .bcard__title a:hover {
+    color: var(--lux-secondary-olive);
   }
 
   .bcard__excerpt {

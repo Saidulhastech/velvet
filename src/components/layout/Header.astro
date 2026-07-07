@@ -1,6 +1,27 @@
 ---
 // Header component containing announcement bar, utility bar, and primary navigation
 import MarketSelector from './MarketSelector.astro';
+import { getShopifyProducts } from '../../lib/shopify/client';
+
+const products = await getShopifyProducts(Astro.locals.market);
+
+// Real distinct categories (Shopify `productType`, via filterCategory) per
+// gender — empty when the store hasn't set it. Dropdown sub-links are only
+// ever built from these, never a fixed taxonomy, so a nav link can't point
+// at a category that has zero matching real products.
+function categoriesFor(gender: string) {
+  const set = new Set<string>();
+  products.forEach((p) => {
+    if (p.gender === gender && p.filterCategory) set.add(p.filterCategory);
+  });
+  return Array.from(set);
+}
+const womenCategories = categoriesFor('women');
+const menCategories = categoriesFor('men');
+const allRealCategories = new Set(products.map((p) => p.filterCategory).filter(Boolean));
+const hasBags = allRealCategories.has('bags');
+const hasAccessories = allRealCategories.has('accessories');
+const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 ---
 
 <!-- ANNOUNCEMENT BAR -->
@@ -40,47 +61,41 @@ import MarketSelector from './MarketSelector.astro';
     <nav class="nav nav--left" aria-label="Primary">
       <ul>
         <li>
-          <a href="/shop?gender=women">Women 
-            <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
-            </svg>
+          <a href="/shop?gender=women">Women
+            {womenCategories.length > 0 && (
+              <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
+              </svg>
+            )}
           </a>
-          <div class="nav__dropdown">
-            <a href="/shop?category=outerwear&gender=women">Coats &amp; Jackets <span>New</span></a>
-            <a href="/shop?category=dresses&gender=women">Dresses</a>
-            <a href="/shop?category=knitwear&gender=women">Knitwear</a>
-            <a href="/shop?category=tailoring&gender=women">Trousers</a>
-            <a href="/shop?gender=women">View All</a>
-          </div>
+          {womenCategories.length > 0 && (
+            <div class="nav__dropdown">
+              {womenCategories.map((cat) => (
+                <a href={`/shop?category=${cat}&gender=women`}>{label(cat)}</a>
+              ))}
+              <a href="/shop?gender=women">View All</a>
+            </div>
+          )}
         </li>
         <li>
-          <a href="/shop?gender=men">Men 
-            <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
-            </svg>
+          <a href="/shop?gender=men">Men
+            {menCategories.length > 0 && (
+              <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
+              </svg>
+            )}
           </a>
-          <div class="nav__dropdown">
-            <a href="/shop?category=tailoring&gender=men">Tailoring <span>New</span></a>
-            <a href="/shop?category=outerwear&gender=men">Outerwear</a>
-            <a href="/shop?category=shirts&gender=men">Shirts</a>
-            <a href="/shop?category=tailoring&gender=men">Trousers</a>
-            <a href="/shop?gender=men">View All</a>
-          </div>
+          {menCategories.length > 0 && (
+            <div class="nav__dropdown">
+              {menCategories.map((cat) => (
+                <a href={`/shop?category=${cat}&gender=men`}>{label(cat)}</a>
+              ))}
+              <a href="/shop?gender=men">View All</a>
+            </div>
+          )}
         </li>
-        <li>
-          <a href="/shop?category=bags">Bags 
-            <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
-            </svg>
-          </a>
-          <div class="nav__dropdown">
-            <a href="/shop?category=bags&type=totes">Totes</a>
-            <a href="/shop?category=bags&type=shoulder">Shoulder Bags</a>
-            <a href="/shop?category=bags&type=clutches">Clutches</a>
-            <a href="/shop?category=bags">View All</a>
-          </div>
-        </li>
-        <li><a href="/shop?category=accessories">Accessories</a></li>
+        {hasBags && <li><a href="/shop?category=bags">Bags</a></li>}
+        {hasAccessories && <li><a href="/shop?category=accessories">Accessories</a></li>}
         <li><a href="/blog">Journal <span class="nav__new-dot">N</span></a></li>
       </ul>
     </nav>
@@ -254,11 +269,26 @@ import MarketSelector from './MarketSelector.astro';
   // Mobile Drawer Menu Handler
   const burger = document.getElementById('menuToggle');
   const navLeft = document.querySelector('.nav--left');
+  const menuOverlay = document.querySelector('[data-drawer-overlay]');
   if (burger && navLeft) {
     const setMenu = (open: boolean) => {
       burger.setAttribute('aria-expanded', String(open));
-      document.body.classList.toggle('no-scroll', open);
       navLeft.classList.toggle('is-open', open);
+      // .header is a stacking-context ancestor (position:sticky + z-index), so
+      // nav--left's own z-index can't lift it above the overlay/drawers on its
+      // own — bump the ancestor's z-index only while the menu is open.
+      document.getElementById('siteHeader')?.classList.toggle('menu-open', open);
+      if (open) {
+        menuOverlay?.classList.add('is-open');
+        document.body.classList.add('no-scroll');
+      } else {
+        const cartOpen = document.getElementById('cartDrawer')?.classList.contains('is-open');
+        const wishOpen = document.getElementById('wishDrawer')?.classList.contains('is-open');
+        if (!cartOpen && !wishOpen) {
+          menuOverlay?.classList.remove('is-open');
+          document.body.classList.remove('no-scroll');
+        }
+      }
     };
     burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
     // Escape closes the menu; tapping a nav link closes it too.
@@ -421,6 +451,10 @@ import MarketSelector from './MarketSelector.astro';
 
   .header.is-scrolled {
     box-shadow: 0 1px 0 rgba(48, 56, 44, .05), 0 12px 40px -24px rgba(48, 56, 44, .3);
+  }
+
+  .header.menu-open {
+    z-index: 101;
   }
 
   .header__inner {
@@ -783,17 +817,24 @@ import MarketSelector from './MarketSelector.astro';
       top: 0;
       left: 0;
       right: 0;
+      bottom: 0;
       background: var(--lux-light-bg);
       padding: 84px 28px 40px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
       transform: translateY(-100%);
-      transition: transform .5s var(--ease);
-      z-index: 49;
+      visibility: hidden;
+      transition: transform .5s var(--ease), visibility 0s linear .5s;
+      z-index: 100;
       border-bottom: 1px solid var(--lux-light-border);
       box-shadow: 0 24px 60px -30px rgba(48, 56, 44, .4);
     }
 
     .nav--left.is-open {
       transform: translateY(0);
+      visibility: visible;
+      transition: transform .5s var(--ease);
     }
 
     .nav--left ul {

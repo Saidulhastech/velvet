@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../components/layout/BaseLayout.astro';
 import { Image } from 'astro:assets';
+import { BRAND } from '../config/velvet';
 
 // Import images
 import imgBout1 from '../assets/images/ct-bout__overlay image 01.png';
@@ -235,20 +236,20 @@ const faqItems = [
       <div class="ct-info__divider"></div>
       <div class="ct-info__soc-label">Follow the Maison</div>
       <div class="ct-soc">
-        <a href="#" aria-label="Instagram">
+        <a href={BRAND.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <rect x="2.5" y="2.5" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.3" />
             <circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.3" />
             <circle cx="14.5" cy="5.5" r="1" fill="currentColor" />
           </svg>
         </a>
-        <a href="#" aria-label="Pinterest">
+        <a href={BRAND.social.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" />
             <path d="M8 15l2-7m0 0a2.5 2.5 0 1 1 2.4 1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
           </svg>
         </a>
-        <a href="#" aria-label="TikTok">
+        <a href={BRAND.social.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <path d="M11 3v9.5a3 3 0 1 1-3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
             <path d="M11 5.5c.6 1.5 1.8 2.4 3.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
@@ -348,7 +349,7 @@ const faqItems = [
       
       <div class="ct-bouts__grid">
         {boutiques.map((bout) => (
-          <a href="#" class:list={['ct-bout reveal', bout.delay]}>
+          <a href={`https://www.google.com/maps?q=${encodeURIComponent(bout.address)}`} target="_blank" rel="noopener" class:list={['ct-bout reveal', bout.delay]}>
             <div class="ct-bout__media">
               {bout.badge && <span class="ct-bout__badge">{bout.badge}</span>}
               <span class="ct-bout__num">{bout.num}</span>
@@ -373,7 +374,7 @@ const faqItems = [
   </section>
 
   <!-- FAQ Accordion -->
-  <section class="faq2" aria-label="Frequently asked questions">
+  <section class="faq2" id="faq" aria-label="Frequently asked questions">
     <div class="faq2__inner">
       <header class="faq2__head reveal">
         <span class="eyebrow eyebrow--center">Help Centre</span>

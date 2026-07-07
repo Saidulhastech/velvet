@@ -130,11 +130,13 @@ const knitwearPromo = '/src/assets/images/Promo banner image 02.png';
       <div class="pbanner__overlay"></div>
       <div class="pbanner__frame" aria-hidden="true"></div>
       <div class="pbanner__content">
-        <span class="pbanner__eyebrow">New Season</span>
-        <h3 class="pbanner__title">The Tailoring Edit</h3>
-        <p class="pbanner__sub">Softly constructed suiting in natural fibres.</p>
+        <div class="pbanner__text">
+          <span class="pbanner__eyebrow">New Season</span>
+          <h3 class="pbanner__title">The Tailoring Edit</h3>
+          <p class="pbanner__sub">Softly constructed suiting in natural fibres.</p>
+        </div>
         <span class="pbanner__btn">
-          Shop the Edit 
+          Shop the Edit
           <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
             <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
           </svg>
@@ -155,11 +157,13 @@ const knitwearPromo = '/src/assets/images/Promo banner image 02.png';
       <div class="pbanner__overlay"></div>
       <div class="pbanner__frame" aria-hidden="true"></div>
       <div class="pbanner__content">
-        <span class="pbanner__eyebrow">Limited Atelier Run</span>
-        <h3 class="pbanner__title">Cashmere &amp; Wool</h3>
-        <p class="pbanner__sub">Hand-finished knitwear, made in small batches.</p>
+        <div class="pbanner__text">
+          <span class="pbanner__eyebrow">Limited Atelier Run</span>
+          <h3 class="pbanner__title">Cashmere &amp; Wool</h3>
+          <p class="pbanner__sub">Hand-finished knitwear, made in small batches.</p>
+        </div>
         <span class="pbanner__btn">
-          Discover Knitwear 
+          Discover Knitwear
           <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
             <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
           </svg>
@@ -334,8 +338,13 @@ const knitwearPromo = '/src/assets/images/Promo banner image 02.png';
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: space-between;
     padding: clamp(26px, 3vw, 48px);
+  }
+
+  .pbanner__text {
+    display: flex;
+    flex-direction: column;
   }
 
   .pbanner__eyebrow {
@@ -371,7 +380,7 @@ const knitwearPromo = '/src/assets/images/Promo banner image 02.png';
   .pbanner__sub {
     font-size: clamp(13px, 1vw, 15px);
     color: var(--lux-text-secondary);
-    margin: 0 0 150px;
+    margin: 0;
     max-width: 30ch;
   }
 
@@ -403,6 +412,12 @@ const knitwearPromo = '/src/assets/images/Promo banner image 02.png';
 
   .pbanner:hover .pbanner__btn svg {
     transform: translateX(3px);
+  }
+
+  @media (max-width: 1200px) {
+    .pbanner {
+      aspect-ratio: 4/5;
+    }
   }
 
   @media (max-width: 720px) {

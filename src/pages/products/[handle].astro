@@ -73,64 +73,16 @@ if (related.length < 4) {
   }
 }
 
-// Pre-defined customer reviews for the product, initialized in the DOM
-const initialReviews = [
-  {
-    author: "Camille D.",
-    avatar: "CD",
-    verified: true,
-    location: "Paris, FR",
-    rating: 5,
-    date: "2 weeks ago",
-    title: "Worth every euro",
-    comment: "The wool is substantial yet light, and the cut is impeccable. It has become the coat I reach for every morning.",
-    helpfulCount: 14,
-  },
-  {
-    author: "Hugo B.",
-    avatar: "HB",
-    verified: true,
-    location: "London, UK",
-    rating: 5,
-    date: "1 month ago",
-    title: "A forever piece",
-    comment: "Beautifully made — the hand-finishing is obvious up close. Exactly the quiet quality I hoped for.",
-    helpfulCount: 9,
-  },
-  {
-    author: "Sophie L.",
-    avatar: "SL",
-    verified: true,
-    location: "Geneva, CH",
-    rating: 4,
-    date: "1 month ago",
-    title: "Gorgeous, runs slightly large",
-    comment: "The colour is even better in person. I sized down to a S and the fit is now perfect.",
-    helpfulCount: 6,
-  },
-  {
-    author: "Mireille F.",
-    avatar: "MF",
-    verified: true,
-    location: "Lyon, FR",
-    rating: 5,
-    date: "2 months ago",
-    title: "Quiet luxury at its best",
-    comment: "Understated and elegant. Three compliments the first time I wore it, none of them asked about a logo.",
-    helpfulCount: 11,
-  },
-  {
-    author: "Adèle R.",
-    avatar: "AR",
-    verified: true,
-    location: "Brussels, BE",
-    rating: 5,
-    date: "3 months ago",
-    title: "Exceptional finish",
-    comment: "Worth the investment. The lining and buttons feel considered, and it drapes wonderfully.",
-    helpfulCount: 4,
-  }
-];
+// Real reviews only — from the `reviews.reviews` metafield (see parseReviews()
+// in transforms.ts). Empty when the store hasn't set one; never fabricated.
+const realReviews = product.reviews ?? [];
+const reviewCount = product.ratingCount ?? realReviews.length;
+const avgRating = product.rating ?? 0;
+const starStr = (n: number) => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+const initials = (name: string) => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : name.slice(0, 2)).toUpperCase();
+};
 
 // --- SEO: Product + Breadcrumb structured data -------------------------------
 const productImageUrl = getSrcString(productImages[0]);
@@ -142,8 +94,8 @@ const productSchema = {
   image: productImageUrl ? [new URL(productImageUrl, Astro.site ?? Astro.url).toString()] : undefined,
   sku: product.id,
   brand: { '@type': 'Brand', name: 'Maison Arden' },
-  ...(product.rating
-    ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating, reviewCount: initialReviews.length } }
+  ...(product.rating && reviewCount > 0
+    ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating, reviewCount } }
     : {}),
   offers: {
     '@type': 'Offer',
@@ -224,10 +176,12 @@ const breadcrumbSchema = {
     <div class="pdp-info">
       <div class="pdp-info__eyebrow">{product.category}</div>
       <h1 class="pdp-info__name">{product.name}</h1>
+      {(avgRating > 0 || reviewCount > 0) && (
       <div class="pdp-info__rating">
-        <span class="pdp-info__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-        <span data-rv-avg>4.8</span> · <a href="#reviews" style="color:inherit;text-decoration:underline"><span data-rv-count>5</span> reviews</a>
+        <span class="pdp-info__stars" data-rv-avgstars>{starStr(avgRating)}</span>
+        <span data-rv-avg>{avgRating.toFixed(1)}</span> · <a href="#reviews" style="color:inherit;text-decoration:underline"><span data-rv-count>{reviewCount}</span> reviews</a>
       </div>
+      )}
       <div class="pdp-info__price">
         <span id="pdpPrice">{product.formattedPrice}</span>
         <s id="pdpComparePrice" style="display:none"></s>
@@ -238,18 +192,14 @@ const breadcrumbSchema = {
       <p class="pdp-info__desc">{product.description}</p>
       
       <div class="pdp-info__meta">
-        <span>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M2 8l3 3 9-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-          </svg> 
-          {product.materials.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' & ')}
-        </span>
-        <span>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="6.5" stroke="currentColor" />
-          </svg> 
-          Made in Paris
-        </span>
+        {product.materials.length > 0 && (
+          <span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8l3 3 9-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            {product.materials.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' & ')}
+          </span>
+        )}
         <span>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M8 1l2 4.5 5 .5-3.7 3.3L12 14 8 11.5 4 14l.7-4.7L1 6l5-.5L8 1z" stroke="currentColor" stroke-linejoin="round" />
@@ -392,27 +342,28 @@ const breadcrumbSchema = {
             </div>
           </div>
         </div>
-        <div class="pdp-acc__item">
-          <button class="pdp-acc__toggle">Materials & Care <span class="pdp-acc__icon"></span></button>
-          <div class="pdp-acc__body">
-            <div class="pdp-acc__content">
-              <ul>
-                <li>100% natural fibres sourced from leading mills</li>
-                <li>Specialist dry clean only</li>
-                <li>Store on a wide wooden hanger; steam to refresh</li>
-                <li>Complimentary lifetime repairs</li>
-              </ul>
+        {product.materialsCare && product.materialsCare.length > 0 && (
+          <div class="pdp-acc__item">
+            <button class="pdp-acc__toggle">Materials & Care <span class="pdp-acc__icon"></span></button>
+            <div class="pdp-acc__body">
+              <div class="pdp-acc__content">
+                <ul>
+                  {product.materialsCare.map((line) => <li>{line}</li>)}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="pdp-acc__item">
-          <button class="pdp-acc__toggle">Shipping & Returns <span class="pdp-acc__icon"></span></button>
-          <div class="pdp-acc__body">
-            <div class="pdp-acc__content">
-              Complimentary carbon-neutral shipping worldwide. Easy returns within 30 days of arrival. Orders placed before 2pm CET ship the same day.
+        )}
+        {product.shippingReturns && product.shippingReturns.length > 0 && (
+          <div class="pdp-acc__item">
+            <button class="pdp-acc__toggle">Shipping & Returns <span class="pdp-acc__icon"></span></button>
+            <div class="pdp-acc__body">
+              <div class="pdp-acc__content">
+                {product.shippingReturns.join(' ')}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   </section>
@@ -429,14 +380,14 @@ const breadcrumbSchema = {
         <div class="rsum">
           <span class="rsum__label">Overall Rating</span>
           <div class="rsum__avgrow">
-            <span class="rsum__avg"><span data-rv-avg>0.0</span></span>
+            <span class="rsum__avg"><span data-rv-avg>{avgRating.toFixed(1)}</span></span>
             <div>
-              <div class="rsum__stars" data-rv-avgstars>&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-              <div class="rsum__count">Based on <span data-rv-count>0</span> reviews</div>
+              <div class="rsum__stars" data-rv-avgstars>{starStr(avgRating)}</div>
+              <div class="rsum__count">Based on <span data-rv-count>{reviewCount}</span> reviews</div>
             </div>
           </div>
-          <div class="rsum__bars" data-rv-bars></div>
-          <div class="rsum__rec">
+          <div class="rsum__bars" data-rv-bars hidden={realReviews.length === 0}></div>
+          <div class="rsum__rec" data-rv-rec-wrap hidden={realReviews.length === 0}>
             <span class="rsum__rec-num" data-rv-rec>0%</span>
             <span class="rsum__rec-txt">of clients would recommend this piece to a friend</span>
           </div>
@@ -491,45 +442,36 @@ const breadcrumbSchema = {
             </form>
           </div>
 
-          <!-- Reviews List -->
+          <!-- Reviews List — real reviews only (reviews.reviews metafield) -->
           <div class="rlist" id="rList">
-            {initialReviews.map((rev) => (
+            {realReviews.length > 0 ? realReviews.map((rev) => (
               <article class="ritem" data-rating={rev.rating}>
                 <div class="ritem__head">
-                  <div class="ritem__avatar">{rev.avatar}</div>
+                  <div class="ritem__avatar">{initials(rev.author)}</div>
                   <div class="ritem__who">
-                    <div class="ritem__name">
-                      {rev.author}
-                      {rev.verified && (
-                        <span class="ritem__verified">
-                          <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
-                            <path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                          Verified
-                        </span>
-                      )}
-                    </div>
-                    <div class="ritem__loc">{rev.location}</div>
+                    <div class="ritem__name">{rev.author}</div>
                   </div>
                   <div class="ritem__right">
                     <div class="ritem__stars">{"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}</div>
-                    <div class="ritem__date">{rev.date}</div>
+                    {rev.date && <div class="ritem__date">{rev.date}</div>}
                   </div>
                 </div>
-                <h3 class="ritem__title">{rev.title}</h3>
-                <p class="ritem__body">{rev.comment}</p>
+                {rev.title && <h3 class="ritem__title">{rev.title}</h3>}
+                {rev.body && <p class="ritem__body">{rev.body}</p>}
                 <div class="ritem__foot">
                   <span class="ritem__foot-q">Was this helpful?</span>
-                  <button class="ritem__helpful" data-helpful={rev.helpfulCount}>
+                  <button class="ritem__helpful" data-helpful="0">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
                       <path d="M5 7l3-4c.9 0 1.5.8 1.3 1.7L9 6h3.2c.8 0 1.4.8 1.2 1.6l-1 4c-.1.7-.8 1.2-1.5 1.2H5V7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
                       <rect x="2" y="7" width="3" height="6" stroke="currentColor" stroke-width="1.2" />
                     </svg>
-                    Helpful (<span data-help-count>{rev.helpfulCount}</span>)
+                    Helpful (<span data-help-count>0</span>)
                   </button>
                 </div>
               </article>
-            ))}
+            )) : (
+              <p class="rlist__empty">No reviews yet — be the first to share your experience.</p>
+            )}
           </div>
         </div>
       </div>
@@ -911,16 +853,24 @@ const breadcrumbSchema = {
       if (!list) return;
       const items = $$('.ritem', list);
       const total = items.length;
-      const ratings = items.map((i: any) => +(i as HTMLElement).dataset.rating || 5);
-      const avg = total ? ratings.reduce((a: number, b: number) => a + b, 0) / total : 0;
-      const avgstarsEl = $('[data-rv-avgstars]');
+      const ratings = items.map((i: any) => +(i as HTMLElement).dataset.rating || 0);
+      const avgstarsEls = $$('[data-rv-avgstars]');
       const recEl = $('[data-rv-rec]');
       const barsEl = $('[data-rv-bars]');
-      // Both the info-rating line and the review-summary card carry
-      // data-rv-avg / data-rv-count — update ALL, not just the first.
-      $$('[data-rv-avg]').forEach((e: any) => (e.textContent = avg.toFixed(1)));
-      $$('[data-rv-count]').forEach((e: any) => (e.textContent = String(total)));
-      if (avgstarsEl) avgstarsEl.textContent = starStr(Math.round(avg));
+      // Only recompute avg/count from the rendered review list when there ARE
+      // real reviews — otherwise leave the server-rendered aggregate rating
+      // (from Shopify's reviews.rating metafield) alone instead of zeroing it.
+      if (total > 0) {
+        const avg = ratings.reduce((a: number, b: number) => a + b, 0) / total;
+        $$('[data-rv-avg]').forEach((e: any) => (e.textContent = avg.toFixed(1)));
+        $$('[data-rv-count]').forEach((e: any) => (e.textContent = String(total)));
+        avgstarsEls.forEach((e: any) => (e.textContent = starStr(Math.round(avg))));
+      }
+      const recWrap = $('[data-rv-rec-wrap]');
+      if (total > 0) {
+        if (recWrap) (recWrap as HTMLElement).hidden = false;
+        if (barsEl) (barsEl as HTMLElement).hidden = false;
+      }
       const rec = total ? Math.round(ratings.filter((r: number) => r >= 4).length / total * 100) : 0;
       if (recEl) recEl.textContent = rec + '%';
       if (barsEl) {
@@ -1810,6 +1760,14 @@ const breadcrumbSchema = {
     display: flex;
     flex-direction: column;
     gap: 16px;
+  }
+
+  .rlist__empty {
+    font-size: 13.5px;
+    color: var(--lux-on-light-soft);
+    padding: clamp(22px, 2.3vw, 32px);
+    border: 1px dashed var(--lux-light-border);
+    text-align: center;
   }
 
   .ritem {

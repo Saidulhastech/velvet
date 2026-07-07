@@ -142,7 +142,7 @@ if (!isRemoteImage && product.image && images[imagePath]) {
     
     <div class="pc__meta">
       <span class="pc__price">{product.formattedPrice}</span>
-      <span class="pc__rating">&#9733; {product.rating}</span>
+      {product.rating != null && <span class="pc__rating">&#9733; {product.rating}</span>}
     </div>
   </div>
 </article>

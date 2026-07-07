@@ -33,6 +33,10 @@ const blog = defineCollection({
     image: z.string(),
     excerpt: z.string(),
     order: z.number().optional(),
+    author: z.string().default('Hélène Arden'),
+    authorRole: z.string().default('Founder & Creative Director'),
+    authorBio: z.string().default('Hélène founded Maison Arden in Paris in 2014 with a single cashmere coat and a belief that fewer, finer things are worth keeping. She writes on craft, materials and dressing with intention.'),
+    authorImage: z.string().default('Product Image 17.png'),
   }),
 });
 

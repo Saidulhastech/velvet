@@ -33,8 +33,9 @@ const POSITIONS = [
 
 // The `shop-the-look` collection decides WHICH products + their order. Each is
 // then fetched in full (getShopifyProductWithVariants) so the real variant matrix
-// drives the inline Quick View. If the collection is missing/empty, fall back to
-// the first few store (or demo) products so the section never blanks.
+// drives the inline colour/size pickers on each row. If the collection is
+// missing/empty, fall back to the first few store (or demo) products so the
+// section never blanks.
 const curated = await getShopifyCollection(SHOP_THE_LOOK_HANDLE, market);
 let handles = (curated?.products ?? []).map((p) => p.handle);
 if (handles.length === 0) {
@@ -58,19 +59,12 @@ const lookItems = resolved
       name: p.name,
       price: p.price,
       formattedPrice: p.formattedPrice,
-      originalPrice: undefined as string | undefined,
-      color: p.swatches?.[0]?.color ?? '',
+      swatches: p.swatches ?? [],
       image: resolveImg(p.image),
-      needsPicker: p.needsPicker ?? false,
       currency: r.currency,
-      // Data the Quick View needs to build its variant picker inline.
+      // Real variant matrix — drives the inline colour/size pickers per row.
       variants: p.variants ?? [],
       options: p.options ?? [],
-      category: p.category,
-      rating: p.rating,
-      description: p.description,
-      sizes: p.filterSizes ?? [],
-      stock: p.stock,
       ...POSITIONS[i],
     };
   })
@@ -120,59 +114,33 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
         {lookItems.map((item, idx) => (
           <div
             class={`look__row ${idx !== 0 ? 'is-dim' : ''}`}
-            data-qv-source
             data-index={item.index}
             data-id={item.id}
             data-name={item.name}
-            data-price={item.formattedPrice}
             data-img={item.image}
-            data-color={item.color}
             data-handle={item.handle}
-            data-cat={item.category ?? ''}
-            data-rating={item.rating ?? ''}
-            data-desc={item.description ?? ''}
-            data-size={(item.sizes ?? []).join(' ')}
-            data-stock={item.stock ?? 'in'}
+            data-symbol={(item.formattedPrice.match(/^[^\d.,]+/) || ['$'])[0]}
             data-variants={item.variants?.length ? JSON.stringify(item.variants) : ''}
             data-options={item.options?.length ? JSON.stringify(item.options) : ''}
-            data-needs-picker={item.needsPicker ? 'true' : 'false'}
+            data-swatch-hex={JSON.stringify(Object.fromEntries((item.swatches ?? []).map((sw) => [sw.color, sw.hex])))}
           >
             <div class="look__row-thumb">
-              <img src={item.image} alt={item.name} width={66} height={66} loading="lazy" />
+              <img class="look__row-img" src={item.image} alt={item.name} width={66} height={66} loading="lazy" />
             </div>
             <div>
               <div class="look__row-name">{item.name}</div>
-              <span class="look__row-opt">
-                Colour: {item.color} 
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                  <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-linecap="round" />
-                </svg>
-              </span>
-              <br />
-              <button
-                class="look__row-add"
-                data-add-bag
-                data-id={item.id}
-                data-qv={(item as any).needsPicker ? '' : undefined}
-                aria-label={(item as any).needsPicker ? `Select options for ${item.name}` : `Add ${item.name} to bag`}
-              >{(item as any).needsPicker ? 'Select Options' : 'Add to Bag'}</button>
+              <div class="look__opt-line" data-role="opt-line"></div>
+              <div class="look__sw-row" data-role="colors" hidden></div>
+              <div class="look__sizes-row" data-role="sizes" hidden></div>
+              <button class="look__row-add" data-add-bag disabled>Add to Bag</button>
             </div>
-            <div class="look__row-price">
-              {item.originalPrice ? (
-                <>
-                  <span class="sale">{item.formattedPrice}</span> 
-                  <s>{item.originalPrice}</s>
-                </>
-              ) : (
-                item.formattedPrice
-              )}
-            </div>
+            <div class="look__row-price" data-role="price">{item.formattedPrice}</div>
           </div>
         ))}
       </div>
-      
-      <button class="look__total" data-add-bag data-ids={lookItems.map(item => item.id).join(',')}>
-        Add All to Bag — {bundleTotalFormatted}
+
+      <button class="look__total" data-add-bag>
+        <span data-role="total-label">Add All to Bag — {bundleTotalFormatted}</span>
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
           <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
         </svg>
@@ -185,8 +153,10 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
   import { addToCart } from '../../../stores/cart';
 
   const dots = Array.from(document.querySelectorAll('.look__dot')) as HTMLElement[];
-  const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
+  const rows = Array.from(document.querySelectorAll<HTMLElement>('.look__row'));
   const tips = Array.from(document.querySelectorAll('.look__tip')) as HTMLElement[];
+  const totalBtn = document.querySelector<HTMLElement>('.look__total');
+  const totalLabel = totalBtn?.querySelector<HTMLElement>('[data-role="total-label"]');
 
   function setLook(indexStr: string) {
     dots.forEach(d => d.classList.toggle('is-active', d.dataset.index === indexStr));
@@ -197,56 +167,162 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
   dots.forEach(d => d.addEventListener('click', () => {
     if (d.dataset.index) setLook(d.dataset.index);
   }));
-  
+
   rows.forEach(r => r.addEventListener('mouseenter', () => {
     if (r.dataset.index) setLook(r.dataset.index);
   }));
 
-  // Add one directly-resolvable row to the bag (strips the currency symbol from
-  // the localized data-price before parsing).
-  function addRowDirect(dataset: DOMStringMap) {
-    addToCart({
-      id: dataset.id || '',
-      name: dataset.name || '',
-      price: parseFloat((dataset.price || '').replace(/[^0-9.]/g, '')) || 0,
-      image: dataset.img || '',
-      color: dataset.color || undefined,
-      size: undefined,
-      description: dataset.handle || '',
-    }, 1);
+  const money = (symbol: string, n: number) => `${symbol}${n.toLocaleString('en-US', {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+  interface Resolved { id: string; price: number; image: string; available: boolean; color?: string; size?: string; }
+  const resolvedByRow = new Map<HTMLElement, Resolved>();
+
+  function updateTotal() {
+    if (!totalLabel) return;
+    const symbol = rows[0]?.dataset.symbol || '$';
+    const total = rows.reduce((sum, r) => sum + (resolvedByRow.get(r)?.price ?? 0), 0);
+    totalLabel.textContent = `Add All to Bag — ${money(symbol, total)}`;
   }
 
-  // Single hotspot add to bag. Variant rows carry `data-qv` and are opened by
-  // the Quick View's global listener (pick a size inline) — so here we only
-  // handle the directly-addable ones and let QV take the rest.
-  document.querySelectorAll('.look__row-add').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      const rowEl = btn.closest('.look__row') as HTMLElement | null;
-      if (!rowEl) return;
-      if (rowEl.dataset.needsPicker === 'true') return; // → Quick View
+  // Build an inline colour/size picker for one row straight from its real
+  // Shopify variant matrix — no Quick View round-trip needed for this section.
+  function initRow(row: HTMLElement) {
+    let variants: any[] = [];
+    let options: any[] = [];
+    try { variants = row.dataset.variants ? JSON.parse(row.dataset.variants) : []; } catch { variants = []; }
+    try { options = row.dataset.options ? JSON.parse(row.dataset.options) : []; } catch { options = []; }
+    let swatchHex: Record<string, string> = {};
+    try { swatchHex = row.dataset.swatchHex ? JSON.parse(row.dataset.swatchHex) : {}; } catch { swatchHex = {}; }
+    void options;
+
+    const addBtn = row.querySelector<HTMLButtonElement>('.look__row-add');
+    const colorsEl = row.querySelector<HTMLElement>('[data-role="colors"]');
+    const sizesEl = row.querySelector<HTMLElement>('[data-role="sizes"]');
+    const optLine = row.querySelector<HTMLElement>('[data-role="opt-line"]');
+    const priceEl = row.querySelector<HTMLElement>('[data-role="price"]');
+    const imgEl = row.querySelector<HTMLImageElement>('.look__row-img');
+    const symbol = row.dataset.symbol || '$';
+
+    if (!variants.length) {
+      if (addBtn) addBtn.disabled = true;
+      return;
+    }
+
+    const optNames = Object.keys(variants[0].opts || {}).filter((n) => !/^title$/i.test(n));
+    const colorKey = optNames.find((n) => /colou?r/i.test(n)) || '';
+    const sizeKey = optNames.find((n) => /size/i.test(n)) || optNames.find((n) => n !== colorKey) || '';
+
+    const distinct = (key: string) => {
+      const seen: string[] = [];
+      variants.forEach((v) => { const val = v.opts[key]; if (val && !seen.includes(val)) seen.push(val); });
+      return seen;
+    };
+    const colors = colorKey ? distinct(colorKey) : [];
+    const sizes = sizeKey ? distinct(sizeKey) : [];
+
+    const seed = variants.find((v) => v.available) || variants[0];
+    const selected: Record<string, string> = { ...seed.opts };
+
+    function currentVariant() {
+      return variants.find((v) => Object.keys(selected).every((k) => v.opts[k] === selected[k])) || null;
+    }
+    function optionAvailable(key: string, value: string) {
+      const trial = { ...selected, [key]: value };
+      return variants.some((v) => v.available && Object.keys(trial).every((k) => v.opts[k] === trial[k]));
+    }
+
+    function resolve() {
+      const v = currentVariant();
+      const resolved: Resolved = {
+        id: v?.id || seed.id,
+        price: v ? v.price : seed.price,
+        image: v?.img || row.dataset.img || '',
+        available: !!(v && v.available),
+        color: colorKey ? selected[colorKey] : undefined,
+        size: sizeKey ? selected[sizeKey] : undefined,
+      };
+      resolvedByRow.set(row, resolved);
+
+      if (priceEl) priceEl.textContent = money(symbol, resolved.price);
+      if (imgEl && resolved.image) imgEl.src = resolved.image;
+      if (addBtn) addBtn.disabled = !resolved.available;
+      if (optLine) optLine.textContent = [resolved.color, resolved.size].filter(Boolean).join(' · ');
+
+      colorsEl?.querySelectorAll<HTMLElement>('.look__sw').forEach((el) => {
+        const val = el.dataset.value || '';
+        el.classList.toggle('is-active', selected[colorKey] === val);
+        el.classList.toggle('is-unavailable', !!colorKey && !optionAvailable(colorKey, val));
+      });
+      sizesEl?.querySelectorAll<HTMLButtonElement>('.look__size').forEach((el) => {
+        const val = el.dataset.value || '';
+        const ok = !sizeKey || optionAvailable(sizeKey, val);
+        el.classList.toggle('is-active', selected[sizeKey] === val);
+        el.disabled = !ok;
+        el.classList.toggle('is-oos', !ok);
+      });
+
+      updateTotal();
+    }
+
+    if (colors.length > 1 && colorsEl) {
+      colorsEl.hidden = false;
+      colorsEl.innerHTML = colors.map((c) =>
+        `<span class="look__sw" data-value="${c}" style="background:${swatchHex[c.toLowerCase()] || '#858A76'}" title="${c}"></span>`
+      ).join('');
+      colorsEl.querySelectorAll<HTMLElement>('.look__sw').forEach((sw) => sw.addEventListener('click', () => {
+        if (sw.classList.contains('is-unavailable')) return;
+        selected[colorKey] = sw.dataset.value || '';
+        resolve();
+      }));
+    }
+
+    if (sizes.length > 1 && sizesEl) {
+      sizesEl.hidden = false;
+      sizesEl.innerHTML = sizes.map((s) =>
+        `<button type="button" class="look__size" data-value="${s}">${s.toUpperCase()}</button>`
+      ).join('');
+      sizesEl.querySelectorAll<HTMLButtonElement>('.look__size').forEach((btn) => btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        selected[sizeKey] = btn.dataset.value || '';
+        resolve();
+      }));
+    }
+
+    resolve();
+  }
+
+  rows.forEach(initRow);
+
+  function addRowToBag(row: HTMLElement) {
+    const resolved = resolvedByRow.get(row);
+    if (!resolved || !resolved.available) return false;
+    addToCart({
+      id: resolved.id,
+      name: row.dataset.name || '',
+      price: resolved.price,
+      image: resolved.image || row.dataset.img || '',
+      color: resolved.color,
+      size: resolved.size,
+      description: row.dataset.handle || '',
+    }, 1);
+    return true;
+  }
+
+  rows.forEach((row) => {
+    row.querySelector('.look__row-add')?.addEventListener('click', (e) => {
       e.preventDefault();
-      addRowDirect(rowEl.dataset);
+      addRowToBag(row);
     });
   });
 
-  // Add entire lookbook edit to bag. Add every directly-addable piece, then open
-  // the Quick View for the first piece that still needs a size/option chosen so
-  // the shopper can complete the set (no more silent skips / total mismatch).
-  const addAllBtn = document.querySelector('.look__total');
-  addAllBtn?.addEventListener('click', (e) => {
+  // Every row is fully resolved inline (colour + size already chosen or
+  // defaulted) — add them all in one shot, no modal hand-off, no silent drops.
+  totalBtn?.addEventListener('click', (e) => {
     e.preventDefault();
-    const rows = Array.from(document.querySelectorAll('.look__row')) as HTMLElement[];
-    let firstPending: HTMLElement | null = null;
-    rows.forEach((rowEl) => {
-      if (rowEl.dataset.needsPicker === 'true') {
-        if (!firstPending) firstPending = rowEl;
-        return;
-      }
-      addRowDirect(rowEl.dataset);
-    });
-    if (firstPending) {
-      (firstPending as HTMLElement).querySelector<HTMLElement>('.look__row-add[data-qv]')?.click();
-    }
+    rows.forEach((row) => addRowToBag(row));
   });
 </script>
 
@@ -452,18 +528,89 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
     color: var(--lux-on-light);
   }
 
-  .look__row-opt {
+  .look__opt-line {
+    font-size: 11px;
+    letter-spacing: .3px;
+    text-transform: capitalize;
+    color: var(--lux-on-light-soft);
+    margin-top: 4px;
+    min-height: 14px;
+  }
+
+  .look__sw-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  :global(.look__sw) {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--lux-light-border-strong);
+    cursor: pointer;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color .2s var(--ease), transform .2s var(--ease);
+  }
+
+  :global(.look__sw:hover) {
+    transform: scale(1.1);
+  }
+
+  :global(.look__sw.is-active) {
+    outline-color: var(--lux-primary-dark);
+  }
+
+  :global(.look__sw.is-unavailable) {
+    opacity: .35;
+    cursor: not-allowed;
+  }
+
+  .look__sizes-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  :global(.look__size) {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    color: var(--lux-on-light-soft);
+    border: 1px solid var(--lux-light-border-strong);
+    background: var(--lux-light-elevated);
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--lux-on-light-soft);
-    margin-top: 5px;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+  }
+
+  :global(.look__size:hover) {
+    border-color: var(--lux-primary-dark);
+  }
+
+  :global(.look__size.is-active) {
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    border-color: var(--lux-primary-dark);
+  }
+
+  :global(.look__size.is-oos) {
+    opacity: .35;
+    cursor: not-allowed;
+    text-decoration: line-through;
   }
 
   .look__row-add {
     display: inline-block;
-    margin-top: 7px;
+    margin-top: 10px;
     font-size: 12px;
     font-weight: 600;
     color: var(--lux-on-light);
@@ -475,6 +622,7 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
     border-top: none;
     padding-left: 0;
     padding-right: 0;
+    cursor: pointer;
   }
 
   .look__row-add:hover {
@@ -482,21 +630,16 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
     border-color: var(--lux-secondary-olive);
   }
 
+  .look__row-add:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+
   .look__row-price {
     font-size: 15px;
     font-weight: 600;
     color: var(--lux-on-light);
     white-space: nowrap;
-  }
-
-  .look__row-price s {
-    color: var(--lux-on-light-soft);
-    font-weight: 400;
-    margin-left: 6px;
-  }
-
-  .look__row-price .sale {
-    color: #B0492F;
   }
 
   .look__total {

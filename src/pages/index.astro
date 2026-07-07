@@ -44,6 +44,15 @@ const icons = [
 if (icons.length === 0) {
   icons.push(...productsList.slice(8, 12));
 }
+
+// Only show a New Arrivals tab when at least one of the featured products
+// actually matches it — mirrors the client-side filter below so a tab like
+// "Accessories" never sits there clickable-but-always-empty when the store
+// has no real category data behind it.
+const catOf = (p: (typeof newArrivals)[number]) => (p?.category || '').toLowerCase();
+const hasWomenArrivals = newArrivals.some(p => catOf(p).includes('women') || catOf(p).includes('unisex'));
+const hasMenArrivals = newArrivals.some(p => catOf(p).includes('men') || catOf(p).includes('unisex'));
+const hasAccessoriesArrivals = newArrivals.some(p => catOf(p).includes('accessories') || catOf(p).includes('bags'));
 ---
 
 <BaseLayout title="Quiet Luxury, Considered Wardrobe" description="Maison Arden — quiet luxury fashion. A considered wardrobe of tailoring, outerwear and knitwear in refined natural materials, finished by hand.">
@@ -66,24 +75,26 @@ if (icons.length === 0) {
         </div>
         <div class="prod__tabs reveal d1" role="tablist">
           <button class="prod__tab is-active" role="tab" data-filter="all">All</button>
-          <button class="prod__tab" role="tab" data-filter="women">Women</button>
-          <button class="prod__tab" role="tab" data-filter="men">Men</button>
-          <button class="prod__tab" role="tab" data-filter="accessories">Accessories</button>
+          {hasWomenArrivals && <button class="prod__tab" role="tab" data-filter="women">Women</button>}
+          {hasMenArrivals && <button class="prod__tab" role="tab" data-filter="men">Men</button>}
+          {hasAccessoriesArrivals && <button class="prod__tab" role="tab" data-filter="accessories">Accessories</button>}
         </div>
       </div>
-      
+
       <div class="prod__grid">
         {newArrivals.map((product, idx) => {
           const delays = ['', 'd1', 'd2', 'd3', '', 'd1', 'd2', 'd3'];
           return (
-            <ProductCard 
-              product={product} 
-              delayClass={delays[idx]} 
+            <ProductCard
+              product={product}
+              delayClass={delays[idx]}
             />
           );
         })}
       </div>
-      
+
+      <p class="prod__empty" data-prod-empty hidden>No pieces in this category yet.</p>
+
       <div class="prod__foot reveal">
         <a href="/shop" class="btn-dark">
           View All New Arrivals 
@@ -152,7 +163,7 @@ if (icons.length === 0) {
               <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
             </svg>
           </a>
-          <a href="#campaign-film" class="btn-ghost-d">
+          <a href="#showcase" class="btn-ghost-d">
             <span class="play">
               <svg width="7" height="8" viewBox="0 0 7 8" fill="currentColor">
                 <path d="M0 0l7 4-7 4z" />
@@ -217,6 +228,7 @@ if (icons.length === 0) {
   // Dynamic client-side filtering for New Arrivals section tabs
   const tabs = Array.from(document.querySelectorAll('.prod__tab')) as HTMLButtonElement[];
   const cards = Array.from(document.querySelectorAll('#new-arrivals .pc')) as HTMLElement[];
+  const emptyState = document.querySelector('[data-prod-empty]') as HTMLElement | null;
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -225,32 +237,21 @@ if (icons.length === 0) {
       tab.classList.add('is-active');
 
       const filter = tab.dataset.filter || 'all';
+      let visibleCount = 0;
 
       cards.forEach(card => {
         const cat = (card.dataset.cat || '').toLowerCase();
-        
-        if (filter === 'all') {
-          card.style.display = '';
-        } else if (filter === 'women') {
-          if (cat.includes('women') || cat.includes('unisex')) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        } else if (filter === 'men') {
-          if (cat.includes('men') || cat.includes('unisex')) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        } else if (filter === 'accessories') {
-          if (cat.includes('accessories') || cat.includes('bags')) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        }
+        let visible = true;
+
+        if (filter === 'women') visible = cat.includes('women') || cat.includes('unisex');
+        else if (filter === 'men') visible = cat.includes('men') || cat.includes('unisex');
+        else if (filter === 'accessories') visible = cat.includes('accessories') || cat.includes('bags');
+
+        card.style.display = visible ? '' : 'none';
+        if (visible) visibleCount++;
       });
+
+      if (emptyState) emptyState.hidden = visibleCount > 0;
     });
   });
 </script>
@@ -266,11 +267,7 @@ if (icons.length === 0) {
   .best__inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 0 var(--gutter) var(--section-y);
-  }
-
-  .best__inner {
-    padding-top: var(--section-y);
+    padding: var(--section-y) var(--gutter);
   }
 
   .prod__head {
@@ -362,6 +359,13 @@ if (icons.length === 0) {
   .prod__foot {
     text-align: center;
     margin-top: clamp(40px, 4.5vw, 64px);
+  }
+
+  .prod__empty {
+    text-align: center;
+    font-size: 14px;
+    color: var(--lux-on-light-soft);
+    padding: 40px 0;
   }
 
   @media (max-width:900px) {

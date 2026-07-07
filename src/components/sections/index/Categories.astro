@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { getShopifyProducts } from '../../../lib/shopify/client';
 
 // Import images to resolve them through Astro's asset pipeline
 import imgP1 from '../../../assets/images/Product Image 1.png';
@@ -19,80 +20,85 @@ import imgP14 from '../../../assets/images/Product Image 14.png';
 import imgP15 from '../../../assets/images/Product Image 15.png';
 import imgP16 from '../../../assets/images/Product Image 16.png';
 
+// Real per-category counts from the actual catalog (Shopify `productType`,
+// via product.filterCategory) — never a fabricated number. A category with
+// zero real matches is dropped below rather than shown with a fake count.
+const productsList = await getShopifyProducts(Astro.locals.market);
+const countFor = (filter: string) => productsList.filter((p) => p.filterCategory === filter).length;
+
 const categories = [
   {
     name: 'Tailoring',
-    count: 42,
     filter: 'tailoring',
     mainImage: imgP1,
     thumbs: [imgP1, imgP2, imgP3]
   },
   {
     name: 'Outerwear',
-    count: 28,
     filter: 'outerwear',
     mainImage: imgP2,
     thumbs: [imgP4, imgP5, imgP6]
   },
   {
     name: 'Knitwear',
-    count: 35,
     filter: 'knitwear',
     mainImage: imgP9,
     thumbs: [imgP7, imgP8, imgP9]
   },
   {
     name: 'Denim',
-    count: 19,
     filter: 'denim',
     mainImage: imgP5,
     thumbs: [imgP10, imgP11, imgP12]
   },
   {
     name: 'Accessories',
-    count: 54,
     filter: 'accessories',
     mainImage: imgP16,
     thumbs: [imgP13, imgP14, imgP15]
   }
-];
+]
+  .map((cat) => ({ ...cat, count: countFor(cat.filter) }))
+  .filter((cat) => cat.count > 0);
 ---
 
-<section class="cats" id="categories" aria-label="Shop by category">
-  <div class="cats__inner">
-    <div class="cats__head reveal">
-      <span class="eyebrow eyebrow--center">Explore the Maison</span>
-      <h2 class="section-title">Shop by <em>Category</em></h2>
-    </div>
-    
-    <div class="catlist reveal d1">
-      <div class="catlist__preview" aria-hidden="true">
-        <img src={categories[2]?.mainImage.src ?? categories[0]?.mainImage.src} alt="" id="catPreviewImg" />
+{categories.length > 0 && (
+  <section class="cats" id="categories" aria-label="Shop by category">
+    <div class="cats__inner">
+      <div class="cats__head reveal">
+        <span class="eyebrow eyebrow--center">Explore the Maison</span>
+        <h2 class="section-title">Shop by <em>Category</em></h2>
       </div>
-      
-      {categories.map((cat, idx) => (
-        <a 
-          href={`/shop?category=${cat.filter}`} 
-          class={`catrow ${idx === 2 ? 'is-active' : ''}`} 
-          data-img={cat.mainImage.src}
-        >
-          <span class="catrow__thumbs">
-            {cat.thumbs.map((thumb) => (
-              <Image src={thumb} alt="" width={58} height={58} />
-            ))}
-          </span>
-          <span class="catrow__name">{cat.name}<sup>{cat.count}</sup></span>
-          <span class="catrow__view">
-            View Products 
-            <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
-              <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-            </svg>
-          </span>
-        </a>
-      ))}
+
+      <div class="catlist reveal d1">
+        <div class="catlist__preview" aria-hidden="true">
+          <img src={categories[2]?.mainImage.src ?? categories[0]?.mainImage.src} alt="" id="catPreviewImg" />
+        </div>
+
+        {categories.map((cat, idx) => (
+          <a
+            href={`/shop?category=${cat.filter}`}
+            class={`catrow ${idx === 2 ? 'is-active' : ''}`}
+            data-img={cat.mainImage.src}
+          >
+            <span class="catrow__thumbs">
+              {cat.thumbs.map((thumb) => (
+                <Image src={thumb} alt="" width={58} height={58} />
+              ))}
+            </span>
+            <span class="catrow__name">{cat.name}<sup>{cat.count}</sup></span>
+            <span class="catrow__view">
+              View Products
+              <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+            </span>
+          </a>
+        ))}
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+)}
 
 <script>
   const list = document.querySelector('.catlist');

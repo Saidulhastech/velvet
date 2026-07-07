@@ -45,7 +45,7 @@ const featuredImgPath = featuredPost ? `/src/assets/images/${featuredPost.data.i
           <div class="blogf__body">
             <span class="blogf__tag">{featuredPost.data.category}</span>
             <div class="blogf__meta">Editorial · {featuredPost.data.readTime} · {featuredPost.data.date}</div>
-            <h2 class="blogf__title">{featuredPost.data.title}</h2>
+            <h2 class="blogf__title"><a href={`/blog/${featuredPost.id}`}>{featuredPost.data.title}</a></h2>
             <p class="blogf__excerpt">{featuredPost.data.excerpt}</p>
             <a href={`/blog/${featuredPost.id}`} class="btn-dark">
               Read the Story 
@@ -84,7 +84,7 @@ const featuredImgPath = featuredPost ? `/src/assets/images/${featuredPost.data.i
               </a>
               <div class="bcard__body">
                 <div class="bcard__meta">{art.data.category} · {art.data.readTime}</div>
-                <h3 class="bcard__title">{art.data.title}</h3>
+                <h3 class="bcard__title"><a href={`/blog/${art.id}`}>{art.data.title}</a></h3>
                 <p class="bcard__excerpt">{art.data.excerpt}</p>
                 <a href={`/blog/${art.id}`} class="bcard__btn">
                   Read Article 
@@ -295,13 +295,20 @@ const featuredImgPath = featuredPost ? `/src/assets/images/${featuredPost.data.i
     color: var(--lux-on-light-soft); 
     margin: 14px 0 12px; 
   }
-  .blogf__title { 
-    font-family: var(--font-display); 
-    font-size: clamp(30px,3.6vw,50px); 
-    font-weight: 500; 
-    line-height: 1.08; 
-    letter-spacing: -1px; 
-    color: var(--lux-on-light); 
+  .blogf__title {
+    font-family: var(--font-display);
+    font-size: clamp(30px,3.6vw,50px);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -1px;
+    color: var(--lux-on-light);
+  }
+  .blogf__title a {
+    color: inherit;
+    transition: color .3s var(--ease);
+  }
+  .blogf__title a:hover {
+    color: var(--lux-secondary-olive);
   }
   .blogf__excerpt { 
     font-size: clamp(15px,1.1vw,17px); 
@@ -445,6 +452,15 @@ const featuredImgPath = featuredPost ? `/src/assets/images/${featuredPost.data.i
     letter-spacing: -.4px;
     color: var(--lux-on-light);
     margin: 0;
+  }
+
+  .bcard__title a {
+    color: inherit;
+    transition: color .3s var(--ease);
+  }
+
+  .bcard__title a:hover {
+    color: var(--lux-secondary-olive);
   }
 
   .bcard__excerpt {

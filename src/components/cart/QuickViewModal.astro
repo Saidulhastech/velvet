@@ -84,6 +84,7 @@
     price: number;
     image: string;
     category?: string;
+    handle?: string;
   } | null = null;
 
   let selectedColor = '';
@@ -110,7 +111,10 @@
   let qvSizeKey = '';
   let qvSymbol = '$';
 
-  const qvMoney = (n: number) => `${qvSymbol}${Math.round(n).toLocaleString('en-US')}`;
+  const qvMoney = (n: number) => `${qvSymbol}${n.toLocaleString('en-US', {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  })}`;
 
   function qvCurrentVariant() {
     if (!qvVariants.length) return null;
@@ -165,8 +169,18 @@
     qvCat.textContent = dataset.cat || 'Collection';
     qvName.textContent = dataset.name || 'Product';
     qvPrice.textContent = dataset.price || '€0';
-    qvRating.textContent = '★ ' + (dataset.rating || '5.0');
-    qvDesc.textContent = dataset.desc || 'A considered piece in natural fibres, finished by hand in our Paris atelier.';
+    if (dataset.rating) {
+      qvRating.textContent = '★ ' + dataset.rating;
+      qvRating.style.display = '';
+    } else {
+      qvRating.style.display = 'none';
+    }
+    if (dataset.desc) {
+      qvDesc.textContent = dataset.desc;
+      qvDesc.style.display = '';
+    } else {
+      qvDesc.style.display = 'none';
+    }
 
     // ---- Pickers: prefer the real variant matrix, fall back to card swatches ----
     qvVariants = [];
@@ -188,6 +202,15 @@
       if (qvSwatches) (qvSwatches as HTMLElement).style.display = qvColorKey ? '' : 'none';
       const hexMap: Record<string, string> = {};
       (optionData.find((o: any) => /colou?r/i.test(o.name))?.values || []).forEach((cv: any) => { if (cv.color) hexMap[cv.name] = cv.color; });
+      // Shopify's colour swatch metafield is often left unconfigured by the
+      // merchant — reuse the card's already-resolved hex (real swatch → curated
+      // palette → neutral grey, see mapToLegacyProduct) instead of rendering blank.
+      const cardHexMap: Record<string, string> = {};
+      card.querySelectorAll<HTMLElement>('.pc__sw').forEach((sw) => {
+        const name = (sw.dataset.color || '').toLowerCase();
+        const hex = sw.style.backgroundColor;
+        if (name && hex) cardHexMap[name] = hex;
+      });
       const seed = qvVariants.find((v) => v.available) || qvVariants[0];
       qvSelected = { ...seed.opts };
       selectedColor = qvColorKey ? qvSelected[qvColorKey] : '';
@@ -202,7 +225,7 @@
       const sizeVals = qvSizeKey ? distinct(qvSizeKey) : [];
 
       qvSwatches.innerHTML = colors.map((c) =>
-        `<span class="qv__sw ${qvSelected[qvColorKey] === c ? 'is-active' : ''}" data-value="${c}" style="background:${hexMap[c] || ''}" title="${c}"></span>`
+        `<span class="qv__sw ${qvSelected[qvColorKey] === c ? 'is-active' : ''}" data-value="${c}" style="background:${hexMap[c] || cardHexMap[c.toLowerCase()] || '#858A76'}" title="${c}"></span>`
       ).join('');
       qvSizes.innerHTML = sizeVals.map((s) =>
         `<button class="qv__size ${qvSelected[qvSizeKey] === s ? 'is-active' : ''}" data-value="${s}">${s.toUpperCase()}</button>`
@@ -225,12 +248,10 @@
 
       qvResolve();
     } else {
-      // Fallback: mock products without a matrix — clone card swatches + size strings.
-      if (qvColorLabel) { qvColorLabel.textContent = 'Colour'; (qvColorLabel as HTMLElement).style.display = ''; }
-      if (qvSizeLabel) { qvSizeLabel.textContent = 'Size'; (qvSizeLabel as HTMLElement).style.display = ''; }
-      if (qvSizes) (qvSizes as HTMLElement).style.display = '';
-      if (qvSwatches) (qvSwatches as HTMLElement).style.display = '';
+      // Fallback: products without a real variant matrix — clone card swatches + size strings.
       const cardSwatches = Array.from(card.querySelectorAll('.pc__sw')) as HTMLElement[];
+      if (qvColorLabel) (qvColorLabel as HTMLElement).style.display = cardSwatches.length ? '' : 'none';
+      if (qvSwatches) (qvSwatches as HTMLElement).style.display = cardSwatches.length ? '' : 'none';
       selectedColor = cardSwatches[0]?.dataset.color || '';
       qvSwatches.innerHTML = cardSwatches.map((sw, idx) => {
         const col = sw.dataset.color || '';
@@ -249,8 +270,10 @@
         });
       });
 
-      const sizes = (dataset.size || 's m l').split(' ');
-      selectedSize = sizes[0] || 'S';
+      const sizes = (dataset.size || '').split('|').filter(Boolean);
+      if (qvSizeLabel) (qvSizeLabel as HTMLElement).style.display = sizes.length ? '' : 'none';
+      if (qvSizes) (qvSizes as HTMLElement).style.display = sizes.length ? '' : 'none';
+      selectedSize = sizes[0] || '';
       qvSizes.innerHTML = sizes.map((size, idx) =>
         `<button class="qv__size ${idx === 0 ? 'is-active' : ''}" data-value="${size}">${size.toUpperCase()}</button>`
       ).join('');
@@ -465,6 +488,7 @@
     padding: clamp(24px, 3.5vw, 42px);
     display: flex;
     flex-direction: column;
+    justify-content: center;
     overflow-y: auto;
   }
 
@@ -514,6 +538,10 @@
     line-height: 1.7;
     color: var(--lux-on-light-soft);
     margin: 0 0 20px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
   }
 
   .qv__label {
@@ -531,7 +559,7 @@
     margin-bottom: 22px;
   }
 
-  .qv__sw {
+  :global(.qv__sw) {
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -542,29 +570,38 @@
     transition: outline-color .2s var(--ease), transform .2s var(--ease);
   }
 
-  .qv__sw:hover {
+  :global(.qv__sw:hover) {
     transform: scale(1.1);
   }
 
-  .qv__sw.is-active {
+  :global(.qv__sw.is-active) {
     outline-color: var(--lux-primary-dark);
+  }
+
+  :global(.qv__sw.is-unavailable) {
+    opacity: .35;
+    cursor: not-allowed;
   }
 
   .qv__sizes {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 26px;
   }
 
-  .qv__size {
-    font-size: 12px;
+  :global(.qv__size) {
+    font-size: 11px;
     font-weight: 500;
     letter-spacing: .5px;
+    text-transform: uppercase;
+    white-space: nowrap;
     color: var(--lux-on-light-soft);
     border: 1px solid var(--lux-light-border-strong);
-    background: transparent;
-    width: 36px;
+    background: var(--lux-light-surface);
+    min-width: 36px;
     height: 36px;
+    padding: 0 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -572,20 +609,26 @@
     transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
   }
 
-  .qv__size:hover {
+  :global(.qv__size:hover) {
     border-color: var(--lux-primary-dark);
   }
 
-  .qv__size.is-active {
+  :global(.qv__size.is-active) {
     background: var(--lux-primary-dark);
     color: var(--lux-text-primary);
     border-color: var(--lux-primary-dark);
   }
 
+  :global(.qv__size.is-oos) {
+    opacity: .35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
   .qv__actions {
     display: flex;
     gap: 12px;
-    margin-top: auto;
+    margin-top: 32px;
   }
 
   .qv__add {

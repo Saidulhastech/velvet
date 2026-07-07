@@ -1,3 +1,0 @@
-[   40926ms] [INFO] Clear-Site-Data header on 'https://foesta-demo.myshopify.com/cart/c/hWNDy7NcmcpLKIEJMTBLUag8?key=c0e1891aeca81355f53856173a2a48d5&_s=7a062c19-7053-4cc8-96f9-3b3201ed2ac2&_y=61280b7d-3832-47bc-acc7-a452b374097f': Cleared data types: "prefetchCache", "prerenderCache". @ http://localhost:4323/cart:0
-[   42778ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://cdn.shopify.com/shopify-marketing_assets/static/ShopifySans--regular.woff:0
-[   43337ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://foesta-demo.myshopify.com/favicon.ico:0
