@@ -66,6 +66,11 @@ export default defineConfig({
       CUSTOMER_ACCOUNT_API_CLIENT_ID: envField.string({ context: 'server', access: 'secret', optional: true }),
       SHOPIFY_SHOP_ID: envField.string({ context: 'server', access: 'secret', optional: true }),
       CUSTOMER_ACCOUNT_API_VERSION: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Judge.me private API token (Settings > Integrations > View API tokens).
+      // Only needed to READ reviews server-side; submitting a review uses
+      // Judge.me's public create-review endpoint (no token). Optional so the
+      // site still renders (reviews list empty) if not yet configured.
+      JUDGEME_API_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
   image: {

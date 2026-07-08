@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../components/layout/BaseLayout.astro';
 import ProductCard from '../../components/product/ProductCard.astro';
 import { getShopifyProductWithVariants, getShopifyProducts, getShopifyRelatedProducts } from '../../lib/shopify/client';
+import { getProductReviews } from '../../lib/judgeme';
 
 const { handle } = Astro.params;
 const { product, variants: shopifyVariants, currency, singleVariant, productId } = await getShopifyProductWithVariants(handle || '', Astro.locals.market);
@@ -12,7 +13,7 @@ if (!product) {
 }
 
 // Boot data for client-side variant controller
-const bootData = JSON.stringify({ currency, variants: shopifyVariants, singleVariant });
+const bootData = JSON.stringify({ currency, variants: shopifyVariants, singleVariant, productId });
 
 // Parse category and gender for breadcrumb
 const categoryParts = product.category.split(' · ');
@@ -73,9 +74,10 @@ if (related.length < 4) {
   }
 }
 
-// Real reviews only — from the `reviews.reviews` metafield (see parseReviews()
-// in transforms.ts). Empty when the store hasn't set one; never fabricated.
-const realReviews = product.reviews ?? [];
+// Real reviews only — fetched from Judge.me at request time (review TEXT lives
+// in Judge.me, not a Shopify metafield). Empty when unconfigured or the
+// product has none yet; never fabricated.
+const realReviews = await getProductReviews(productId);
 const reviewCount = product.ratingCount ?? realReviews.length;
 const avgRating = product.rating ?? 0;
 const starStr = (n: number) => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
@@ -407,6 +409,7 @@ const breadcrumbSchema = {
               <h3 class="rform__title">Write a Review</h3>
               <p class="rform__sub">Share your experience with this piece. Your feedback helps others choose well.</p>
               <p class="rform__err" data-rform-err>Please add a rating, your name and a short review.</p>
+              <p class="rform__success" data-rform-success>Thanks — your review was submitted and will appear once it's approved.</p>
               <div class="rform__field">
                 <span class="rform__label">Your Rating</span>
                  <div class="rform__stars" id="rformStars">
@@ -423,8 +426,8 @@ const breadcrumbSchema = {
                   <input id="rvName" type="text" placeholder="Your name" required />
                 </div>
                 <div class="rform__field">
-                  <label class="rform__label" for="rvLoc">Location (optional)</label>
-                  <input id="rvLoc" type="text" placeholder="City, Country" />
+                  <label class="rform__label" for="rvEmail">Email</label>
+                  <input id="rvEmail" type="email" placeholder="you@example.com" required />
                 </div>
               </div>
               <div class="rform__field">
@@ -442,7 +445,7 @@ const breadcrumbSchema = {
             </form>
           </div>
 
-          <!-- Reviews List — real reviews only (reviews.reviews metafield) -->
+          <!-- Reviews List — real reviews only, fetched from Judge.me -->
           <div class="rlist" id="rList">
             {realReviews.length > 0 ? realReviews.map((rev) => (
               <article class="ritem" data-rating={rev.rating}>
@@ -470,7 +473,7 @@ const breadcrumbSchema = {
                 </div>
               </article>
             )) : (
-              <p class="rlist__empty">No reviews yet — be the first to share your experience.</p>
+              <p class="rlist__empty" data-rlist-empty>No reviews yet — be the first to share your experience.</p>
             )}
           </div>
         </div>
@@ -563,8 +566,9 @@ const breadcrumbSchema = {
     currency: string;
     variants: VariantData[];
     singleVariant: boolean;
+    productId: string | null;
   }
-  let bootData: BootData = { currency: 'EUR', variants: [], singleVariant: true };
+  let bootData: BootData = { currency: 'EUR', variants: [], singleVariant: true, productId: null };
   try {
     const bootEl = document.getElementById('pdpBootData');
     if (bootEl?.textContent) bootData = JSON.parse(bootEl.textContent);
@@ -580,9 +584,11 @@ const breadcrumbSchema = {
   if (baseVariant) Object.assign(selected, baseVariant.opts);
   let qty = 1;
 
+  const sameOptionValue = (a: string, b: string) => (a ?? '').toLowerCase() === (b ?? '').toLowerCase();
+
   function currentVariant(): VariantData | undefined {
     if (singleVariant || variants.length === 0) return baseVariant;
-    return variants.find(v => Object.keys(selected).every(k => v.opts[k] === selected[k]));
+    return variants.find(v => Object.keys(selected).every(k => sameOptionValue(v.opts[k], selected[k])));
   }
 
   // ---- Render price / availability / stock badge ----
@@ -681,7 +687,7 @@ const breadcrumbSchema = {
         ? { [colorKey]: selected[colorKey], Size: size }
         : { Size: size };
       const hasAvailable = variants.some(v =>
-        v.available && Object.keys(trial).every(k => v.opts[k] === trial[k])
+        v.available && Object.keys(trial).every(k => sameOptionValue(v.opts[k], trial[k]))
       );
       if (!hasAvailable) {
         btn.classList.add('is-oos');
@@ -851,7 +857,10 @@ const breadcrumbSchema = {
 
     function renderSummary() {
       if (!list) return;
-      const items = $$('.ritem', list);
+      // Locally-inserted pending reviews (awaiting Judge.me moderation) are
+      // excluded from the aggregate — that number is real Shopify metafield
+      // data and shouldn't move until Judge.me actually approves the review.
+      const items = $$('.ritem:not([data-pending])', list);
       const total = items.length;
       const ratings = items.map((i: any) => +(i as HTMLElement).dataset.rating || 0);
       const avgstarsEls = $$('[data-rv-avgstars]');
@@ -887,7 +896,14 @@ const breadcrumbSchema = {
 
     const formWrap = $('[data-rform-wrap]');
     $$('[data-review-toggle]').forEach((b: any) => b.addEventListener('click', () => {
-      if (formWrap) { formWrap.classList.toggle('is-open'); if (formWrap.classList.contains('is-open')) formWrap.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      if (formWrap) {
+        formWrap.classList.toggle('is-open');
+        if (formWrap.classList.contains('is-open')) {
+          rSuccess?.classList.remove('is-shown');
+          rErr?.classList.remove('is-shown');
+          formWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     }));
     $$('[data-review-cancel]').forEach((b: any) => b.addEventListener('click', () => { if (formWrap) formWrap.classList.remove('is-open'); }));
 
@@ -902,43 +918,78 @@ const breadcrumbSchema = {
     if (starContainer) starContainer.addEventListener('mouseleave', () => paint(rating));
 
     const HELP = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M5 7l3-4c.9 0 1.5.8 1.3 1.7L9 6h3.2c.8 0 1.4.8 1.2 1.6l-1 4c-.1.7-.8 1.2-1.5 1.2H5V7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="7" width="3" height="6" stroke="currentColor" stroke-width="1.2"/></svg>';
-    const VER = '<span class="ritem__verified"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Verified</span>';
-    const esc = (t: string) => t.replace(/</g, '&lt;');
+    const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const getInitials = (n: string) => {
-      const parts = n.trim().split(' ');
-      return parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : n.slice(0, 2).toUpperCase();
+      const parts = n.trim().split(/\s+/).filter(Boolean);
+      return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : n.slice(0, 2)).toUpperCase();
     };
 
+    function addPendingReview(input: { rating: number; title: string; body: string; name: string }) {
+      if (!list) return;
+      const emptyState = $('[data-rlist-empty]');
+      emptyState?.remove();
+      const html = `
+        <article class="ritem" data-rating="${input.rating}" data-pending="1">
+          <div class="ritem__head">
+            <div class="ritem__avatar">${esc(getInitials(input.name))}</div>
+            <div class="ritem__who">
+              <div class="ritem__name">${esc(input.name)}</div>
+              <span class="ritem__pending-badge">Pending approval</span>
+            </div>
+            <div class="ritem__right">
+              <div class="ritem__stars">${'★'.repeat(input.rating)}${'☆'.repeat(5 - input.rating)}</div>
+            </div>
+          </div>
+          ${input.title ? `<h3 class="ritem__title">${esc(input.title)}</h3>` : ''}
+          <p class="ritem__body">${esc(input.body)}</p>
+        </article>`;
+      list.insertAdjacentHTML('afterbegin', html);
+    }
+
     const rForm = $('#reviewForm') as HTMLFormElement | null;
+    const rErr = $('[data-rform-err]') as HTMLElement | null;
+    const rSuccess = $('[data-rform-success]') as HTMLElement | null;
+    const showErr = (msg: string) => {
+      if (rSuccess) rSuccess.classList.remove('is-shown');
+      if (rErr) { rErr.textContent = msg; rErr.classList.add('is-shown'); }
+    };
     if (rForm) {
-      rForm.addEventListener('submit', (e) => {
+      rForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        // Inputs use ids (rvName/rvTitle/rvBody), not name attributes.
-        const name = ($('#rvName') as HTMLInputElement | null)?.value.trim() || 'Anonymous';
+        if (rErr) rErr.classList.remove('is-shown');
+        // Inputs use ids (rvName/rvEmail/rvTitle/rvBody), not name attributes.
+        const name = ($('#rvName') as HTMLInputElement | null)?.value.trim() || '';
+        const email = ($('#rvEmail') as HTMLInputElement | null)?.value.trim() || '';
         const title = ($('#rvTitle') as HTMLInputElement | null)?.value.trim() || '';
         const comment = ($('#rvBody') as HTMLTextAreaElement | null)?.value.trim() || '';
-        if (!rating || !comment) { alert('Please select a rating and write a review.'); return; }
-        const initials = getInitials(name);
-        const html = `
-          <div class="ritem" data-rating="${rating}">
-            <div class="ritem__head">
-              <span class="ritem__avatar">${esc(initials)}</span>
-              <div>
-                <div class="ritem__name">${esc(name)} ${VER}</div>
-                <div class="ritem__meta">Just now</div>
-              </div>
-              <div class="ritem__stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
-            </div>
-            ${title ? `<div class="ritem__title">${esc(title)}</div>` : ''}
-            <p class="ritem__body">${esc(comment)}</p>
-            <button class="ritem__helpful">${HELP} Helpful (0)</button>
-          </div>`;
-        list?.insertAdjacentHTML('afterbegin', html);
-        if (formWrap) formWrap.classList.remove('is-open');
-        rForm.reset();
-        rating = 0;
-        paint(0);
-        renderSummary();
+        if (!rating || !name || !email || !comment) {
+          showErr('Please add a rating, your name, email and a short review.');
+          return;
+        }
+        const submitBtn = rForm.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          const res = await fetch('/api/reviews', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ productId: bootData.productId, rating, title, body: comment, name, email }),
+          });
+          const result = await res.json();
+          if (!result.ok) {
+            showErr(result.error || 'Could not submit the review — please try again.');
+            return;
+          }
+          addPendingReview({ rating, title, body: comment, name });
+          if (rSuccess) rSuccess.classList.add('is-shown');
+          rForm.reset();
+          rating = 0;
+          paint(0);
+          if (formWrap) formWrap.classList.remove('is-open');
+        } catch {
+          showErr('Could not reach the reviews service — please try again.');
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+        }
       });
     }
     $$('[data-helpful]').forEach((b: any) => b.addEventListener('click', function (this: HTMLElement) {
@@ -1770,7 +1821,9 @@ const breadcrumbSchema = {
     text-align: center;
   }
 
-  .ritem {
+  /* :global — this list can also be built client-side (pending-review insert
+     after submit), which produces plain HTML with no astro-cid scope attr. */
+  :global(.ritem) {
     border: 1px solid var(--lux-light-border);
     background: var(--lux-light-surface);
     padding: clamp(22px, 2.3vw, 32px);
@@ -1778,7 +1831,7 @@ const breadcrumbSchema = {
     animation: rIn .5s var(--ease) both;
   }
 
-  .ritem:hover {
+  :global(.ritem:hover) {
     border-color: var(--lux-light-border-strong);
     box-shadow: 0 26px 60px -48px rgba(48, 56, 44, .5);
     transform: translateY(-2px);
@@ -1795,13 +1848,13 @@ const breadcrumbSchema = {
     }
   }
 
-  .ritem__head {
+  :global(.ritem__head) {
     display: flex;
     align-items: center;
     gap: 13px;
   }
 
-  .ritem__avatar {
+  :global(.ritem__avatar) {
     width: 46px;
     height: 46px;
     border-radius: 50%;
@@ -1815,12 +1868,12 @@ const breadcrumbSchema = {
     flex-shrink: 0;
   }
 
-  .ritem__who {
+  :global(.ritem__who) {
     flex: 1;
     min-width: 0;
   }
 
-  .ritem__name {
+  :global(.ritem__name) {
     font-size: 14px;
     font-weight: 600;
     color: var(--lux-on-light);
@@ -1830,7 +1883,23 @@ const breadcrumbSchema = {
     flex-wrap: wrap;
   }
 
-  .ritem__verified {
+  :global(.ritem__pending-badge) {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--lux-secondary-olive, #4b5a3a);
+    background: rgba(107, 112, 94, .08);
+    border: 1px solid rgba(107, 112, 94, .25);
+    padding: 3px 9px;
+    border-radius: 2px;
+    margin-top: 4px;
+  }
+
+  :global(.ritem__verified) {
     font-size: 10px;
     font-weight: 600;
     letter-spacing: .5px;
@@ -1841,37 +1910,37 @@ const breadcrumbSchema = {
     gap: 4px;
   }
 
-  .ritem__loc {
+  :global(.ritem__loc) {
     font-size: 12px;
     color: var(--lux-on-light-soft);
     margin-top: 2px;
   }
 
-  .ritem__right {
+  :global(.ritem__right) {
     text-align: right;
     flex-shrink: 0;
   }
 
-  .ritem__stars {
+  :global(.ritem__stars) {
     color: var(--lux-secondary-olive);
     letter-spacing: 2px;
     font-size: 13px;
   }
 
-  .ritem__date {
+  :global(.ritem__date) {
     font-size: 11px;
     color: var(--lux-on-light-soft);
     margin-top: 3px;
   }
 
-  .ritem__title {
+  :global(.ritem__title) {
     font-size: 15px;
     font-weight: 600;
     color: var(--lux-on-light);
     margin: 18px 0 7px;
   }
 
-  .ritem__body {
+  :global(.ritem__body) {
     font-size: 14px;
     line-height: 1.72;
     color: var(--lux-on-light-soft);
@@ -1879,7 +1948,7 @@ const breadcrumbSchema = {
     max-width: 72ch;
   }
 
-  .ritem__foot {
+  :global(.ritem__foot) {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -1888,12 +1957,12 @@ const breadcrumbSchema = {
     border-top: 1px solid var(--lux-light-border);
   }
 
-  .ritem__foot-q {
+  :global(.ritem__foot-q) {
     font-size: 12px;
     color: var(--lux-on-light-soft);
   }
 
-  .ritem__helpful {
+  :global(.ritem__helpful) {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -1908,22 +1977,22 @@ const breadcrumbSchema = {
     transition: color .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease);
   }
 
-  .ritem__helpful:hover {
+  :global(.ritem__helpful:hover) {
     border-color: var(--lux-primary-dark);
     color: var(--lux-on-light);
   }
 
-  .ritem__helpful.is-on {
+  :global(.ritem__helpful.is-on) {
     border-color: var(--lux-secondary-olive);
     color: var(--lux-secondary-olive);
     background: rgba(107, 112, 94, .06);
   }
 
-  .ritem__helpful svg {
+  :global(.ritem__helpful svg) {
     transition: transform .25s var(--ease);
   }
 
-  .ritem__helpful.is-on svg {
+  :global(.ritem__helpful.is-on svg) {
     transform: translateY(-2px);
   }
 
@@ -2038,6 +2107,17 @@ const breadcrumbSchema = {
     display: block;
   }
 
+  .rform__success {
+    font-size: 12px;
+    color: var(--lux-secondary-olive, #4b5a3a);
+    margin: 0 0 14px;
+    display: none;
+  }
+
+  .rform__success.is-shown {
+    display: block;
+  }
+
   .rform__actions {
     display: flex;
     gap: 12px;
@@ -2122,7 +2202,7 @@ const breadcrumbSchema = {
       grid-template-columns: 1fr;
     }
  
-    .ritem__head {
+    :global(.ritem__head) {
       flex-wrap: wrap;
     }
   }

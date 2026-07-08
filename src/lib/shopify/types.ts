@@ -101,10 +101,6 @@ export interface Product {
   materialsCare?: string[];
   /** Shipping & returns bullets from `custom.shipping_returns` (JSON list); [] when none. */
   shippingReturns?: string[];
-  /** Individual reviews from a review metafield; [] when none available. */
-  reviews?: ProductReview[];
-  /** Star distribution [5★..1★] counts, derived from `reviews`; null when none. */
-  ratingDistribution?: number[] | null;
 }
 
 export interface ProductReview {
@@ -375,7 +371,7 @@ export interface LegacyProduct {
   gender: string;
   price: number;
   formattedPrice: string;
-  /** Review rating from Shopify (`reviews.rating` metafield or a `rating:` tag). Null when the store has neither. */
+  /** Review rating from the real `reviews.rating` metafield (written by Judge.me). Null when the store has none. */
   rating: number | null;
   image: string;
   hoverImage?: string;
@@ -413,8 +409,6 @@ export interface LegacyProduct {
   /** True when the product has ≥2 real options (e.g. Colour+Size) and >1 variant,
    *  so a size/colour must be chosen (via Quick View) before adding to cart. */
   needsPicker?: boolean;
-  /** Real individual reviews from the `reviews.reviews` metafield. Empty when the store has none — never fabricated. */
-  reviews?: { author: string; rating: number; title?: string; body?: string; date?: string }[];
   /** Total review count from the `reviews.rating_count` metafield; null if untracked. */
   ratingCount?: number | null;
   /** Care instructions from the `custom.materials_care` metafield (one entry per line/bullet). Absent when the store hasn't set it. */

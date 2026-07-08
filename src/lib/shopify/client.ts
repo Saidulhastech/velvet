@@ -334,8 +334,11 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
   const genderLabel = gender.charAt(0).toUpperCase() + gender.slice(1);
   const category = categoryLabel ? `${genderLabel} · ${categoryLabel}` : genderLabel;
 
-  const ratingTag = tags.find((t: string) => t.startsWith('rating:'));
-  const rating = p.rating ?? (ratingTag ? parseFloat(ratingTag.split(':')[1]) : null);
+  // Real rating ONLY from the `reviews.rating` metafield (written by Judge.me).
+  // A `rating:` tag was previously an accepted fallback, but this catalog's
+  // seed/demo products all carry one regardless of real review state — using
+  // it would show a fabricated star rating on products with zero reviews.
+  const rating = p.rating ?? null;
   const image = p.featuredImage?.url || p.images?.[0]?.url || '';
   const hoverImage = p.images?.[1]?.url || undefined;
   // Full gallery: featured first, then the rest, de-duped — drives the real
@@ -408,7 +411,8 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
     needsPicker,
     // Real metafield-backed content only — absent/empty means the store
     // hasn't set it, never a fabricated fallback (see mapProduct in transforms.ts).
-    reviews: p.reviews ?? [],
+    // Individual review TEXT comes from Judge.me (see ~/lib/judgeme), not a
+    // Shopify metafield — only the aggregate count/rating are metafield-backed.
     ratingCount: p.ratingCount ?? null,
     materialsCare: p.materialsCare ?? [],
     shippingReturns: p.shippingReturns ?? [],

@@ -92,13 +92,6 @@ export const PRODUCT_BY_HANDLE_QUERY = /* GraphQL */ `
         value
         type
       }
-      # Optional individual reviews (JSON list) — populated by a reviews app.
-      reviewsMetafield: metafield(namespace: "custom", key: "reviews") {
-        value
-      }
-      reviewsAltMetafield: metafield(namespace: "reviews", key: "reviews") {
-        value
-      }
       featuredImage {
         ...ImageFields
       }

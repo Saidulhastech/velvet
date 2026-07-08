@@ -139,46 +139,6 @@ function parseStringList(raw?: string | null): string[] {
 }
 
 /**
- * Parse an individual-reviews metafield (JSON array). Tolerant of common
- * field names used by review apps (author/name, body/content/text, etc).
- */
-function parseReviews(raw?: string | null): {
-  author: string;
-  rating: number;
-  title?: string;
-  body?: string;
-  date?: string;
-}[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    const list = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.reviews) ? parsed.reviews : [];
-    return list
-      .map((r: Record<string, unknown>) => ({
-        author: String(r.author ?? r.name ?? r.reviewer ?? 'Verified buyer'),
-        rating: Number(r.rating ?? r.score ?? r.stars ?? 0),
-        title: r.title ? String(r.title) : undefined,
-        body: r.body ? String(r.body) : r.content ? String(r.content) : r.text ? String(r.text) : undefined,
-        date: r.date ? String(r.date) : r.created_at ? String(r.created_at) : undefined,
-      }))
-      .filter((r: { rating: number }) => Number.isFinite(r.rating) && r.rating > 0);
-  } catch {
-    return [];
-  }
-}
-
-/** Count reviews per star [5★,4★,3★,2★,1★]; null when there are no reviews. */
-function deriveDistribution(reviews: { rating: number }[]): number[] | null {
-  if (!reviews.length) return null;
-  const buckets = [0, 0, 0, 0, 0];
-  for (const r of reviews) {
-    const star = Math.min(5, Math.max(1, Math.round(r.rating)));
-    buckets[5 - star]++;
-  }
-  return buckets;
-}
-
-/**
  * Parse a `custom.specifications` metafield into label/value rows. Accepts a
  * JSON array of `{label,value}` objects OR an array of "Label: Value" strings.
  */
@@ -279,12 +239,6 @@ export function mapProduct(p: Raw): Product {
     highlights: parseStringList(p.highlightsMetafield?.value),
     materialsCare: parseStringList(p.materialsCareMetafield?.value),
     shippingReturns: parseStringList(p.shippingReturnsMetafield?.value),
-    // Parse the reviews metafield once, reuse for both the list and the
-    // star-distribution (was parsed twice per product).
-    ...(() => {
-      const reviews = parseReviews(p.reviewsMetafield?.value ?? p.reviewsAltMetafield?.value);
-      return { reviews, ratingDistribution: deriveDistribution(reviews) };
-    })(),
   };
 }
 

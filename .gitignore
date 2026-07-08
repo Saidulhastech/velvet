@@ -16,6 +16,7 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.dev.vars
 
 # macOS-specific files
 .DS_Store
@@ -27,3 +28,6 @@ pnpm-debug.log*
 .vercel/
 .netlify/
 .playwright-mcp/
+
+# root-level Shopify import scripts (contain per-store tokens in scripts/shopify-import/.env)
+/scripts/
