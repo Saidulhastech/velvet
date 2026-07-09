@@ -505,25 +505,8 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     white-space: nowrap;
   }
 
-  .nav a::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 13px;
-    right: 13px;
-    height: 1px;
-    background: var(--lux-primary-dark);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform .32s var(--ease);
-  }
-
   .nav a:hover {
     color: var(--lux-secondary-olive);
-  }
-
-  .nav a:hover::after {
-    transform: scaleX(1);
   }
 
   .nav__new-dot {
@@ -869,10 +852,6 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .nav--left a::after {
-      display: none;
     }
 
     .nav__dropdown,
