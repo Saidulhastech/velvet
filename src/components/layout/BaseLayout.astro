@@ -126,7 +126,13 @@ const schemas = [...baseSchema, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [j
 
     <!-- Global Client side scripts for animation triggers, scroll listening, etc. -->
     <script>
-      import { addToCart, toggleWishlist, persistedWishItems, toggleCompare, persistedCompareItems } from '../../stores/cart';
+      import { addToCart, toggleWishlist, persistedWishItems, toggleCompare, persistedCompareItems, isCartOpen, isWishOpen } from '../../stores/cart';
+
+      // Clicking the shared backdrop closes whichever cart/wishlist drawer is open.
+      document.querySelector('[data-drawer-overlay]')?.addEventListener('click', () => {
+        isCartOpen.set(false);
+        isWishOpen.set(false);
+      });
 
       // Scroll listener for sticky header shading
       const header = document.getElementById('siteHeader');

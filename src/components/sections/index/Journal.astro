@@ -202,7 +202,13 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/
     transform: translateX(3px);
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
+    .journal__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
     .journal__grid {
       grid-template-columns: 1fr;
       gap: 24px;

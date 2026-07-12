@@ -44,3 +44,15 @@
   --ease: cubic-bezier(.2, .7, .2, 1);
   --ease-soft: cubic-bezier(.4, 0, .2, 1);
 }
+
+/*
+ * Breakpoint scale — use these exact values in every component's @media
+ * (max-width: ...) queries. CSS custom properties can't be referenced inside
+ * a media query condition, so this is a convention, not an enforced token —
+ * keep new components aligned to it instead of picking an ad-hoc number.
+ *
+ *   480px  — mobile
+ *   768px  — tablet-portrait
+ *   1024px — tablet-landscape / small laptop
+ *   1280px — desktop
+ */

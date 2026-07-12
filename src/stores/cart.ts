@@ -315,6 +315,57 @@ export async function addToCart(product: Omit<CartItem, 'quantity'>, quantity = 
   }
 }
 
+/**
+ * Add several products in one shot (e.g. wishlist "Add All to Bag"). Firing
+ * `addToCart` N times in a loop races: with no cart yet, concurrent
+ * `/api/cart/add` calls can each see "no cart" and create separate Shopify
+ * carts, so only the last response's line(s) survive. Batching into a single
+ * `cartLinesAdd` mutation removes the race and is faster besides.
+ */
+export async function addMultipleToCart(products: Omit<CartItem, 'quantity'>[]) {
+  if (!products.length) return;
+
+  // Merge duplicate variants within this batch into one quantity.
+  const merged = new Map<string, CartItem>();
+  for (const p of products) {
+    const key = `${p.id}__${p.color ?? ''}__${p.size ?? ''}`;
+    const existing = merged.get(key);
+    if (existing) existing.quantity += 1;
+    else merged.set(key, { ...p, quantity: 1 });
+  }
+  const batch = [...merged.values()];
+
+  const snapshot = persistedCartItems.get().map((i) => ({ ...i }));
+  const currentItems = [...persistedCartItems.get()].map((i) => ({ ...i }));
+
+  batch.forEach((product) => {
+    const existingIndex = currentItems.findIndex(
+      item => item.id === product.id && item.color === product.color && item.size === product.size
+    );
+    if (existingIndex > -1) {
+      currentItems[existingIndex].quantity += product.quantity;
+    } else {
+      currentItems.push({ ...product });
+    }
+  });
+
+  persistedCartItems.set(currentItems);
+  updateCartTotals();
+  isCartOpen.set(true);
+
+  const shopifyLines = batch
+    .filter(p => p.id.startsWith('gid://shopify/ProductVariant/'))
+    .map(p => ({ merchandiseId: p.id, quantity: p.quantity }));
+
+  if (shopifyLines.length) {
+    const resp = await postToApi('/api/cart/add', { lines: shopifyLines });
+    if (!resp.cart) {
+      persistedCartItems.set(snapshot);
+      updateCartTotals();
+    }
+  }
+}
+
 export async function updateCartQuantity(id: string, color: string | undefined, size: string | undefined, quantity: number) {
   let currentItems = [...persistedCartItems.get()];
   const itemIndex = currentItems.findIndex(

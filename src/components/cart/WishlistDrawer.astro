@@ -46,7 +46,9 @@
     wishCount,
     cartCurrency,
     removeFromWishlist,
-    addToCart
+    addToCart,
+    addMultipleToCart,
+    updateWishTotals
   } from '../../stores/cart';
   import { shopifyImageUrl } from '../../lib/shopify/image-url';
 
@@ -226,9 +228,14 @@
     if (!itemsList || !emptyState || !footer) return;
 
     if (items.length === 0) {
-      emptyState.style.display = 'flex';
       itemsList.style.display = 'none';
       footer.style.display = 'none';
+      emptyState.style.display = 'flex';
+      emptyState.style.opacity = '0';
+      requestAnimationFrame(() => {
+        emptyState.style.transition = 'opacity .35s var(--ease)';
+        emptyState.style.opacity = '1';
+      });
       return;
     }
 
@@ -309,6 +316,7 @@
           description: item.description || ''
         }, 1);
         removeFromWishlist(id); // Remove from wishlist on adding to bag
+        isWishOpen.set(false); // Hand off to the cart drawer, which addToCart opens
       });
     });
   });
@@ -336,12 +344,13 @@
 
     setTimeout(() => {
       const addedIds: string[] = [];
+      const toAdd: Parameters<typeof addMultipleToCart>[0] = [];
       rows.forEach((rowEl) => {
         const id = rowEl.getAttribute('data-id') || '';
         const item = items.find((i) => i.id === id);
         const resolved = resolvedByRow.get(rowEl);
         if (!item || !resolved || !resolved.available) return;
-        addToCart({
+        toAdd.push({
           id: resolved.id,
           name: item.name,
           price: resolved.price,
@@ -349,11 +358,17 @@
           color: resolved.color,
           size: resolved.size,
           description: item.description || ''
-        }, 1);
+        });
         addedIds.push(id);
       });
 
+      // One batched mutation for every line — firing N separate addToCart
+      // calls here raced (see addMultipleToCart's doc comment).
+      addMultipleToCart(toAdd);
+
       persistedWishItems.set(items.filter((i) => !addedIds.includes(i.id)));
+      updateWishTotals();
+      isWishOpen.set(false); // Hand off to the cart drawer, which addToCart opens
 
       addAllBtn.disabled = false;
       addAllBtn.classList.remove('is-loading');

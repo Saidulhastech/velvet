@@ -327,6 +327,16 @@ const categories = [
     transform: translateX(4px);
   }
 
+  @media (max-width: 1024px) {
+    .catrow {
+      gap: 14px;
+    }
+
+    .catrow__name {
+      font-size: clamp(26px, 4.6vw, 46px);
+    }
+  }
+
   @media (max-width: 820px) {
     .catlist__preview {
       display: none;
