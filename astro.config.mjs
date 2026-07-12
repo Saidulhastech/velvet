@@ -18,10 +18,10 @@ function getAdapter() {
     return netlify();
   }
   if (target === "cloudflare" || process.env.CF_PAGES === "1") {
-    return cloudflare({ platformProxy: { enabled: true }, imageService: "passthrough" });
+    return cloudflare({ imageService: "passthrough" });
   }
   // Default fallback
-  return cloudflare({ platformProxy: { enabled: true }, imageService: "passthrough" });
+  return cloudflare({ imageService: "passthrough" });
 }
 
 // https://astro.build/config

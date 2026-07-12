@@ -230,6 +230,18 @@ const schemas = [...baseSchema, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [j
             const resolvedImg = dataset.img || '';
             const activeSwatch = card.querySelector('.pc__sw.is-active') as HTMLElement | null;
             const color = activeSwatch ? activeSwatch.dataset.color : undefined;
+            let variants: any[] = [];
+            let options: any[] = [];
+            try { variants = dataset.variants ? JSON.parse(dataset.variants) : []; } catch { variants = []; }
+            try { options = dataset.options ? JSON.parse(dataset.options) : []; } catch { options = []; }
+            // Snapshot each swatch's real rendered colour (card CSS, not a
+            // Shopify metafield on this store) so the wishlist drawer's inline
+            // picker can reuse the exact same swatch colours as the grid.
+            const swatchHex: Record<string, string> = {};
+            card.querySelectorAll<HTMLElement>('.pc__sw').forEach((sw) => {
+              const c = sw.dataset.color?.toLowerCase();
+              if (c) swatchHex[c] = sw.style.backgroundColor || sw.style.background || '#858A76';
+            });
 
             toggleWishlist({
               id: dataset.id || '',
@@ -240,7 +252,10 @@ const schemas = [...baseSchema, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [j
               size: undefined,
               category: dataset.cat || '',
               description: dataset.handle || '',
-              needsPicker: dataset.needsPicker === 'true'
+              needsPicker: dataset.needsPicker === 'true',
+              variants,
+              options,
+              swatchHex
             });
           }
         }

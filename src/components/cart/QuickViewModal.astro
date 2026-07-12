@@ -106,6 +106,8 @@
 
   // ---- Real variant matrix state (size×colour → specific Shopify variant) ----
   let qvVariants: any[] = [];
+  let qvOptions: any[] = [];
+  let qvSwatchHex: Record<string, string> = {};
   let qvSelected: Record<string, string> = {};
   let qvColorKey = '';
   let qvSizeKey = '';
@@ -188,6 +190,8 @@
     try { qvVariants = dataset.variants ? JSON.parse(dataset.variants) : []; } catch { qvVariants = []; }
     let optionData: any[] = [];
     try { optionData = dataset.options ? JSON.parse(dataset.options) : []; } catch { optionData = []; }
+    qvOptions = optionData;
+    qvSwatchHex = {};
     qvSymbol = (String(dataset.price || '').match(/^[^\d.,]+/) || ['$'])[0];
 
     if (qvVariants.length) {
@@ -211,6 +215,7 @@
         const hex = sw.style.backgroundColor;
         if (name && hex) cardHexMap[name] = hex;
       });
+      qvSwatchHex = cardHexMap;
       const seed = qvVariants.find((v) => v.available) || qvVariants[0];
       qvSelected = { ...seed.opts };
       selectedColor = qvColorKey ? qvSelected[qvColorKey] : '';
@@ -393,7 +398,10 @@
       color: selectedColor || undefined,
       size: selectedSize || undefined,
       category: currentProduct.category,
-      description: (currentProduct as any).handle || ''
+      description: (currentProduct as any).handle || '',
+      variants: qvVariants,
+      options: qvOptions,
+      swatchHex: qvSwatchHex
     });
 
     const isSaved = wishlistBtn.getAttribute('aria-pressed') === 'true';

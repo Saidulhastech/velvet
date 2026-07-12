@@ -25,7 +25,7 @@ Path alias: `~/*` → `src/*`.
 
 Config comes from `astro:env` (schema in [astro.config.mjs](astro.config.mjs)), NOT `process.env`. On Cloudflare Workers secrets are per-request only, so **always read them lazily via `getSecret()` at request time** — reading at module top-level yields `undefined` on the edge. See the getter pattern in [src/lib/shopify/client.ts](src/lib/shopify/client.ts).
 
-Required: `SHOPIFY_SHOP_DOMAIN`, `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`. Optional: `SHOPIFY_API_VERSION` (default `2026-04`), plus Customer Account API vars (`CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_SHOP_ID`, `CUSTOMER_ACCOUNT_API_VERSION`). Copy `.env.example` → `.env`. Adapter: `@astrojs/cloudflare` with `platformProxy` enabled, `output: 'server'`.
+Required: `SHOPIFY_SHOP_DOMAIN`, `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`. Optional: `SHOPIFY_API_VERSION` (default `2026-04`), plus Customer Account API vars (`CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_SHOP_ID`, `CUSTOMER_ACCOUNT_API_VERSION`). Copy `.env.example` → `.env`. Adapter: `@astrojs/cloudflare` (v14.1+, local Workers runtime via `@cloudflare/vite-plugin`, no `platformProxy` option), `output: 'server'`.
 
 **Graceful degradation:** if Shopify env is unset, the legacy bridge falls back to `src/lib/mockData.ts` so the site still renders. Keep that fallback intact when touching product fetch code.
 

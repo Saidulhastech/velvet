@@ -838,6 +838,11 @@ const breadcrumbSchema = {
       const v = currentVariant();
       const selectedColorBtn = $('#pdpColors .pdp-color.is-active');
       const selectedSizeBtn = $('#pdpSizes .pdp-size.is-active');
+      const swatchHex: Record<string, string> = {};
+      $$('#pdpColors .pdp-color').forEach((btn: any) => {
+        const c = (btn.dataset.color || '').toLowerCase();
+        if (c) swatchHex[c] = btn.style.backgroundColor || btn.style.background || '#858A76';
+      });
       toggleWishlist({
         id: v?.id || variantIdForWish,
         name: document.querySelector('.pdp-info__name')?.textContent || '',
@@ -845,6 +850,9 @@ const breadcrumbSchema = {
         image: mainImg?.src || '',
         color: selectedColorBtn?.getAttribute('data-color') || undefined,
         size: selectedSizeBtn?.getAttribute('data-size') || undefined,
+        variants,
+        options: [],
+        swatchHex
       });
     });
   }

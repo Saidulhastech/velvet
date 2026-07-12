@@ -30,7 +30,7 @@
   <!-- Drawer Footer -->
   <div class="drawer__foot" id="wishDrawerFoot">
     <button class="btn-primary cart__checkout" id="addAllToCartBtn">
-      Add All to Bag 
+      Add All to Bag
       <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
         <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
       </svg>
@@ -100,6 +100,126 @@
   continueBtn?.addEventListener('click', () => isWishOpen.set(false));
   emptyState?.querySelector('#emptyWishShopBtn')?.addEventListener('click', () => isWishOpen.set(false));
 
+  // Resolved-variant state per row (id → currently selected real variant).
+  // Rebuilt every render since the list's DOM nodes are entirely replaced.
+  interface WishResolved { id: string; price: number; image: string; available: boolean; color?: string; size?: string; }
+  let resolvedByRow = new Map<HTMLElement, WishResolved>();
+
+  // Build an inline colour/size picker for one wishlist row straight from its
+  // snapshotted Shopify variant matrix — same pattern as Shop the Look, so a
+  // shopper can pick the exact variant here instead of hitting a dead end.
+  function initWishRow(row: HTMLElement, item: any) {
+    const variants: any[] = Array.isArray(item.variants) ? item.variants : [];
+    const swatchHex: Record<string, string> = item.swatchHex || {};
+    const addBtn = row.querySelector<HTMLButtonElement>('[data-add-bag-from-wish]');
+    const colorsEl = row.querySelector<HTMLElement>('[data-role="wcolors"]');
+    const sizesEl = row.querySelector<HTMLElement>('[data-role="wsizes"]');
+    const optLine = row.querySelector<HTMLElement>('[data-role="woptline"]');
+    const priceEl = row.querySelector<HTMLElement>('[data-role="wprice"]');
+    const imgEl = row.querySelector<HTMLImageElement>('.ditem__media img');
+
+    if (!variants.length) {
+      // No snapshotted matrix (older wishlist entry, or a single-variant
+      // product) — fall back to whatever was captured at add-time.
+      resolvedByRow.set(row, {
+        id: item.id,
+        price: item.price,
+        image: item.image,
+        available: true,
+        color: item.color || undefined,
+        size: item.size || undefined,
+      });
+      if (optLine) optLine.textContent = [item.color, item.size].filter(Boolean).join(' · ');
+      return;
+    }
+
+    const optNames = Object.keys(variants[0].opts || {}).filter((n) => !/^title$/i.test(n));
+    const colorKey = optNames.find((n) => /colou?r/i.test(n)) || '';
+    const sizeKey = optNames.find((n) => /size/i.test(n)) || optNames.find((n) => n !== colorKey) || '';
+
+    const distinct = (key: string) => {
+      const seen: string[] = [];
+      variants.forEach((v) => { const val = v.opts[key]; if (val && !seen.includes(val)) seen.push(val); });
+      return seen;
+    };
+    const colors = colorKey ? distinct(colorKey) : [];
+    const sizes = sizeKey ? distinct(sizeKey) : [];
+
+    // Seed from the item's originally-saved colour/size when it still
+    // resolves to a real variant, else the first available variant.
+    const savedMatch = variants.find((v) =>
+      (!colorKey || !item.color || v.opts[colorKey]?.toLowerCase() === String(item.color).toLowerCase()) &&
+      (!sizeKey || !item.size || v.opts[sizeKey]?.toLowerCase() === String(item.size).toLowerCase())
+    );
+    const seed = (savedMatch && savedMatch.available) ? savedMatch : (variants.find((v) => v.available) || variants[0]);
+    const selected: Record<string, string> = { ...seed.opts };
+
+    function currentVariant() {
+      return variants.find((v) => Object.keys(selected).every((k) => v.opts[k] === selected[k])) || null;
+    }
+    function optionAvailable(key: string, value: string) {
+      const trial = { ...selected, [key]: value };
+      return variants.some((v) => v.available && Object.keys(trial).every((k) => v.opts[k] === trial[k]));
+    }
+
+    function resolve() {
+      const v = currentVariant();
+      const resolved: WishResolved = {
+        id: v?.id || seed.id,
+        price: v ? v.price : seed.price,
+        image: v?.img || item.image || '',
+        available: !!(v && v.available),
+        color: colorKey ? selected[colorKey] : undefined,
+        size: sizeKey ? selected[sizeKey] : undefined,
+      };
+      resolvedByRow.set(row, resolved);
+
+      if (priceEl) priceEl.textContent = euro(resolved.price);
+      if (imgEl && resolved.image) imgEl.src = resolved.image;
+      if (addBtn) addBtn.disabled = !resolved.available;
+      if (optLine) optLine.textContent = [resolved.color, resolved.size].filter(Boolean).join(' · ');
+
+      colorsEl?.querySelectorAll<HTMLElement>('.witem-sw').forEach((el) => {
+        const val = el.dataset.value || '';
+        el.classList.toggle('is-active', selected[colorKey] === val);
+        el.classList.toggle('is-unavailable', !!colorKey && !optionAvailable(colorKey, val));
+      });
+      sizesEl?.querySelectorAll<HTMLButtonElement>('.witem-size').forEach((el) => {
+        const val = el.dataset.value || '';
+        const ok = !sizeKey || optionAvailable(sizeKey, val);
+        el.classList.toggle('is-active', selected[sizeKey] === val);
+        el.disabled = !ok;
+        el.classList.toggle('is-oos', !ok);
+      });
+    }
+
+    if (colors.length > 1 && colorsEl) {
+      colorsEl.hidden = false;
+      colorsEl.innerHTML = colors.map((c) =>
+        `<span class="witem-sw" data-value="${c}" style="background:${swatchHex[c.toLowerCase()] || '#858A76'}" title="${c}"></span>`
+      ).join('');
+      colorsEl.querySelectorAll<HTMLElement>('.witem-sw').forEach((sw) => sw.addEventListener('click', () => {
+        if (sw.classList.contains('is-unavailable')) return;
+        selected[colorKey] = sw.dataset.value || '';
+        resolve();
+      }));
+    }
+
+    if (sizes.length > 1 && sizesEl) {
+      sizesEl.hidden = false;
+      sizesEl.innerHTML = sizes.map((s) =>
+        `<button type="button" class="witem-size" data-value="${s}">${s.toUpperCase()}</button>`
+      ).join('');
+      sizesEl.querySelectorAll<HTMLButtonElement>('.witem-size').forEach((btn) => btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        selected[sizeKey] = btn.dataset.value || '';
+        resolve();
+      }));
+    }
+
+    resolve();
+  }
+
   // Render Wishlist Items
   persistedWishItems.subscribe((items) => {
     if (!itemsList || !emptyState || !footer) return;
@@ -119,8 +239,8 @@
     itemsList.innerHTML = items.map((item) => {
       // Resolve local vs remote images
       const imgUrl = (item.image && typeof item.image === 'string')
-        ? (item.image.startsWith('Images/') 
-          ? `/src/assets/images/${item.image.split('/').pop()}` 
+        ? (item.image.startsWith('Images/')
+          ? `/src/assets/images/${item.image.split('/').pop()}`
           : item.image)
         : '';
 
@@ -138,9 +258,11 @@
                 </svg>
               </button>
             </div>
-            <p class="ditem__meta">${item.color || ''}${item.color && item.size ? ' · ' : ''}${item.size || ''}</p>
+            <p class="witem-optline" data-role="woptline"></p>
+            <div class="witem-colors" data-role="wcolors" hidden></div>
+            <div class="witem-sizes" data-role="wsizes" hidden></div>
             <div class="ditem__foot">
-              <span class="ditem__price">${euro(item.price)}</span>
+              <span class="ditem__price" data-role="wprice">${euro(item.price)}</span>
               <button class="ditem__add" data-add-bag-from-wish style="background:none; border:none; border-bottom: 1px solid var(--lux-accent-lime); padding-bottom:2px; font-size:11px; font-weight:600; text-transform:uppercase; cursor:pointer;">
                 Add to Bag
               </button>
@@ -150,37 +272,39 @@
       `;
     }).join('');
 
-    // Attach Event Listeners
-    const rows = itemsList.querySelectorAll('.ditem');
+    // (Re)build resolved-variant state + attach listeners for the fresh DOM.
+    resolvedByRow = new Map();
+    const rows = Array.from(itemsList.querySelectorAll<HTMLElement>('.ditem'));
     rows.forEach((rowEl) => {
       const id = rowEl.getAttribute('data-id') || '';
       const item = items.find(i => i.id === id);
       if (!item) return;
 
+      initWishRow(rowEl, item);
+
       // Remove
       rowEl.querySelector('[data-wish-remove]')?.addEventListener('click', () => {
-        const itemLi = rowEl as HTMLElement;
-        itemLi.style.transition = 'opacity 0.3s, transform 0.3s';
-        itemLi.style.opacity = '0';
-        itemLi.style.transform = 'translateX(20px)';
+        rowEl.style.transition = 'opacity 0.3s, transform 0.3s';
+        rowEl.style.opacity = '0';
+        rowEl.style.transform = 'translateX(20px)';
         setTimeout(() => {
           removeFromWishlist(id);
         }, 300);
       });
 
-      // Add to bag — multi-option items go to the PDP to pick a size.
+      // Add to bag — uses whatever variant is currently selected in this row's
+      // inline picker (defaults to the saved colour/size, or the first
+      // available variant when that combo no longer exists).
       rowEl.querySelector('[data-add-bag-from-wish]')?.addEventListener('click', () => {
-        if (item.needsPicker && !item.size) {
-          window.location.href = `/products/${item.description || item.id}`;
-          return;
-        }
+        const resolved = resolvedByRow.get(rowEl);
+        if (!resolved || !resolved.available) return;
         addToCart({
-          id: item.id,
+          id: resolved.id,
           name: item.name,
-          price: item.price,
-          image: item.image,
-          color: item.color || undefined,
-          size: item.size || undefined,
+          price: resolved.price,
+          image: resolved.image || item.image,
+          color: resolved.color,
+          size: resolved.size,
           description: item.description || ''
         }, 1);
         removeFromWishlist(id); // Remove from wishlist on adding to bag
@@ -188,23 +312,32 @@
     });
   });
 
-  // Add all items to bag — skip multi-option items that still need a size choice;
-  // they stay in the wishlist for the shopper to add individually.
+  // Add all items to bag — every row is resolved inline (colour + size already
+  // chosen or defaulted), so this always has a real variant to add, no more
+  // silent skips.
   addAllBtn?.addEventListener('click', () => {
     const items = persistedWishItems.get();
-    items.forEach((item) => {
-      if (item.needsPicker && !item.size) return;
+    const rows = Array.from(itemsList?.querySelectorAll<HTMLElement>('.ditem') || []);
+    const addedIds: string[] = [];
+
+    rows.forEach((rowEl) => {
+      const id = rowEl.getAttribute('data-id') || '';
+      const item = items.find((i) => i.id === id);
+      const resolved = resolvedByRow.get(rowEl);
+      if (!item || !resolved || !resolved.available) return;
       addToCart({
-        id: item.id,
+        id: resolved.id,
         name: item.name,
-        price: item.price,
-        image: item.image,
-        color: item.color || undefined,
-        size: item.size || undefined,
+        price: resolved.price,
+        image: resolved.image || item.image,
+        color: resolved.color,
+        size: resolved.size,
         description: item.description || ''
       }, 1);
+      addedIds.push(id);
     });
-    persistedWishItems.set(items.filter((i) => i.needsPicker && !i.size));
+
+    persistedWishItems.set(items.filter((i) => !addedIds.includes(i.id)));
   });
 
   // Subscribe to count
@@ -362,6 +495,93 @@
   :global(.ditem__add:hover) {
     color: var(--lux-secondary-olive) !important;
     border-color: var(--lux-secondary-olive) !important;
+  }
+
+  :global(.ditem__add:disabled) {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+
+  /* Inline colour/size picker per wishlist row — built client-side (see
+     initWishRow), so these rules are :global to reach JS-injected markup. */
+  :global(.witem-optline) {
+    font-size: 11px;
+    letter-spacing: .3px;
+    text-transform: capitalize;
+    color: var(--lux-on-light-soft);
+    margin: 4px 0 0;
+    min-height: 14px;
+  }
+
+  :global(.witem-colors) {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  :global(.witem-sw) {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--lux-light-border-strong);
+    cursor: pointer;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color .2s var(--ease), transform .2s var(--ease);
+  }
+
+  :global(.witem-sw:hover) {
+    transform: scale(1.1);
+  }
+
+  :global(.witem-sw.is-active) {
+    outline-color: var(--lux-primary-dark);
+  }
+
+  :global(.witem-sw.is-unavailable) {
+    opacity: .35;
+    cursor: not-allowed;
+  }
+
+  :global(.witem-sizes) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  :global(.witem-size) {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    color: var(--lux-on-light-soft);
+    border: 1px solid var(--lux-light-border-strong);
+    background: var(--lux-light-elevated);
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+  }
+
+  :global(.witem-size:hover) {
+    border-color: var(--lux-primary-dark);
+  }
+
+  :global(.witem-size.is-active) {
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    border-color: var(--lux-primary-dark);
+  }
+
+  :global(.witem-size.is-oos) {
+    opacity: .35;
+    cursor: not-allowed;
+    text-decoration: line-through;
   }
 
   @media (max-width: 480px) {

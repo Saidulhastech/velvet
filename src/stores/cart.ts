@@ -24,9 +24,24 @@ export interface WishItem {
   size?: string;
   category?: string;
   description?: string; // Stores product handle
-  /** True when the product needs a size/colour choice — move-to-bag routes to
-   *  the PDP instead of silently adding the wrong variant. */
+  /** True when the product needs a size/colour choice. */
   needsPicker?: boolean;
+  /** Real Shopify variant matrix + options, snapshotted at wishlist-add time —
+   *  lets the wishlist drawer build an inline colour/size picker so the
+   *  shopper can resolve a real variant without leaving the drawer. */
+  variants?: {
+    id: string;
+    opts: Record<string, string>;
+    price: number;
+    compareAt: number | null;
+    available: boolean;
+    qty: number | null;
+    img: string | null;
+  }[];
+  options?: { name: string; values: { name: string; color?: string | null }[] }[];
+  /** Rendered swatch colour per option value (lowercased), snapshotted from
+   *  the card at add-time — this store has no real Shopify swatch metafield. */
+  swatchHex?: Record<string, string>;
 }
 
 // Persistent Atoms
