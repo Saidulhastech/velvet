@@ -891,7 +891,7 @@ const authorImage = images[authorImgPath]?.default;
   .news__inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 0 50px 140px 50px;
+    padding: 0 clamp(20px, 5vw, 50px) clamp(56px, 10vw, 140px) clamp(20px, 5vw, 50px);
   }
 
   .news__card {

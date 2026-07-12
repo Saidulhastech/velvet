@@ -1098,6 +1098,12 @@ const journey = [
   }
 
   /* ============ RESPONSIVE BREAKPOINTS ============ */
+  @media (max-width: 1200px) {
+    .ab-values {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
   @media (max-width: 920px) {
     .ab-split {
       grid-template-columns: 1fr;
@@ -1115,10 +1121,6 @@ const journey = [
 
     .ab-split--rev .ab-split__visual {
       order: 0;
-    }
-
-    .ab-values {
-      grid-template-columns: 1fr 1fr;
     }
 
     .ab-stats__row {
@@ -1159,7 +1161,9 @@ const journey = [
   .news__inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 140px 50px 140px 50px;
+    /* Fluid — scales down on smaller viewports, hits exactly 140px/50px
+       (the original fixed value) once the viewport is large enough. */
+    padding: clamp(56px, 10vw, 140px) clamp(20px, 5vw, 50px);
   }
 
   .news__card {

@@ -1563,7 +1563,7 @@ const faqItems = [
   .news__inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 150px var(--gutter) 150px var(--gutter);
+    padding: clamp(60px, 10vw, 150px) var(--gutter) clamp(60px, 10vw, 150px) var(--gutter);
   }
 
   .news__card {
@@ -1730,7 +1730,21 @@ const faqItems = [
     .ct-info {
       order: -1;
     }
+  }
 
+  @media (max-width: 991px) {
+    .ct-bouts__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .ct-dept__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 575px) {
     .ct-dept__grid {
       grid-template-columns: 1fr;
     }

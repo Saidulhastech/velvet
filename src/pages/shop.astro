@@ -178,8 +178,15 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
         </button>
         <div class="fgroup__body">
           <div class="fprice">
-            <div class="fprice__readout">Up to <strong data-price-readout>{`€${maxPrice}`}</strong></div>
-            <input class="fprice__range" type="range" min={minPrice} max={maxPrice} value={maxPrice} step={priceStep} data-price-range aria-label="Maximum price" />
+            <div class="fprice__readout">
+              <strong data-price-min-label>{`€${minPrice}`}</strong> &ndash; <strong data-price-max-label>{`€${maxPrice}`}</strong>
+            </div>
+            <div class="fprice__slider">
+              <div class="fprice__track"></div>
+              <div class="fprice__track-fill" data-price-fill></div>
+              <input class="fprice__range" type="range" min={minPrice} max={maxPrice} value={minPrice} step={priceStep} data-price-min aria-label="Minimum price" />
+              <input class="fprice__range" type="range" min={minPrice} max={maxPrice} value={maxPrice} step={priceStep} data-price-max aria-label="Maximum price" />
+            </div>
           </div>
         </div>
       </div>
@@ -283,8 +290,13 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
   if (grid) {
     const cards = Array.from(grid.querySelectorAll('.shop-pc')) as HTMLElement[];
     const STEP = 8;
-    const rangeInput = document.querySelector('[data-price-range]') as HTMLInputElement;
-    const initialPriceMax = rangeInput ? parseInt(rangeInput.max, 10) : 900;
+    const minRange = document.querySelector('[data-price-min]') as HTMLInputElement;
+    const maxRange = document.querySelector('[data-price-max]') as HTMLInputElement;
+    const priceFill = document.querySelector('[data-price-fill]') as HTMLElement;
+    const priceMinLabel = document.querySelector('[data-price-min-label]') as HTMLElement;
+    const priceMaxLabel = document.querySelector('[data-price-max-label]') as HTMLElement;
+    const initialPriceMin = minRange ? parseFloat(minRange.min) : 0;
+    const initialPriceMax = maxRange ? parseFloat(maxRange.max) : 900;
 
     const state = {
       cat: 'all',
@@ -292,10 +304,27 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       size: new Set<string>(),
       material: new Set<string>(),
       stock: new Set<string>(),
-      price: initialPriceMax,
+      priceMin: initialPriceMin,
+      priceMax: initialPriceMax,
       sort: 'featured',
       shown: 16
     };
+
+    function updatePriceFill() {
+      if (!priceFill || !minRange) return;
+      const lo = parseFloat(minRange.min);
+      const hi = parseFloat(minRange.max);
+      const span = hi - lo || 1;
+      const leftPct = ((state.priceMin - lo) / span) * 100;
+      const rightPct = ((state.priceMax - lo) / span) * 100;
+      priceFill.style.left = leftPct + '%';
+      priceFill.style.width = Math.max(0, rightPct - leftPct) + '%';
+    }
+
+    function updatePriceLabels() {
+      if (priceMinLabel) priceMinLabel.textContent = '€' + state.priceMin;
+      if (priceMaxLabel) priceMaxLabel.textContent = '€' + state.priceMax;
+    }
 
     const LABELS: Record<string, string> = { in: 'In Stock', pre: 'Pre-Order' };
 
@@ -319,7 +348,8 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       if (state.size.size && !inter(state.size, c.dataset.size || '')) return false;
       if (state.material.size && !inter(state.material, c.dataset.material || '')) return false;
       if (state.stock.size && !state.stock.has(c.dataset.stock || '')) return false;
-      if (parseFloat(c.dataset.pnum || '0') > state.price) return false;
+      const pnum = parseFloat(c.dataset.pnum || '0');
+      if (pnum > state.priceMax || pnum < state.priceMin) return false;
       
       // Match gender from URL parameter behind the scenes if active
       if ((state as any).gender && (state as any).gender !== 'all') {
@@ -394,7 +424,8 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       if (state.size.size) p.set('size', Array.from(state.size).join(','));
       if (state.material.size) p.set('material', Array.from(state.material).join(','));
       if (state.stock.size) p.set('stock', Array.from(state.stock).join(','));
-      if (state.price < initialPriceMax) p.set('price', String(state.price));
+      if (state.priceMin > initialPriceMin) p.set('priceMin', String(state.priceMin));
+      if (state.priceMax < initialPriceMax) p.set('priceMax', String(state.priceMax));
       if (state.sort !== 'featured') p.set('sort', state.sort);
       if ((state as any).gender && (state as any).gender !== 'all') p.set('gender', (state as any).gender);
       const qs = p.toString();
@@ -414,7 +445,9 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       state.size.forEach(s => chips.push(['size', s, s.toUpperCase()]));
       state.material.forEach(m => chips.push(['material', m, m]));
       state.stock.forEach(s => chips.push(['stock', s, LABELS[s] || s]));
-      if (state.price < initialPriceMax) chips.push(['price', '', 'Up to €' + state.price]);
+      if (state.priceMin > initialPriceMin || state.priceMax < initialPriceMax) {
+        chips.push(['price', '', `€${state.priceMin} – €${state.priceMax}`]);
+      }
 
       box.innerHTML = chips
         .map(([g, v, label]) => `<span class="achip">${label}<button data-chip-group="${g}" data-chip-value="${v}" aria-label="Remove">${X}</button></span>`)
@@ -488,17 +521,28 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       });
     });
 
-    // Price range slider
-    const range = document.querySelector('[data-price-range]') as HTMLInputElement;
-    const readout = document.querySelector('[data-price-readout]') as HTMLElement;
-    if (range) {
-      range.addEventListener('input', () => {
-        state.price = parseFloat(range.value);
-        if (readout) readout.textContent = '€' + range.value;
+    // Price range slider — two handles, each clamped so it can't cross the other.
+    if (minRange && maxRange) {
+      minRange.addEventListener('input', () => {
+        let v = parseFloat(minRange.value);
+        if (v > state.priceMax) { v = state.priceMax; minRange.value = String(v); }
+        state.priceMin = v;
+        updatePriceFill();
+        updatePriceLabels();
+        state.shown = 16;
+        render();
+      });
+      maxRange.addEventListener('input', () => {
+        let v = parseFloat(maxRange.value);
+        if (v < state.priceMin) { v = state.priceMin; maxRange.value = String(v); }
+        state.priceMax = v;
+        updatePriceFill();
+        updatePriceLabels();
         state.shown = 16;
         render();
       });
     }
+    updatePriceFill();
 
     // Sort selection change
     const sortSel = document.querySelector('[data-sort]') as HTMLSelectElement;
@@ -547,9 +591,12 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
             if (input.dataset.value === val) input.checked = false;
           });
         } else if (group === 'price') {
-          state.price = initialPriceMax;
-          if (range) range.value = String(initialPriceMax);
-          if (readout) readout.textContent = '€' + initialPriceMax;
+          state.priceMin = initialPriceMin;
+          state.priceMax = initialPriceMax;
+          if (minRange) minRange.value = String(initialPriceMin);
+          if (maxRange) maxRange.value = String(initialPriceMax);
+          updatePriceFill();
+          updatePriceLabels();
         } else {
           const set = (state as any)[group] as Set<string>;
           set.delete(val || '');
@@ -570,7 +617,8 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
         state.size.clear();
         state.material.clear();
         state.stock.clear();
-        state.price = initialPriceMax;
+        state.priceMin = initialPriceMin;
+        state.priceMax = initialPriceMax;
         state.shown = 16;
 
         document.querySelectorAll('.fpill[data-group="cat"]').forEach(x => {
@@ -583,8 +631,10 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
         document.querySelectorAll('.fcheck input').forEach(x => {
           (x as HTMLInputElement).checked = false;
         });
-        if (range) range.value = String(initialPriceMax);
-        if (readout) readout.textContent = '€' + initialPriceMax;
+        if (minRange) minRange.value = String(initialPriceMin);
+        if (maxRange) maxRange.value = String(initialPriceMax);
+        updatePriceFill();
+        updatePriceLabels();
         render();
       });
     });
@@ -616,8 +666,10 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       document.querySelectorAll('.fpill[data-group="stock"]').forEach(x => x.classList.toggle('is-active', state.stock.has((x as HTMLElement).dataset.value || '')));
       document.querySelectorAll('.fswatch').forEach(x => x.classList.toggle('is-active', state.color.has((x as HTMLElement).dataset.value || '')));
       document.querySelectorAll('.fcheck input').forEach(x => { const i = x as HTMLInputElement; i.checked = state.material.has(i.dataset.value || ''); });
-      if (range) range.value = String(state.price);
-      if (readout) readout.textContent = '€' + state.price;
+      if (minRange) minRange.value = String(state.priceMin);
+      if (maxRange) maxRange.value = String(state.priceMax);
+      updatePriceFill();
+      updatePriceLabels();
       if (sortSel) sortSel.value = state.sort;
     }
 
@@ -630,8 +682,10 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       state.size = csv('size');
       state.material = csv('material');
       state.stock = csv('stock');
-      const priceP = params.get('price');
-      state.price = priceP ? parseFloat(priceP) : initialPriceMax;
+      const priceMinP = params.get('priceMin');
+      const priceMaxP = params.get('priceMax');
+      state.priceMin = priceMinP ? parseFloat(priceMinP) : initialPriceMin;
+      state.priceMax = priceMaxP ? parseFloat(priceMaxP) : initialPriceMax;
       state.sort = params.get('sort') || 'featured';
       const gender = params.get('gender');
       if (gender) (state as any).gender = gender.toLowerCase(); else delete (state as any).gender;
@@ -1029,13 +1083,53 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
     font-weight: 500;
   }
 
+  /* Two-handle range: two native inputs stacked on the same track. Each
+     input's own track is transparent (drawn once via .fprice__track /
+     .fprice__track-fill instead) and the input itself ignores pointer
+     events — only its thumb re-enables them — so clicking/dragging always
+     reaches whichever handle the pointer is actually over. */
+  .fprice__slider {
+    position: relative;
+    height: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .fprice__track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--lux-light-border-strong);
+  }
+
+  .fprice__track-fill {
+    position: absolute;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--lux-primary-dark);
+  }
+
   .fprice__range {
+    position: absolute;
+    left: 0;
+    width: 100%;
     -webkit-appearance: none;
     appearance: none;
-    width: 100%;
-    height: 2px;
-    background: var(--lux-light-border-strong);
+    height: 16px;
+    margin: 0;
+    background: none;
     outline: none;
+    pointer-events: none;
+  }
+
+  .fprice__range::-webkit-slider-runnable-track {
+    background: transparent;
+  }
+
+  .fprice__range::-moz-range-track {
+    background: transparent;
   }
 
   .fprice__range::-webkit-slider-thumb {
@@ -1044,16 +1138,21 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
     height: 16px;
     border-radius: 50%;
     background: var(--lux-primary-dark);
+    border: 2px solid var(--lux-light-bg);
+    box-shadow: 0 0 0 1px var(--lux-primary-dark);
     cursor: pointer;
+    pointer-events: auto;
   }
 
   .fprice__range::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    border: none;
+    border: 2px solid var(--lux-light-bg);
     border-radius: 50%;
     background: var(--lux-primary-dark);
+    box-shadow: 0 0 0 1px var(--lux-primary-dark);
     cursor: pointer;
+    pointer-events: auto;
   }
 
   /* Active chips */
@@ -1164,14 +1263,21 @@ const priceStep = maxPrice - minPrice > 200 ? 20 : 1;
       position: fixed;
       top: 0;
       left: 0;
-      bottom: 0;
       width: min(86vw, 340px);
+      /* Shrink-wraps to its content instead of always stretching to the
+         viewport bottom (was leaving a large empty area when all filter
+         groups were collapsed) — caps at the viewport height and scrolls
+         internally once content actually exceeds it. */
+      height: auto;
+      max-height: 100vh;
       background: var(--lux-light-bg);
       z-index: 100;
       transform: translateX(-100%);
       transition: transform .42s var(--ease);
       padding: 22px 22px 40px;
-      max-height: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
       box-shadow: 12px 0 40px -16px rgba(48,56,44,.35);
     }
 
