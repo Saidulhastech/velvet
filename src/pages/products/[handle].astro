@@ -5,6 +5,7 @@ import BaseLayout from '../../components/layout/BaseLayout.astro';
 import ProductCard from '../../components/product/ProductCard.astro';
 import { getShopifyProductWithVariants, getShopifyProducts, getShopifyRelatedProducts } from '../../lib/shopify/client';
 import { getProductReviews } from '../../lib/judgeme';
+import { shopifyImageUrl, shopifySrcset } from '../../lib/shopify/image-url';
 
 const { handle } = Astro.params;
 const { product, variants: shopifyVariants, currency, singleVariant, productId } = await getShopifyProductWithVariants(handle || '', Astro.locals.market);
@@ -40,10 +41,17 @@ const sourceImages = (product.images && product.images.length > 0)
 let productImages: any[] = sourceImages.map(resolveImg).filter(Boolean);
 if (productImages.length === 0) productImages = [product.image || ''];
 
+const isRemoteImg = (img: any) => typeof img === 'string' && /^https?:\/\//.test(img);
+
 const getSrcString = (img: any) => {
   if (typeof img === 'string') return img;
   return img?.src || '';
 };
+
+// Full-res swap target for the thumb-click gallery script — resized via
+// Shopify's CDN, not the raw original (Cloudflare's passthrough image
+// service never touches remote URLs).
+const getMainSrc = (img: any) => isRemoteImg(img) ? shopifyImageUrl(img, 1200, 1500) : getSrcString(img);
 
 // Sizes still available for this product, from the real variant matrix. When
 // there's no variant data (mock/single-variant) nothing is force-disabled.
@@ -145,22 +153,41 @@ const breadcrumbSchema = {
     <div class="pdp-gallery">
       <div class="pdp-thumbs" id="pdpThumbs">
         {productImages.map((img, idx) => (
-          <button class={`pdp-thumb ${idx === 0 ? 'is-active' : ''}`} data-index={idx} data-src={getSrcString(img)} data-position="center center" aria-label={`View image ${idx + 1}`}>
-            <Image src={img} alt="" width={78} height={104} />
+          <button class={`pdp-thumb ${idx === 0 ? 'is-active' : ''}`} data-index={idx} data-src={getMainSrc(img)} data-position="center center" aria-label={`View image ${idx + 1}`}>
+            {isRemoteImg(img) ? (
+              <img src={shopifyImageUrl(img, 78, 104)} srcset={shopifySrcset(img, [78, 156])} alt="" width={78} height={104} loading="lazy" decoding="async" />
+            ) : (
+              <Image src={img} alt="" width={78} height={104} />
+            )}
           </button>
         ))}
       </div>
       <div class="pdp-main" id="pdpMain">
         {product.badge && <span class="pdp-badge">{product.badge}</span>}
-        <Image 
-          id="pdpMainImg" 
-          src={productImages[0]} 
-          alt={product.name} 
-          width={600} 
-          height={750} 
-          class="pdp-main-img" 
-          loading="eager"
-        />
+        {isRemoteImg(productImages[0]) ? (
+          <img
+            id="pdpMainImg"
+            src={shopifyImageUrl(productImages[0], 600, 750)}
+            srcset={shopifySrcset(productImages[0], [600, 1200])}
+            sizes="(min-width: 900px) 600px, 90vw"
+            alt={product.name}
+            width={600}
+            height={750}
+            class="pdp-main-img"
+            loading="eager"
+            decoding="async"
+          />
+        ) : (
+          <Image
+            id="pdpMainImg"
+            src={productImages[0]}
+            alt={product.name}
+            width={600}
+            height={750}
+            class="pdp-main-img"
+            loading="eager"
+          />
+        )}
         <span class="pdp-counter"><span id="pdpCur">1</span> / {productImages.length}</span>
         <button class="pdp-arrow pdp-arrow--prev" id="pdpPrev" aria-label="Previous">
           <svg width="16" height="16" viewBox="0 0 18 18" fill="none">

@@ -75,6 +75,7 @@
     type CartItem
   } from '../../stores/cart';
   import { BRAND } from '../../config/velvet';
+  import { shopifyImageUrl } from '../../lib/shopify/image-url';
 
   const cartDrawer = document.getElementById('cartDrawer');
   const overlay = document.querySelector('[data-drawer-overlay]');
@@ -173,15 +174,15 @@
     itemsList.innerHTML = items.map((item) => {
       // Resolve local vs remote images
       const imgUrl = (item.image && typeof item.image === 'string')
-        ? (item.image.startsWith('Images/') 
-          ? `/src/assets/images/${item.image.split('/').pop()}` 
-          : item.image)
+        ? (item.image.startsWith('Images/')
+          ? `/src/assets/images/${item.image.split('/').pop()}`
+          : (item.image.startsWith('http') ? shopifyImageUrl(item.image, 100, 134) : item.image))
         : '';
 
       return `
         <li class="ditem" data-id="${item.id}" data-color="${item.color || ''}" data-size="${item.size || ''}">
           <a href="/products/${item.description || item.id}" class="ditem__media">
-            <img src="${imgUrl}" alt="${item.name}" loading="lazy" />
+            <img src="${imgUrl}" alt="${item.name}" loading="lazy" decoding="async" />
           </a>
           <div class="ditem__body">
             <div class="ditem__row">

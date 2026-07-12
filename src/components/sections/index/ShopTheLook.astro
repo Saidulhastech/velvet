@@ -8,6 +8,9 @@ import {
   getShopifyProductWithVariants,
 } from '../../../lib/shopify/client';
 import { SHOP_THE_LOOK_HANDLE } from '../../../config/velvet';
+import { shopifyImageUrl, shopifySrcset } from '../../../lib/shopify/image-url';
+
+const isRemoteImg = (img: string) => /^https?:\/\//.test(img);
 
 const market = Astro.locals.market;
 
@@ -94,7 +97,15 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
             style={item.tipStyle} 
             data-index={item.index}
           >
-            <img src={item.image} alt={item.name} width={42} height={42} loading="lazy" />
+            <img
+              src={isRemoteImg(item.image) ? shopifyImageUrl(item.image, 42, 42) : item.image}
+              srcset={isRemoteImg(item.image) ? shopifySrcset(item.image, [42, 84]) : undefined}
+              alt={item.name}
+              width={42}
+              height={42}
+              loading="lazy"
+              decoding="async"
+            />
             <div>
               <div class="look__tip-name">{item.name}</div>
               <div class="look__tip-price">{item.formattedPrice}</div>
@@ -125,7 +136,16 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
             data-swatch-hex={JSON.stringify(Object.fromEntries((item.swatches ?? []).map((sw) => [sw.color, sw.hex])))}
           >
             <div class="look__row-thumb">
-              <img class="look__row-img" src={item.image} alt={item.name} width={66} height={66} loading="lazy" />
+              <img
+                class="look__row-img"
+                src={isRemoteImg(item.image) ? shopifyImageUrl(item.image, 66, 66) : item.image}
+                srcset={isRemoteImg(item.image) ? shopifySrcset(item.image, [66, 132]) : undefined}
+                alt={item.name}
+                width={66}
+                height={66}
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <div>
               <div class="look__row-name">{item.name}</div>

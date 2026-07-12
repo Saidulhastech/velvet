@@ -48,6 +48,7 @@
     removeFromWishlist,
     addToCart
   } from '../../stores/cart';
+  import { shopifyImageUrl } from '../../lib/shopify/image-url';
 
   const wishDrawer = document.getElementById('wishDrawer');
   const overlay = document.querySelector('[data-drawer-overlay]');
@@ -56,7 +57,7 @@
   const itemsList = document.getElementById('wishItemsList');
   const emptyState = document.getElementById('wishEmptyState');
   const footer = document.getElementById('wishDrawerFoot');
-  const addAllBtn = document.getElementById('addAllToCartBtn');
+  const addAllBtn = document.getElementById('addAllToCartBtn') as HTMLButtonElement | null;
 
   let currencyCode = cartCurrency.get();
   cartCurrency.subscribe((code) => { currencyCode = code || 'EUR'; });
@@ -241,13 +242,13 @@
       const imgUrl = (item.image && typeof item.image === 'string')
         ? (item.image.startsWith('Images/')
           ? `/src/assets/images/${item.image.split('/').pop()}`
-          : item.image)
+          : (item.image.startsWith('http') ? shopifyImageUrl(item.image, 100, 134) : item.image))
         : '';
 
       return `
         <li class="ditem" data-id="${item.id}">
           <a href="/products/${item.description || item.id}" class="ditem__media">
-            <img src="${imgUrl}" alt="${item.name}" loading="lazy" />
+            <img src="${imgUrl}" alt="${item.name}" loading="lazy" decoding="async" />
           </a>
           <div class="ditem__body">
             <div class="ditem__row">
@@ -314,30 +315,50 @@
 
   // Add all items to bag — every row is resolved inline (colour + size already
   // chosen or defaulted), so this always has a real variant to add, no more
-  // silent skips.
+  // silent skips. Rows fade out first and the button shows a loading spinner
+  // so the move to cart reads as a deliberate action, not an instant wipe.
+  const addAllOriginalHtml = addAllBtn?.innerHTML ?? '';
   addAllBtn?.addEventListener('click', () => {
+    if (!addAllBtn || addAllBtn.classList.contains('is-loading')) return;
     const items = persistedWishItems.get();
     const rows = Array.from(itemsList?.querySelectorAll<HTMLElement>('.ditem') || []);
-    const addedIds: string[] = [];
+    if (!rows.length) return;
+
+    addAllBtn.disabled = true;
+    addAllBtn.classList.add('is-loading');
+    addAllBtn.innerHTML = '<span class="btn-spinner"></span> Adding to Bag…';
 
     rows.forEach((rowEl) => {
-      const id = rowEl.getAttribute('data-id') || '';
-      const item = items.find((i) => i.id === id);
-      const resolved = resolvedByRow.get(rowEl);
-      if (!item || !resolved || !resolved.available) return;
-      addToCart({
-        id: resolved.id,
-        name: item.name,
-        price: resolved.price,
-        image: resolved.image || item.image,
-        color: resolved.color,
-        size: resolved.size,
-        description: item.description || ''
-      }, 1);
-      addedIds.push(id);
+      rowEl.style.transition = 'opacity .35s var(--ease), transform .35s var(--ease)';
+      rowEl.style.opacity = '0';
+      rowEl.style.transform = 'translateX(20px)';
     });
 
-    persistedWishItems.set(items.filter((i) => !addedIds.includes(i.id)));
+    setTimeout(() => {
+      const addedIds: string[] = [];
+      rows.forEach((rowEl) => {
+        const id = rowEl.getAttribute('data-id') || '';
+        const item = items.find((i) => i.id === id);
+        const resolved = resolvedByRow.get(rowEl);
+        if (!item || !resolved || !resolved.available) return;
+        addToCart({
+          id: resolved.id,
+          name: item.name,
+          price: resolved.price,
+          image: resolved.image || item.image,
+          color: resolved.color,
+          size: resolved.size,
+          description: item.description || ''
+        }, 1);
+        addedIds.push(id);
+      });
+
+      persistedWishItems.set(items.filter((i) => !addedIds.includes(i.id)));
+
+      addAllBtn.disabled = false;
+      addAllBtn.classList.remove('is-loading');
+      addAllBtn.innerHTML = addAllOriginalHtml;
+    }, 360);
   });
 
   // Subscribe to count
@@ -471,6 +492,26 @@
     justify-content: center;
     padding: 18px;
     letter-spacing: 1.2px;
+  }
+
+  .cart__checkout.is-loading {
+    opacity: .75;
+    cursor: wait;
+  }
+
+  :global(.btn-spinner) {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255, 255, 255, .35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: btn-spin .6s linear infinite;
+    vertical-align: -2px;
+  }
+
+  @keyframes btn-spin {
+    to { transform: rotate(360deg); }
   }
 
   .cart__continue {

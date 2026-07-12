@@ -60,6 +60,11 @@
 
 <script>
   import { addToCart, toggleWishlist, persistedWishItems } from '../../stores/cart';
+  import { shopifyImageUrl } from '../../lib/shopify/image-url';
+
+  // Quick View media panel renders at ~600px — cap remote (Shopify CDN)
+  // images to that instead of shipping full-resolution originals.
+  const qvResize = (src: string) => /^https?:\/\//.test(src) ? shopifyImageUrl(src, 600, 750) : src;
 
   const overlay = document.getElementById('qvOverlay');
   const modal = document.getElementById('qvModal');
@@ -131,7 +136,7 @@
     if (!qvVariants.length) return;
     const v = qvCurrentVariant();
     if (qvPrice) qvPrice.textContent = v ? qvMoney(v.price) : 'Unavailable';
-    if (v?.img && qvImg) qvImg.src = v.img;
+    if (v?.img && qvImg) qvImg.src = qvResize(v.img);
     if (qvColorKey) selectedColor = qvSelected[qvColorKey] || selectedColor;
     if (qvSizeKey) selectedSize = qvSelected[qvSizeKey] || selectedSize;
     if (addToCartBtn) (addToCartBtn as HTMLButtonElement).disabled = !(v && v.available);
@@ -166,7 +171,7 @@
     };
 
     // Update Text Elements
-    qvImg.src = resolvedImg.startsWith('Images/') ? `/src/assets/images/${resolvedImg.split('/').pop()}` : resolvedImg;
+    qvImg.src = resolvedImg.startsWith('Images/') ? `/src/assets/images/${resolvedImg.split('/').pop()}` : qvResize(resolvedImg);
     qvImg.alt = dataset.name || 'Product Image';
     qvCat.textContent = dataset.cat || 'Collection';
     qvName.textContent = dataset.name || 'Product';
@@ -271,7 +276,7 @@
           sw.classList.add('is-active');
           selectedColor = sw.getAttribute('data-value') || '';
           const imgUrl = sw.getAttribute('data-img');
-          if (imgUrl && qvImg) qvImg.src = imgUrl;
+          if (imgUrl && qvImg) qvImg.src = qvResize(imgUrl);
         });
       });
 

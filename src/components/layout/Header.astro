@@ -157,6 +157,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
 <script>
   import { isCartOpen, isWishOpen, cartCount, wishCount } from '../../stores/cart';
+  import { shopifyImageUrl } from '../../lib/shopify/image-url';
 
   // Search toggle + live predictive results
   const sToggle = document.getElementById('searchToggle');
@@ -208,7 +209,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
       }
       if (products.length) {
         html += `<div style="${lbl}">Products</div>`;
-        html += products.slice(0, 6).map((p: any) => `<a href="/products/${esc(p.handle)}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;text-decoration:none;color:var(--lux-on-light)"><span style="width:44px;height:52px;flex:0 0 auto;background:var(--lux-light-surface);overflow:hidden">${p.featuredImage?.url ? `<img src="${esc(p.featuredImage.url)}" alt="" style="width:100%;height:100%;object-fit:cover">` : ''}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</span><span style="font-size:12px;color:var(--lux-secondary-olive)">${fmt(p.priceRange?.minVariantPrice)}</span></span></a>`).join('');
+        html += products.slice(0, 6).map((p: any) => `<a href="/products/${esc(p.handle)}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;text-decoration:none;color:var(--lux-on-light)"><span style="width:44px;height:52px;flex:0 0 auto;background:var(--lux-light-surface);overflow:hidden">${p.featuredImage?.url ? `<img src="${esc(shopifyImageUrl(p.featuredImage.url, 44, 52))}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover">` : ''}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</span><span style="font-size:12px;color:var(--lux-secondary-olive)">${fmt(p.priceRange?.minVariantPrice)}</span></span></a>`).join('');
       }
       if (collections.length) {
         html += `<div style="${lbl}">Collections</div>`;
