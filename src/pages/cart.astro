@@ -172,7 +172,7 @@ const extrasData = JSON.stringify({
                 <div class="copt__hsub">Pick a preferred day</div>
               </div>
             </div>
-            <input class="copt__date" type="date" aria-label="Preferred delivery date">
+            <input class="copt__date" type="date" aria-label="Preferred delivery date" data-delivery-date min={new Date().toISOString().slice(0, 10)}>
             <p class="copt__hint">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" />
@@ -359,11 +359,6 @@ const extrasData = JSON.stringify({
             <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
           </svg>
         </a>
-        <span class="csum__express-label">or express checkout</span>
-        <div class="csum__express">
-          <button type="button" id="expressApplePay">&#63743; Pay</button>
-          <button type="button" id="expressGooglePay">G Pay</button>
-        </div>
       </div>
 
       <!-- Trust Badges -->
@@ -477,6 +472,7 @@ const extrasData = JSON.stringify({
     removeExtraLine,
     checkout
   } from '../stores/cart';
+  import { BRAND } from '../config/velvet';
 
   // Real gift-wrap / protection config injected by the server. In fallback mode
   // (no configured products) protection[] is empty and giftWrap is null, so the
@@ -502,7 +498,7 @@ const extrasData = JSON.stringify({
   const emptyEl = document.getElementById('cartEmpty');
   const checkoutBtn = document.getElementById('checkoutBtn');
 
-  const SHIPPING_THRESHOLD = 1800;
+  const SHIPPING_THRESHOLD = BRAND.freeShippingThreshold ?? 0;
   let currentDiscount = 0;
   let activeDiscountCode: string | null = null;
   let currentNoteText = '';
@@ -821,6 +817,8 @@ const extrasData = JSON.stringify({
     if (protVariant && protName && protName !== 'No coverage') {
       attrs.push({ key: 'Protection Plan', value: protName });
     }
+    const deliveryDate = (document.querySelector('[data-delivery-date]') as HTMLInputElement | null)?.value;
+    if (deliveryDate) attrs.push({ key: 'Preferred Delivery Date', value: deliveryDate });
     return attrs;
   }
 
@@ -885,6 +883,15 @@ const extrasData = JSON.stringify({
       giftMsgTimer = setTimeout(() => {
         if ((giftCheckbox as HTMLInputElement | null)?.checked) setCartAttributes(buildAttributes());
       }, 600);
+    });
+  }
+
+  // Persist the preferred delivery date as a cart attribute — same mechanism
+  // as the gift message, just always active (no toggle to gate it on).
+  const deliveryDateInput = $('[data-delivery-date]') as HTMLInputElement | null;
+  if (deliveryDateInput) {
+    deliveryDateInput.addEventListener('change', () => {
+      setCartAttributes(buildAttributes());
     });
   }
 
@@ -964,20 +971,6 @@ const extrasData = JSON.stringify({
     });
   }
 
-  const expressPay = (platform: string) => {
-    const currentItems = persistedCartItems.get();
-    if (currentItems.length === 0) {
-      alert('Your bag is empty.');
-      return;
-    }
-    alert(`Processing express payment via ${platform}.`);
-    persistedCartItems.set([]);
-    window.location.href = '/';
-  }
-
-  document.getElementById('expressApplePay')?.addEventListener('click', () => expressPay('Apple Pay'));
-  document.getElementById('expressGooglePay')?.addEventListener('click', () => expressPay('Google Pay'));
-
   // Subscribe to Shopify cost and notes details
   cartDiscount.subscribe(val => {
     currentDiscount = val;
@@ -997,9 +990,13 @@ const extrasData = JSON.stringify({
     }
   });
 
-  // Re-render money in the authoritative cart currency once it syncs.
+  // Re-render money in the authoritative cart currency once it syncs — item
+  // rows and saved-for-later rows format their own prices too, not just the
+  // summary, so both must re-render or they're left showing the stale currency.
   cartCurrency.subscribe(code => {
     currentCurrency = code || 'EUR';
+    renderCartItems(persistedCartItems.get());
+    renderSavedItems(persistedSavedItems.get());
     recomputeSummary(persistedCartItems.get());
   });
 </script>
@@ -1592,35 +1589,6 @@ const extrasData = JSON.stringify({
     width: 100%;
     justify-content: center;
     padding: 17px;
-  }
-
-  :global(.csum__express-label) {
-    text-align: center;
-    font-size: 11px;
-    letter-spacing: .5px;
-    text-transform: uppercase;
-    color: var(--lux-on-light-soft);
-  }
-
-  :global(.csum__express) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  :global(.csum__express button) {
-    padding: 12px;
-    border: 1px solid var(--lux-light-border-strong);
-    background: var(--lux-light-elevated);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--lux-on-light);
-    cursor: pointer;
-    transition: border-color .2s var(--ease);
-  }
-
-  :global(.csum__express button:hover) {
-    border-color: var(--lux-primary-dark);
   }
 
   :global(.csum__trust) {
