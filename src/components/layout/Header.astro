@@ -1,7 +1,7 @@
 ---
 // Header component containing announcement bar, utility bar, and primary navigation
-import MarketSelector from './MarketSelector.astro';
-import { getShopifyProducts } from '../../lib/shopify/client';
+import MarketSelector from "./MarketSelector.astro";
+import { getShopifyProducts } from "../../lib/shopify/client";
 
 const products = await getShopifyProducts(Astro.locals.market);
 
@@ -16,11 +16,13 @@ function categoriesFor(gender: string) {
   });
   return Array.from(set);
 }
-const womenCategories = categoriesFor('women');
-const menCategories = categoriesFor('men');
-const allRealCategories = new Set(products.map((p) => p.filterCategory).filter(Boolean));
-const hasBags = allRealCategories.has('bags');
-const hasAccessories = allRealCategories.has('accessories');
+const womenCategories = categoriesFor("women");
+const menCategories = categoriesFor("men");
+const allRealCategories = new Set(
+  products.map((p) => p.filterCategory).filter(Boolean),
+);
+const hasBags = allRealCategories.has("bags");
+const hasAccessories = allRealCategories.has("accessories");
 const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 ---
 
@@ -28,7 +30,9 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 <div class="announcement">
   <div class="announcement__inner">
     <span class="announcement__dot"></span>
-    <p class="announcement__text">Complimentary shipping &amp; returns worldwide — Resort 2026 has arrived</p>
+    <p class="announcement__text">
+      Complimentary shipping &amp; returns worldwide — Resort 2026 has arrived
+    </p>
     <span class="announcement__dot"></span>
   </div>
 </div>
@@ -39,8 +43,12 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     <div class="utility-bar__left">
       <span class="utility-bar__item">
         <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-          <rect x="1.5" y="5" width="11" height="8" rx="1" stroke="currentColor"></rect>
-          <path d="M4.5 5V3.5a2.5 2.5 0 0 1 5 0V5" stroke="currentColor" stroke-linecap="round"></path>
+          <rect x="1.5" y="5" width="11" height="8" rx="1" stroke="currentColor"
+          ></rect>
+          <path
+            d="M4.5 5V3.5a2.5 2.5 0 0 1 5 0V5"
+            stroke="currentColor"
+            stroke-linecap="round"></path>
         </svg> Secure Payments
       </span>
       <span class="utility-bar__divider"></span>
@@ -61,41 +69,85 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     <nav class="nav nav--left" aria-label="Primary">
       <ul>
         <li>
-          <a href="/shop?gender=women">Women
-            {womenCategories.length > 0 && (
-              <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
-              </svg>
-            )}
+          <a href="/shop?gender=women"
+            >Women
+            {
+              womenCategories.length > 0 && (
+                <svg
+                  class="nav__chevron"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                >
+                  <path
+                    d="M2 3.5l3 3 3-3"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              )
+            }
           </a>
-          {womenCategories.length > 0 && (
-            <div class="nav__dropdown">
-              {womenCategories.map((cat) => (
-                <a href={`/shop?category=${cat}&gender=women`}>{label(cat)}</a>
-              ))}
-              <a href="/shop?gender=women">View All</a>
-            </div>
-          )}
+          {
+            womenCategories.length > 0 && (
+              <div class="nav__dropdown">
+                {womenCategories.map((cat) => (
+                  <a href={`/shop?category=${cat}&gender=women`}>
+                    {label(cat)}
+                  </a>
+                ))}
+                <a href="/shop?gender=women">View All</a>
+              </div>
+            )
+          }
         </li>
         <li>
-          <a href="/shop?gender=men">Men
-            {menCategories.length > 0 && (
-              <svg class="nav__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-linecap="round"></path>
-              </svg>
-            )}
+          <a href="/shop?gender=men"
+            >Men
+            {
+              menCategories.length > 0 && (
+                <svg
+                  class="nav__chevron"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                >
+                  <path
+                    d="M2 3.5l3 3 3-3"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              )
+            }
           </a>
-          {menCategories.length > 0 && (
-            <div class="nav__dropdown">
-              {menCategories.map((cat) => (
-                <a href={`/shop?category=${cat}&gender=men`}>{label(cat)}</a>
-              ))}
-              <a href="/shop?gender=men">View All</a>
-            </div>
-          )}
+          {
+            menCategories.length > 0 && (
+              <div class="nav__dropdown">
+                {menCategories.map((cat) => (
+                  <a href={`/shop?category=${cat}&gender=men`}>{label(cat)}</a>
+                ))}
+                <a href="/shop?gender=men">View All</a>
+              </div>
+            )
+          }
         </li>
-        {hasBags && <li><a href="/shop?category=bags">Bags</a></li>}
-        {hasAccessories && <li><a href="/shop?category=accessories">Accessories</a></li>}
+        {
+          hasBags && (
+            <li>
+              <a href="/shop?category=bags">Bags</a>
+            </li>
+          )
+        }
+        {
+          hasAccessories && (
+            <li>
+              <a href="/shop?category=accessories">Accessories</a>
+            </li>
+          )
+        }
         <li><a href="/blog">Journal <span class="nav__new-dot">N</span></a></li>
       </ul>
     </nav>
@@ -103,50 +155,114 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     <!-- CENTER BRAND LOGO -->
     <a class="brand" href="/" aria-label="Maison Arden — Home">
       <span class="brand__mark">VELVET</span>
-      <div class="brand__rule"><span class="brand__sub">EST. MMXIV · PARIS</span></div>
+      <div class="brand__rule">
+        <span class="brand__sub">EST. MMXIV · PARIS</span>
+      </div>
     </a>
 
     <!-- RIGHT UTILITY NAVIGATION -->
     <div class="nav nav--right">
       <!-- Search Input Wrap -->
       <div class="header__search-wrap" id="searchWrap">
-        <input class="header__search-input" type="search" placeholder="Search collections…" id="searchInput" aria-label="Search" />
-        <button class="icon-btn icon-btn--search" id="searchToggle" aria-label="Search" aria-expanded="false">
+        <input
+          class="header__search-input"
+          type="search"
+          placeholder="Search collections…"
+          id="searchInput"
+          aria-label="Search"
+        />
+        <button
+          class="icon-btn icon-btn--search"
+          id="searchToggle"
+          aria-label="Search"
+          aria-expanded="false"
+        >
           <svg width="19" height="19" viewBox="0 0 22 22" fill="none">
-            <circle cx="9.5" cy="9.5" r="7" stroke="currentColor" stroke-width="1.4"></circle>
-            <path d="m14.5 14.5 5.5 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+            <circle
+              cx="9.5"
+              cy="9.5"
+              r="7"
+              stroke="currentColor"
+              stroke-width="1.4"></circle>
+            <path
+              d="m14.5 14.5 5.5 5.5"
+              stroke="currentColor"
+              stroke-width="1.4"
+              stroke-linecap="round"></path>
           </svg>
         </button>
       </div>
       <span class="nav__icon-divider"></span>
-      
+
       <!-- Account Link -->
       <a class="icon-btn" href="/account" aria-label="Account">
         <svg width="19" height="19" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="8" r="3.5" stroke="currentColor" stroke-width="1.4"></circle>
-          <path d="M3 20c1.3-4 4.2-6 8-6s6.7 2 8 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+          <circle
+            cx="11"
+            cy="8"
+            r="3.5"
+            stroke="currentColor"
+            stroke-width="1.4"></circle>
+          <path
+            d="M3 20c1.3-4 4.2-6 8-6s6.7 2 8 6"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"></path>
         </svg>
       </a>
-      
+
       <!-- Wishlist trigger -->
-      <button class="icon-btn icon-btn--wish" id="wishlistToggle" data-wish-open aria-label="Wishlist" aria-expanded="false">
+      <button
+        class="icon-btn icon-btn--wish"
+        id="wishlistToggle"
+        data-wish-open
+        aria-label="Wishlist"
+        aria-expanded="false"
+      >
         <svg width="19" height="19" viewBox="0 0 22 22" fill="none">
-          <path d="M11 19S3 14 3 8.3C3 5.5 5.2 3.5 8 3.5c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.8 0 5 2 5 4.8C21 14 13 19 11 19z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path>
+          <path
+            d="M11 19S3 14 3 8.3C3 5.5 5.2 3.5 8 3.5c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.8 0 5 2 5 4.8C21 14 13 19 11 19z"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linejoin="round"></path>
         </svg>
-        <span class="icon-btn__wish-count" data-wish-count id="headerWishCount">0</span>
+        <span class="icon-btn__wish-count" data-wish-count id="headerWishCount"
+          >0</span
+        >
       </button>
-      
+
       <!-- Cart trigger -->
-      <button class="icon-btn icon-btn--cart" id="cartToggle" data-cart-open aria-label="Cart" aria-expanded="false">
+      <button
+        class="icon-btn icon-btn--cart"
+        id="cartToggle"
+        data-cart-open
+        aria-label="Cart"
+        aria-expanded="false"
+      >
         <svg width="19" height="19" viewBox="0 0 22 22" fill="none">
-          <path d="M3.5 8h15l-1.5 11h-12L3.5 8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path>
-          <path d="M8 8V5.5a3 3 0 0 1 6 0V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+          <path
+            d="M3.5 8h15l-1.5 11h-12L3.5 8z"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linejoin="round"></path>
+          <path
+            d="M8 8V5.5a3 3 0 0 1 6 0V8"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"></path>
         </svg>
-        <span class="icon-btn__count" data-cart-count id="headerCartCount">0</span>
+        <span class="icon-btn__count" data-cart-count id="headerCartCount"
+          >0</span
+        >
       </button>
-      
+
       <!-- Mobile Hamburger Button -->
-      <button class="hamburger" id="menuToggle" aria-label="Menu" aria-expanded="false">
+      <button
+        class="hamburger"
+        id="menuToggle"
+        aria-label="Menu"
+        aria-expanded="false"
+      >
         <span></span>
         <span></span>
         <span></span>
@@ -156,64 +272,110 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 </header>
 
 <script>
-  import { isCartOpen, isWishOpen, cartCount, wishCount } from '../../stores/cart';
-  import { shopifyImageUrl } from '../../lib/shopify/image-url';
+  import {
+    isCartOpen,
+    isWishOpen,
+    cartCount,
+    wishCount,
+  } from "../../stores/cart";
+  import { shopifyImageUrl } from "../../lib/shopify/image-url";
 
   // Search toggle + live predictive results
-  const sToggle = document.getElementById('searchToggle');
-  const sWrap = document.getElementById('searchWrap');
-  const sInput = document.getElementById('searchInput') as HTMLInputElement | null;
+  const sToggle = document.getElementById("searchToggle");
+  const sWrap = document.getElementById("searchWrap");
+  const sInput = document.getElementById(
+    "searchInput",
+  ) as HTMLInputElement | null;
 
   if (sToggle && sWrap && sInput) {
     // Results dropdown injected at runtime — no change to existing markup/CSS.
-    if (getComputedStyle(sWrap).position === 'static') sWrap.style.position = 'relative';
-    const results = document.createElement('div');
-    results.className = 'header__search-results';
-    results.setAttribute('role', 'listbox');
-    results.style.cssText = 'position:absolute;top:calc(100% + 8px);right:0;width:min(420px,92vw);max-height:70vh;overflow-y:auto;background:var(--lux-light-elevated,#fdfdf8);border:1px solid var(--lux-light-border,#e6e3da);box-shadow:0 18px 44px -18px rgba(48,56,44,.45);z-index:120;display:none;';
+    if (getComputedStyle(sWrap).position === "static")
+      sWrap.style.position = "relative";
+    const results = document.createElement("div");
+    results.className = "header__search-results";
+    results.setAttribute("role", "listbox");
+    results.style.cssText =
+      "position:absolute;top:calc(100% + 8px);right:0;width:min(420px,92vw);max-height:70vh;overflow-y:auto;background:var(--lux-light-elevated,#fdfdf8);border:1px solid var(--lux-light-border,#e6e3da);box-shadow:0 18px 44px -18px rgba(48,56,44,.45);z-index:120;display:none;";
     sWrap.appendChild(results);
 
     const openSearch = () => {
-      sWrap.classList.add('is-open');
-      sToggle.setAttribute('aria-expanded', 'true');
+      sWrap.classList.add("is-open");
+      sToggle.setAttribute("aria-expanded", "true");
       setTimeout(() => sInput.focus(), 60);
     };
     const closeSearch = () => {
-      sWrap.classList.remove('is-open');
-      sToggle.setAttribute('aria-expanded', 'false');
-      results.style.display = 'none';
+      sWrap.classList.remove("is-open");
+      sToggle.setAttribute("aria-expanded", "false");
+      results.style.display = "none";
     };
 
-    sToggle.addEventListener('click', (e) => {
+    sToggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (sWrap.classList.contains('is-open')) { closeSearch(); sInput.value = ''; }
-      else openSearch();
+      if (sWrap.classList.contains("is-open")) {
+        closeSearch();
+        sInput.value = "";
+      } else openSearch();
     });
 
     const fmt = (m: any) => {
-      try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: m?.currencyCode || 'USD', minimumFractionDigits: 0 }).format(Number(m?.amount || 0)); }
-      catch { return ''; }
+      try {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: m?.currencyCode || "USD",
+          minimumFractionDigits: 0,
+        }).format(Number(m?.amount || 0));
+      } catch {
+        return "";
+      }
     };
-    const esc = (t: any) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
-    const lbl = 'padding:10px 14px 4px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--lux-on-light-soft)';
+    const esc = (t: any) =>
+      String(t ?? "").replace(
+        /[&<>"]/g,
+        (c) =>
+          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[
+            c
+          ] as string,
+      );
+    const lbl =
+      "padding:10px 14px 4px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--lux-on-light-soft)";
 
     let seq = 0;
     let timer: any;
 
     function renderResults(data: any, q: string) {
-      const products = data.products || [], collections = data.collections || [], queries = data.queries || [];
-      let html = '';
+      const products = data.products || [],
+        collections = data.collections || [],
+        queries = data.queries || [];
+      let html = "";
       if (queries.length) {
         html += `<div style="${lbl}">Suggestions</div>`;
-        html += queries.slice(0, 4).map((x: any) => `<a href="/search?q=${encodeURIComponent(x.text)}" style="display:block;padding:7px 14px;font-size:13px;color:var(--lux-on-light);text-decoration:none">${esc(x.text)}</a>`).join('');
+        html += queries
+          .slice(0, 4)
+          .map(
+            (x: any) =>
+              `<a href="/search?q=${encodeURIComponent(x.text)}" style="display:block;padding:7px 14px;font-size:13px;color:var(--lux-on-light);text-decoration:none">${esc(x.text)}</a>`,
+          )
+          .join("");
       }
       if (products.length) {
         html += `<div style="${lbl}">Products</div>`;
-        html += products.slice(0, 6).map((p: any) => `<a href="/products/${esc(p.handle)}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;text-decoration:none;color:var(--lux-on-light)"><span style="width:44px;height:52px;flex:0 0 auto;background:var(--lux-light-surface);overflow:hidden">${p.featuredImage?.url ? `<img src="${esc(shopifyImageUrl(p.featuredImage.url, 44, 52))}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover">` : ''}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</span><span style="font-size:12px;color:var(--lux-secondary-olive)">${fmt(p.priceRange?.minVariantPrice)}</span></span></a>`).join('');
+        html += products
+          .slice(0, 6)
+          .map(
+            (p: any) =>
+              `<a href="/products/${esc(p.handle)}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;text-decoration:none;color:var(--lux-on-light)"><span style="width:44px;height:52px;flex:0 0 auto;background:var(--lux-light-surface);overflow:hidden">${p.featuredImage?.url ? `<img src="${esc(shopifyImageUrl(p.featuredImage.url, 44, 52))}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover">` : ""}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</span><span style="font-size:12px;color:var(--lux-secondary-olive)">${fmt(p.priceRange?.minVariantPrice)}</span></span></a>`,
+          )
+          .join("");
       }
       if (collections.length) {
         html += `<div style="${lbl}">Collections</div>`;
-        html += collections.slice(0, 4).map((c: any) => `<a href="/collections/${esc(c.handle)}" style="display:block;padding:7px 14px;font-size:13px;color:var(--lux-on-light);text-decoration:none">${esc(c.title)}</a>`).join('');
+        html += collections
+          .slice(0, 4)
+          .map(
+            (c: any) =>
+              `<a href="/collections/${esc(c.handle)}" style="display:block;padding:7px 14px;font-size:13px;color:var(--lux-on-light);text-decoration:none">${esc(c.title)}</a>`,
+          )
+          .join("");
       }
       if (!html) {
         html = `<div style="padding:20px 14px;font-size:13px;color:var(--lux-on-light-soft)">No matches for "${esc(q)}"</div>`;
@@ -221,17 +383,21 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
         html += `<a href="/search?q=${encodeURIComponent(q)}" style="display:block;padding:11px 14px;border-top:1px solid var(--lux-light-border);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lux-on-light);text-decoration:none">See all results →</a>`;
       }
       results.innerHTML = html;
-      results.style.display = 'block';
+      results.style.display = "block";
     }
 
-    sInput.addEventListener('input', () => {
+    sInput.addEventListener("input", () => {
       const q = sInput.value.trim();
       clearTimeout(timer);
-      if (q.length < 2) { results.style.display = 'none'; return; }
+      if (q.length < 2) {
+        results.style.display = "none";
+        return;
+      }
       timer = setTimeout(async () => {
         const mySeq = ++seq;
-        results.innerHTML = '<div style="padding:18px 14px;font-size:13px;color:var(--lux-on-light-soft)">Searching…</div>';
-        results.style.display = 'block';
+        results.innerHTML =
+          '<div style="padding:18px 14px;font-size:13px;color:var(--lux-on-light-soft)">Searching…</div>';
+        results.style.display = "block";
         try {
           const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
           const data = await res.json();
@@ -240,27 +406,34 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
           renderResults(data, q);
         } catch {
           if (mySeq !== seq) return;
-          results.innerHTML = '<div style="padding:18px 14px;font-size:13px;color:var(--lux-on-light-soft)">Search is unavailable right now.</div>';
-          results.style.display = 'block';
+          results.innerHTML =
+            '<div style="padding:18px 14px;font-size:13px;color:var(--lux-on-light-soft)">Search is unavailable right now.</div>';
+          results.style.display = "block";
         }
       }, 220);
     });
 
-    sInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { closeSearch(); sInput.value = ''; }
-      else if (e.key === 'Enter') {
+    sInput.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeSearch();
+        sInput.value = "";
+      } else if (e.key === "Enter") {
         const q = sInput.value.trim();
         if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
       }
     });
 
-    document.addEventListener('click', (e) => {
-      if (sWrap.classList.contains('is-open') && !sWrap.contains(e.target as Node)) closeSearch();
+    document.addEventListener("click", (e) => {
+      if (
+        sWrap.classList.contains("is-open") &&
+        !sWrap.contains(e.target as Node)
+      )
+        closeSearch();
     });
 
     // Cmd/Ctrl-K opens the search.
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+    document.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
         openSearch();
       }
@@ -268,55 +441,72 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
   }
 
   // Mobile Drawer Menu Handler
-  const burger = document.getElementById('menuToggle');
-  const navLeft = document.querySelector('.nav--left');
-  const menuOverlay = document.querySelector('[data-drawer-overlay]');
+  const burger = document.getElementById("menuToggle");
+  const navLeft = document.querySelector(".nav--left");
+  const menuOverlay = document.querySelector("[data-drawer-overlay]");
   if (burger && navLeft) {
     const setMenu = (open: boolean) => {
-      burger.setAttribute('aria-expanded', String(open));
-      navLeft.classList.toggle('is-open', open);
+      burger.setAttribute("aria-expanded", String(open));
+      navLeft.classList.toggle("is-open", open);
       // .header is a stacking-context ancestor (position:sticky + z-index), so
       // nav--left's own z-index can't lift it above the overlay/drawers on its
       // own — bump the ancestor's z-index only while the menu is open.
-      const siteHeader = document.getElementById('siteHeader');
-      siteHeader?.classList.toggle('menu-open', open);
+      const siteHeader = document.getElementById("siteHeader");
+      siteHeader?.classList.toggle("menu-open", open);
       if (open) {
         // Header's visual bottom edge shifts with scroll (announcement bar
         // pushes it down until the sticky header pins to y:0), so the panel's
         // top has to be measured at open-time rather than hardcoded.
-        if (siteHeader) navLeft.style.top = `${siteHeader.getBoundingClientRect().bottom}px`;
-        menuOverlay?.classList.add('is-open');
-        document.body.classList.add('no-scroll');
+        if (siteHeader)
+          navLeft.style.top = `${siteHeader.getBoundingClientRect().bottom}px`;
+        menuOverlay?.classList.add("is-open");
+        document.body.classList.add("no-scroll");
       } else {
-        const cartOpen = document.getElementById('cartDrawer')?.classList.contains('is-open');
-        const wishOpen = document.getElementById('wishDrawer')?.classList.contains('is-open');
+        const cartOpen = document
+          .getElementById("cartDrawer")
+          ?.classList.contains("is-open");
+        const wishOpen = document
+          .getElementById("wishDrawer")
+          ?.classList.contains("is-open");
         if (!cartOpen && !wishOpen) {
-          menuOverlay?.classList.remove('is-open');
-          document.body.classList.remove('no-scroll');
+          menuOverlay?.classList.remove("is-open");
+          document.body.classList.remove("no-scroll");
         }
       }
     };
-    burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
+    burger.addEventListener("click", () =>
+      setMenu(burger.getAttribute("aria-expanded") !== "true"),
+    );
     // Escape closes the menu; tapping a nav link closes it too.
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && navLeft.classList.contains('is-open')) setMenu(false);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && navLeft.classList.contains("is-open"))
+        setMenu(false);
     });
-    navLeft.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+    navLeft
+      .querySelectorAll("a")
+      .forEach((a) => a.addEventListener("click", () => setMenu(false)));
+    // Tapping the shared backdrop closes the mobile menu too (BaseLayout's own
+    // listener on this element only handles the cart/wishlist drawers).
+    document
+      .querySelector("[data-drawer-overlay]")
+      ?.addEventListener("click", () => {
+        if (navLeft.classList.contains("is-open")) setMenu(false);
+      });
   }
 
   // Open Cart Drawer
-  const cartBtn = document.getElementById('cartToggle');
+  const cartBtn = document.getElementById("cartToggle");
   if (cartBtn) {
-    cartBtn.addEventListener('click', (e) => {
+    cartBtn.addEventListener("click", (e) => {
       e.preventDefault();
       isCartOpen.set(true);
     });
   }
 
   // Open Wishlist Drawer
-  const wishBtn = document.getElementById('wishlistToggle');
+  const wishBtn = document.getElementById("wishlistToggle");
   if (wishBtn) {
-    wishBtn.addEventListener('click', (e) => {
+    wishBtn.addEventListener("click", (e) => {
       e.preventDefault();
       isWishOpen.set(true);
     });
@@ -324,12 +514,12 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
   // Subscribe to Nanostores for counts in Header
   cartCount.subscribe((count) => {
-    const el = document.getElementById('headerCartCount');
+    const el = document.getElementById("headerCartCount");
     if (el) el.textContent = String(count);
   });
 
   wishCount.subscribe((count) => {
-    const el = document.getElementById('headerWishCount');
+    const el = document.getElementById("headerWishCount");
     if (el) el.textContent = String(count);
   });
 </script>
@@ -362,7 +552,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
   .announcement__text {
     margin: 0;
-    opacity: .92;
+    opacity: 0.92;
   }
 
   .utility-bar {
@@ -393,13 +583,13 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
   .utility-bar__item {
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: .7px;
+    letter-spacing: 0.7px;
     text-transform: uppercase;
     color: var(--lux-on-light-soft);
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: color .22s var(--ease);
+    transition: color 0.22s var(--ease);
     white-space: nowrap;
   }
 
@@ -408,7 +598,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
   }
 
   .utility-bar__item svg {
-    opacity: .6;
+    opacity: 0.6;
   }
 
   .utility-bar__divider {
@@ -425,7 +615,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     font-family: var(--font-body);
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: .7px;
+    letter-spacing: 0.7px;
     text-transform: uppercase;
     color: var(--lux-on-light-soft);
     cursor: pointer;
@@ -448,15 +638,17 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(244, 245, 239, .88);
+    background: rgba(244, 245, 239, 0.88);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--lux-light-border);
-    transition: box-shadow .3s var(--ease);
+    transition: box-shadow 0.3s var(--ease);
   }
 
   .header.is-scrolled {
-    box-shadow: 0 1px 0 rgba(48, 56, 44, .05), 0 12px 40px -24px rgba(48, 56, 44, .3);
+    box-shadow:
+      0 1px 0 rgba(48, 56, 44, 0.05),
+      0 12px 40px -24px rgba(48, 56, 44, 0.3);
   }
 
   .header.menu-open {
@@ -495,14 +687,14 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
   .nav a {
     font-size: 13px;
     font-weight: 500;
-    letter-spacing: .35px;
+    letter-spacing: 0.35px;
     color: var(--lux-on-light);
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 27px 13px;
     position: relative;
-    transition: color .25s var(--ease);
+    transition: color 0.25s var(--ease);
     white-space: nowrap;
   }
 
@@ -528,8 +720,8 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
   .nav__chevron {
     color: var(--lux-on-light-soft);
-    opacity: .6;
-    transition: transform .25s var(--ease);
+    opacity: 0.6;
+    transition: transform 0.25s var(--ease);
   }
 
   .nav--left > ul > li:hover .nav__chevron {
@@ -549,9 +741,12 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-8px);
-    transition: opacity .2s var(--ease), transform .2s var(--ease), visibility .2s;
+    transition:
+      opacity 0.2s var(--ease),
+      transform 0.2s var(--ease),
+      visibility 0.2s;
     z-index: 10;
-    box-shadow: 0 18px 44px -14px rgba(48, 56, 44, .22);
+    box-shadow: 0 18px 44px -14px rgba(48, 56, 44, 0.22);
   }
 
   .nav--left > ul > li:hover .nav__dropdown {
@@ -568,7 +763,10 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     font-size: 13px;
     font-weight: 400;
     color: var(--lux-on-light-soft);
-    transition: color .18s var(--ease), padding-left .18s var(--ease), background .18s var(--ease);
+    transition:
+      color 0.18s var(--ease),
+      padding-left 0.18s var(--ease),
+      background 0.18s var(--ease);
   }
 
   .nav__dropdown a::after {
@@ -583,7 +781,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
   .nav__dropdown a span {
     font-size: 9px;
-    letter-spacing: .8px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--lux-secondary-olive);
     font-weight: 700;
@@ -655,7 +853,10 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     color: var(--lux-on-light);
     padding: 4px 8px 4px 0;
     outline: none;
-    transition: width .35s var(--ease), opacity .35s var(--ease), border-color .35s var(--ease);
+    transition:
+      width 0.35s var(--ease),
+      opacity 0.35s var(--ease),
+      border-color 0.35s var(--ease);
     pointer-events: none;
   }
 
@@ -686,7 +887,7 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     color: var(--lux-on-light);
     background: none;
     border: none;
-    transition: color .25s var(--ease);
+    transition: color 0.25s var(--ease);
   }
 
   .icon-btn:hover {
@@ -743,7 +944,9 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
     width: 20px;
     height: 1px;
     background: var(--lux-on-light);
-    transition: transform .3s var(--ease), opacity .3s var(--ease);
+    transition:
+      transform 0.3s var(--ease),
+      opacity 0.3s var(--ease);
   }
 
   .hamburger span:nth-child(2) {
@@ -789,7 +992,10 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
       order: -1;
     }
 
-    .nav--right .icon-btn:not(.icon-btn--cart):not(.icon-btn--search):not(.icon-btn--wish) {
+    .nav--right
+      .icon-btn:not(.icon-btn--cart):not(.icon-btn--search):not(
+        .icon-btn--wish
+      ) {
       display: none;
     }
 
@@ -820,16 +1026,18 @@ const label = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
       -webkit-overflow-scrolling: touch;
       transform: translateY(-100%);
       visibility: hidden;
-      transition: transform .5s var(--ease), visibility 0s linear .5s;
+      transition:
+        transform 0s var(--ease-soft),
+        visibility 0s linear 0s;
       z-index: 100;
       border-bottom: 1px solid var(--lux-light-border);
-      box-shadow: 0 24px 60px -30px rgba(48, 56, 44, .4);
+      box-shadow: 0 24px 60px -30px rgba(48, 56, 44, 0.4);
     }
 
     .nav--left.is-open {
       transform: translateY(0);
       visibility: visible;
-      transition: transform .5s var(--ease);
+      transition: transform 0.5s var(--ease);
     }
 
     .nav--left ul {

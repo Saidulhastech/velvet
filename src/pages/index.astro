@@ -388,7 +388,7 @@ const hasAccessoriesArrivals = newArrivals.some(p => catOf(p).includes('accessor
     align-items: center;
     overflow: hidden;
     background: var(--lux-bg-dark);
-    margin-top: 150px;
+    margin-top: var(--section-y);
   }
 
   .camp__media {
@@ -563,6 +563,11 @@ const hasAccessoriesArrivals = newArrivals.some(p => catOf(p).includes('accessor
   }
 
   @media (max-width:768px) {
+    .camp__inner {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+
     .camp__vlabel {
       display: none;
     }
