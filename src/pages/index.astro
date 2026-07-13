@@ -14,9 +14,11 @@ import { Image } from 'astro:assets';
 import imgCampaign from '../assets/images/Campaign section image.png';
 
 // Import product catalog from Shopify client
-import { getShopifyProducts } from '../lib/shopify/client';
+import { getShopifyProducts, getShopifyCollection } from '../lib/shopify/client';
+import { BEST_SELLERS_HANDLE } from '../config/velvet';
 
-const productsList = await getShopifyProducts(Astro.locals.market);
+const market = Astro.locals.market;
+const productsList = await getShopifyProducts(market);
 
 // Map specific products to homepage sections (matching Luxury Homepage.html)
 const newArrivals = [
@@ -34,16 +36,12 @@ if (newArrivals.length === 0) {
   newArrivals.push(...productsList.slice(0, 8));
 }
 
-const icons = [
-  productsList.find(p => p.handle === 'wide-leg-linen-trouser' || p.id === 'p9'),
-  productsList.find(p => p.handle === 'belted-cotton-trench' || p.id === 'p6'),
-  productsList.find(p => p.handle === 'structured-linen-blazer' || p.id === 'p11'),
-  productsList.find(p => p.handle === 'cashmere-turtleneck' || p.id === 'p12')
-].filter(Boolean);
-
-if (icons.length === 0) {
-  icons.push(...productsList.slice(8, 12));
-}
+// The `best-sellers` collection decides WHICH products show here + their
+// order (respects manual curation order set in Shopify admin). Falls back to
+// a plain product slice if the collection is missing/empty so the section
+// never blanks.
+const bestSellers = await getShopifyCollection(BEST_SELLERS_HANDLE, market);
+const icons = (bestSellers?.products?.length ? bestSellers.products : productsList.slice(8, 12)).slice(0, 4);
 
 // Only show a New Arrivals tab when at least one of the featured products
 // actually matches it — mirrors the client-side filter below so a tab like

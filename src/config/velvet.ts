@@ -11,6 +11,12 @@ export const MARKET_COUNTRY = DEFAULT_COUNTRY;
 // order maps to the on-image hotspots. Falls back to demo/store products if absent.
 export const SHOP_THE_LOOK_HANDLE = "shop-the-look";
 
+// Shopify collection handle powering the homepage "Most Loved" / best-sellers
+// section. Create a manual collection with this handle in Shopify admin and
+// order its products the way you want them to appear. Falls back to a plain
+// product slice if the collection is missing/empty.
+export const BEST_SELLERS_HANDLE = "best-sellers";
+
 export const BRAND = {
   name: "Maison Arden",
   legalName: "Maison Arden Paris",
