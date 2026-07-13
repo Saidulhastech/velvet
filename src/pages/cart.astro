@@ -10,23 +10,11 @@ const products = await getShopifyProducts(market);
 // Take the first 4 products for cross-sell
 const crossSellProducts = products.slice(0, 4);
 
-// Resolve real gift-wrap + protection products (by handle) for this market.
-// When configured in the store, the toggles become real paid Shopify lines;
-// when not, the template falls back to its original decorative markup so the
+// Resolve the real gift-wrap product (by handle) for this market. When
+// configured in the store, the toggle becomes a real paid Shopify line; when
+// not, the template falls back to its original decorative markup so the
 // shipped (mock) design is unchanged.
 const EXTRAS = await resolveCartExtras(market);
-
-const protectionPlans = EXTRAS.protection.show
-  ? EXTRAS.protection.plans
-      .filter((p) => p.id !== 'none' && p.variantId)
-      .map((p) => ({
-        variantId: p.variantId,
-        name: p.name,
-        best: p.best,
-        priceLabel: p.price ? formatMoney(p.price) : '',
-      }))
-  : [];
-const PROTECT_ON = protectionPlans.length > 0;
 
 const giftWrap = EXTRAS.giftWrap;
 const GIFTWRAP_ON = giftWrap.show && !!giftWrap.variantId;
@@ -35,7 +23,6 @@ const giftWrapPriceLabel = giftWrap.price ? formatMoney(giftWrap.price) : '';
 // Client bootstrap for the real-extras wiring (empty/nulls in fallback mode).
 const extrasData = JSON.stringify({
   giftMessageMax: giftWrap.messageMaxLength ?? 200,
-  protection: protectionPlans.map((p) => ({ variantId: p.variantId, name: p.name })),
   giftWrap: GIFTWRAP_ON ? { variantId: giftWrap.variantId, label: giftWrap.label } : null,
 });
 ---
@@ -102,61 +89,8 @@ const extrasData = JSON.stringify({
         <span class="copt-shead__line"></span>
       </div>
 
-      <!-- Shipping Options -->
-      <div class="copt">
-        <div class="copt__title-row">
-          <span class="copt__icon">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <path d="M1 6h9v8H1z" stroke="currentColor" stroke-width="1.3" />
-              <path d="M10 8h4l3 3v3h-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
-              <circle cx="5" cy="15" r="1.6" stroke="currentColor" stroke-width="1.3" />
-              <circle cx="14" cy="15" r="1.6" stroke="currentColor" stroke-width="1.3" />
-            </svg>
-          </span>
-          <div>
-            <div class="copt__h">Shipping Method</div>
-            <div class="copt__hsub">Choose how fast you would like your order</div>
-          </div>
-        </div>
-        
-        <div class="optcards" data-opt-group="ship">
-          <div class="optcard is-active" data-val="0" data-label="Standard Courier">
-            <span class="optcard__radio"></span>
-            <div class="optcard__main">
-              <div class="optcard__title">Standard Courier</div>
-              <div class="optcard__sub">3–5 business days</div>
-            </div>
-            <span class="optcard__price optcard__price--free">Free</span>
-          </div>
-          <div class="optcard" data-val="14" data-label="Express Air">
-            <span class="optcard__radio"></span>
-            <div class="optcard__main">
-              <div class="optcard__title">Express Air</div>
-              <div class="optcard__sub">1–2 business days</div>
-            </div>
-            <span class="optcard__price">+€14</span>
-          </div>
-          <div class="optcard" data-val="29" data-label="Same-Day Rush">
-            <span class="optcard__radio"></span>
-            <div class="optcard__main">
-              <div class="optcard__title">Same-Day Rush</div>
-              <div class="optcard__sub">Order before 2pm · select cities</div>
-            </div>
-            <span class="optcard__price">+€29</span>
-          </div>
-          <div class="optcard" data-val="0" data-label="Boutique Pickup">
-            <span class="optcard__radio"></span>
-            <div class="optcard__main">
-              <div class="optcard__title">Boutique Pickup</div>
-              <div class="optcard__sub">Ready in 2 hours · Paris flagship</div>
-            </div>
-            <span class="optcard__price optcard__price--free">Free</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Additional Options Split -->
-      <div class="copt-cols">
+      <div class={GIFTWRAP_ON ? 'copt-cols' : 'copt-cols copt-cols--single'}>
         <div class="copt-col">
           <!-- Delivery Date Preference -->
           <div class="copt">
@@ -200,68 +134,8 @@ const extrasData = JSON.stringify({
           </div>
         </div>
 
+        {GIFTWRAP_ON && (
         <div class="copt-col">
-          <!-- Protection Plan -->
-          <div class="copt">
-            <div class="copt__title-row">
-              <span class="copt__icon">
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 1.5l7 2.5v5c0 4-3 7.5-7 9-4-1.5-7-5-7-9v-5l7-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
-                  <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <div>
-                <div class="copt__h">Protection Plan</div>
-                <div class="copt__hsub">Repairs, damage &amp; care</div>
-              </div>
-            </div>
-            
-            {PROTECT_ON ? (
-              <div class="optcards" data-opt-group="protect" data-protect-real>
-                <div class="optcard is-active" data-variant="" data-label="No coverage">
-                  <span class="optcard__radio"></span>
-                  <div class="optcard__main">
-                    <div class="optcard__title">No coverage</div>
-                  </div>
-                  <span class="optcard__price optcard__price--free">Free</span>
-                </div>
-                {protectionPlans.map((p) => (
-                  <div class="optcard" data-variant={p.variantId} data-label={p.name}>
-                    <span class="optcard__radio"></span>
-                    <div class="optcard__main">
-                      <div class="optcard__title">{p.name}{p.best ? <span class="optcard__best"> · Best value</span> : ''}</div>
-                    </div>
-                    {p.priceLabel ? <span class="optcard__price">{p.priceLabel}</span> : ''}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div class="optcards" data-opt-group="protect">
-                <div class="optcard is-active" data-val="0" data-label="No coverage">
-                  <span class="optcard__radio"></span>
-                  <div class="optcard__main">
-                    <div class="optcard__title">No coverage</div>
-                  </div>
-                  <span class="optcard__price optcard__price--free">Free</span>
-                </div>
-                <div class="optcard" data-val="49" data-label="2-Year Care">
-                  <span class="optcard__radio"></span>
-                  <div class="optcard__main">
-                    <div class="optcard__title">2-Year Care</div>
-                  </div>
-                  <span class="optcard__price">+€49</span>
-                </div>
-                <div class="optcard" data-val="79" data-label="3-Year Care">
-                  <span class="optcard__radio"></span>
-                  <div class="optcard__main">
-                    <div class="optcard__title">3-Year Care</div>
-                  </div>
-                  <span class="optcard__price">+€79</span>
-                </div>
-              </div>
-            )}
-          </div>
-
           <!-- Gift Options -->
           <div class="copt">
             <div class="copt__title-row">
@@ -277,10 +151,10 @@ const extrasData = JSON.stringify({
                 <div class="copt__hsub">Ivory box · satin ribbon · card</div>
               </div>
             </div>
-            
+
             <div class="copt__gift">
               <div class="copt__gift-main">
-                <div class="copt__gift-title">Add gift wrapping <b>+{GIFTWRAP_ON && giftWrapPriceLabel ? giftWrapPriceLabel : '€12'}</b></div>
+                <div class="copt__gift-title">Add gift wrapping <b>+{giftWrapPriceLabel}</b></div>
                 <div class="copt__gift-sub">Hand-finished with a written message card.</div>
               </div>
               <label class="gw-switch">
@@ -293,6 +167,7 @@ const extrasData = JSON.stringify({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       <!-- Saved for Later Section -->
@@ -319,13 +194,9 @@ const extrasData = JSON.stringify({
           <span>Discount <span data-disc-code></span></span>
           <span data-sum-disc>−€0</span>
         </div>
-        <div class="csum-row csum-row--free" data-sum-ship-row>
+        <div class="csum-row csum-row--free">
           <span>Shipping</span>
-          <span data-sum-ship>Complimentary</span>
-        </div>
-        <div class="csum-row csum-row--addon" data-sum-prot-row style="display:none">
-          <span>Protection <span data-prot-label></span></span>
-          <span data-sum-prot>+€0</span>
+          <span>Complimentary</span>
         </div>
         <div class="csum-row csum-row--addon" data-sum-gift-row style="display:none">
           <span>Gift Wrapping</span>
@@ -474,20 +345,19 @@ const extrasData = JSON.stringify({
   } from '../stores/cart';
   import { BRAND } from '../config/velvet';
 
-  // Real gift-wrap / protection config injected by the server. In fallback mode
-  // (no configured products) protection[] is empty and giftWrap is null, so the
-  // toggles keep their original decorative-only behavior.
+  // Real gift-wrap config injected by the server. In fallback mode (no
+  // configured product) giftWrap is null, so the toggle keeps its original
+  // decorative-only behavior.
   const rootEl = document.querySelector('[data-cart-root]') as HTMLElement | null;
   const EXTRAS = (() => {
     try { return JSON.parse(rootEl?.dataset.extras || '{}'); }
-    catch { return { giftMessageMax: 200, protection: [], giftWrap: null }; }
-  })() as { giftMessageMax: number; protection: { variantId: string; name: string }[]; giftWrap: { variantId: string; label: string } | null };
+    catch { return { giftMessageMax: 200, giftWrap: null }; }
+  })() as { giftMessageMax: number; giftWrap: { variantId: string; label: string } | null };
 
   const GIFTWRAP_VID = EXTRAS.giftWrap?.variantId || '';
-  const PROTECT_VIDS = new Set((EXTRAS.protection || []).map((p) => p.variantId));
   // Variant gids that are "extras" — hidden from the visible bag list and
-  // excluded from the product subtotal (they show as their own summary rows).
-  const EXTRA_VIDS = new Set<string>([...PROTECT_VIDS, ...(GIFTWRAP_VID ? [GIFTWRAP_VID] : [])]);
+  // excluded from the product subtotal (gift-wrap shows as its own summary row).
+  const EXTRA_VIDS = new Set<string>(GIFTWRAP_VID ? [GIFTWRAP_VID] : []);
 
   const $ = (s: string, c: HTMLElement | Document = document) => c.querySelector(s);
   const $$ = (s: string, c: HTMLElement | Document = document) => Array.from(c.querySelectorAll(s));
@@ -503,8 +373,6 @@ const extrasData = JSON.stringify({
   let activeDiscountCode: string | null = null;
   let currentNoteText = '';
 
-  const state = { ship: 0, shipLabel: 'Standard Courier', protect: 0, protLabel: '', gift: false };
-  const GIFT_COST = 12;
 
   // Active currency, synced from the authoritative Shopify cart (falls back to
   // EUR until the first sync / in mock mode). Amounts are already localized by
@@ -688,7 +556,7 @@ const extrasData = JSON.stringify({
 
   // Recalculate summary details
   function recomputeSummary(allItems: any[]) {
-    // Product lines only — gift-wrap / protection are shown as their own rows.
+    // Product lines only — gift-wrap is shown as its own row.
     const productItems = allItems.filter((i) => !EXTRA_VIDS.has(i.id));
     let sub = 0;
     let count = 0;
@@ -697,18 +565,12 @@ const extrasData = JSON.stringify({
       sub += item.price * item.quantity;
     });
 
-    // Extras: prefer the real Shopify lines (authoritative price) when present,
-    // else fall back to the decorative local state (unconfigured store).
-    const protectLine = allItems.find((i) => PROTECT_VIDS.has(i.id));
     const giftLine = GIFTWRAP_VID ? allItems.find((i) => i.id === GIFTWRAP_VID) : undefined;
-
-    const protectAmount = protectLine ? protectLine.price * protectLine.quantity : state.protect;
-    const protectLabel = protectLine ? (protectLine.name || state.protLabel) : state.protLabel;
-    const giftAmount = giftLine ? giftLine.price * giftLine.quantity : (state.gift ? GIFT_COST : 0);
-    const giftOn = giftLine ? true : state.gift;
+    const giftAmount = giftLine ? giftLine.price * giftLine.quantity : 0;
+    const giftOn = !!giftLine;
 
     const disc = currentDiscount;
-    const total = Math.max(sub - disc, 0) + state.ship + protectAmount + giftAmount;
+    const total = Math.max(sub - disc, 0) + giftAmount;
 
     // Subtotal values
     const sumCountEl = $('[data-sum-count]');
@@ -730,33 +592,6 @@ const extrasData = JSON.stringify({
         if (discCodeSpan) discCodeSpan.textContent = '(' + activeDiscountCode + ')';
       } else {
         discRow.classList.remove('is-shown');
-      }
-    }
-
-    // Shipping fee row
-    const shipRow = $('[data-sum-ship-row]');
-    const shipVal = $('[data-sum-ship]');
-    if (shipRow && shipVal) {
-      if (state.ship > 0) {
-        shipRow.classList.remove('csum-row--free');
-        shipVal.textContent = '+' + formatEur(state.ship);
-      } else {
-        shipRow.classList.add('csum-row--free');
-        shipVal.textContent = 'Complimentary';
-      }
-    }
-
-    // Protection fee row
-    const protRow = $('[data-sum-prot-row]');
-    const protVal = $('[data-sum-prot]');
-    const protLabelSpan = $('[data-prot-label]');
-    if (protRow && protVal) {
-      if (protectAmount > 0) {
-        (protRow as HTMLElement).style.display = 'flex';
-        protVal.textContent = '+' + formatEur(protectAmount);
-        if (protLabelSpan) protLabelSpan.textContent = protectLabel ? '(' + protectLabel + ')' : '';
-      } else {
-        (protRow as HTMLElement).style.display = 'none';
       }
     }
 
@@ -788,10 +623,28 @@ const extrasData = JSON.stringify({
     }
   }
 
+  // Gift checkbox wrapping message drawer — declared before the subscribe
+  // below so syncGiftUI can reference them (subscribe fires immediately on
+  // registration, which would otherwise hit these consts before init).
+  const giftCheckbox = $('[data-gift]') as HTMLInputElement | null;
+  const giftMsgBlock = $('[data-gift-msg]');
+  const giftMsgArea = $('[data-gift-message]') as HTMLTextAreaElement | null;
+
+  // Keep the checkbox + message drawer in sync with the REAL cart — without
+  // this, a gift-wrap line already in the cart (e.g. from a prior visit)
+  // would show the toggle as off while still being charged.
+  function syncGiftUI(items: any[]) {
+    if (!giftCheckbox || !GIFTWRAP_VID) return;
+    const hasLine = items.some((i) => i.id === GIFTWRAP_VID);
+    giftCheckbox.checked = hasLine;
+    giftMsgBlock?.classList.toggle('is-open', hasLine);
+  }
+
   // Subscribe to persistent cart items store changes
   persistedCartItems.subscribe((items) => {
     renderCartItems(items);
     recomputeSummary(items);
+    syncGiftUI(items);
   });
 
   // Subscribe to persistent saved items store changes
@@ -800,8 +653,8 @@ const extrasData = JSON.stringify({
   });
 
   // Build the full cart-attribute set (wholesale replace) from the current
-  // gift + protection selection. Uses live DOM/store state so it's correct
-  // whenever a toggle changes.
+  // gift-wrap selection + delivery date. Uses live DOM/store state so it's
+  // correct whenever either changes.
   function buildAttributes() {
     const attrs: { key: string; value: string }[] = [];
     const giftBox = document.querySelector('[data-gift]') as HTMLInputElement | null;
@@ -811,68 +664,23 @@ const extrasData = JSON.stringify({
       const msg = (document.querySelector('[data-gift-message]') as HTMLTextAreaElement | null)?.value.trim();
       if (msg) attrs.push({ key: 'Gift Message', value: msg });
     }
-    const protCard = document.querySelector('[data-opt-group="protect"] .optcard.is-active');
-    const protName = protCard?.getAttribute('data-label') || '';
-    const protVariant = protCard?.getAttribute('data-variant') || '';
-    if (protVariant && protName && protName !== 'No coverage') {
-      attrs.push({ key: 'Protection Plan', value: protName });
-    }
     const deliveryDate = (document.querySelector('[data-delivery-date]') as HTMLInputElement | null)?.value;
     if (deliveryDate) attrs.push({ key: 'Preferred Delivery Date', value: deliveryDate });
     return attrs;
   }
 
-  // Setup options selection listeners
-  $$('[data-opt-group]').forEach(group => {
-    const groupName = group.getAttribute('data-opt-group');
-    const isRealProtect = groupName === 'protect' && group.hasAttribute('data-protect-real');
-    const cards = $$('.optcard', group);
-    cards.forEach(card => {
-      card.addEventListener('click', async () => {
-        cards.forEach(c => c.classList.remove('is-active'));
-        card.classList.add('is-active');
-        const label = card.getAttribute('data-label') || '';
-
-        if (groupName === 'ship') {
-          state.ship = parseInt(card.getAttribute('data-val') || '0', 10);
-          state.shipLabel = label;
-          recomputeSummary(persistedCartItems.get());
-        } else if (isRealProtect) {
-          // Real paid tiers: swap the protection line, then persist the plan name.
-          const variantId = card.getAttribute('data-variant') || '';
-          const current = persistedCartItems.get().find((i) => PROTECT_VIDS.has(i.id));
-          if (current && current.id !== variantId) await removeExtraLine(current.id);
-          if (variantId && (!current || current.id !== variantId)) await addExtraLine(variantId, 1);
-          await setCartAttributes(buildAttributes());
-        } else if (groupName === 'protect') {
-          // Fallback decorative mode (no configured protection product).
-          state.protect = parseInt(card.getAttribute('data-val') || '0', 10);
-          state.protLabel = label;
-          recomputeSummary(persistedCartItems.get());
-        }
-      });
-    });
-  });
-
-  // Gift checkbox wrapping message drawer
-  const giftCheckbox = $('[data-gift]');
-  const giftMsgBlock = $('[data-gift-msg]');
-  const giftMsgArea = $('[data-gift-message]') as HTMLTextAreaElement | null;
-  if (giftCheckbox) {
+  if (giftCheckbox && GIFTWRAP_VID) {
     giftCheckbox.addEventListener('change', async (e) => {
       const checked = (e.target as HTMLInputElement).checked;
       if (giftMsgBlock) giftMsgBlock.classList.toggle('is-open', checked);
 
-      if (GIFTWRAP_VID) {
-        // Real paid gift-wrap line + gift attributes.
-        if (checked) await addExtraLine(GIFTWRAP_VID, 1);
-        else await removeExtraLine(GIFTWRAP_VID);
-        await setCartAttributes(buildAttributes());
-      } else {
-        // Fallback decorative mode.
-        state.gift = checked;
-        recomputeSummary(persistedCartItems.get());
-      }
+      // Guard against an existing line — Shopify merges same-variant adds
+      // into the existing line's quantity, so firing this while already on
+      // would silently stack extra units instead of no-op'ing.
+      const alreadyHasLine = persistedCartItems.get().some((i) => i.id === GIFTWRAP_VID);
+      if (checked && !alreadyHasLine) await addExtraLine(GIFTWRAP_VID, 1);
+      else if (!checked && alreadyHasLine) await removeExtraLine(GIFTWRAP_VID);
+      await setCartAttributes(buildAttributes());
     });
   }
   // Persist the gift message (debounced) when real gift-wrap is active.
@@ -1656,6 +1464,10 @@ const extrasData = JSON.stringify({
     align-items: start;
   }
 
+  :global(.copt-cols--single) {
+    grid-template-columns: 1fr;
+  }
+
   :global(.copt-col) {
     display: flex;
     flex-direction: column;
@@ -1692,81 +1504,6 @@ const extrasData = JSON.stringify({
     font-size: 12px;
     color: var(--lux-on-light-soft);
     margin-top: 3px;
-  }
-
-  :global(.optcards) {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  :global(.optcard) {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 15px 18px;
-    border: 1px solid var(--lux-light-border);
-    background: var(--lux-light-elevated);
-    cursor: pointer;
-    transition: border-color .25s var(--ease), background .25s var(--ease);
-  }
-
-  :global(.optcard:hover) {
-    border-color: var(--lux-light-border-strong);
-  }
-
-  :global(.optcard.is-active) {
-    border-color: var(--lux-secondary-olive);
-  }
-
-  :global(.optcard__radio) {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 1px solid var(--lux-light-border-strong);
-    flex-shrink: 0;
-    position: relative;
-    transition: border-color .2s var(--ease);
-  }
-
-  :global(.optcard.is-active .optcard__radio) {
-    border-color: var(--lux-secondary-olive);
-  }
-
-  :global(.optcard.is-active .optcard__radio::after) {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-    background: var(--lux-secondary-olive);
-  }
-
-  :global(.optcard__main) {
-    flex: 1;
-    min-width: 0;
-  }
-
-  :global(.optcard__title) {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--lux-on-light);
-  }
-
-  :global(.optcard__sub) {
-    font-size: 12px;
-    color: var(--lux-on-light-soft);
-    margin-top: 2px;
-  }
-
-  :global(.optcard__price) {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--lux-on-light);
-    white-space: nowrap;
-  }
-
-  :global(.optcard__price--free) {
-    color: var(--lux-secondary-olive);
   }
 
   :global(.copt__date) {

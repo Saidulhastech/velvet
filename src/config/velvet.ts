@@ -15,7 +15,8 @@ export const BRAND = {
   name: "Maison Arden",
   legalName: "Maison Arden Paris",
   tagline: "Luxury Fashion & Accessories",
-  description: "Maison Arden — luxury clothing, tailoring, coats, knitwear and leather accessories.",
+  description:
+    "Maison Arden — luxury clothing, tailoring, coats, knitwear and leather accessories.",
   freeShippingThreshold: 1180 as number | null, // Matches Shipping Progress Threshold in CartDrawer
   social: {
     instagram: "https://instagram.com",
@@ -27,7 +28,7 @@ export const BRAND = {
 
 export const CART_EXTRAS = {
   giftWrap: {
-    enabled: false,
+    enabled: true,
     handle: "gift-wrap",
     label: "Premium gift wrap",
     desc: "Signature box, ivory tissue & satin ribbon",
@@ -37,10 +38,5 @@ export const CART_EXTRAS = {
   orderNotes: {
     enabled: true,
     maxLength: 500,
-  },
-  protection: {
-    enabled: false,
-    handle: "protection",
-    plans: [] as any[],
   },
 } as const;

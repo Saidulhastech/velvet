@@ -47,6 +47,10 @@
       <span>Shipping</span>
       <span class="cart__shipping-free">Complimentary</span>
     </div>
+    <div class="cart__sum-row" id="cartGiftRow" style="display:none">
+      <span>Gift Wrapping</span>
+      <span id="cartGiftValue">+€0</span>
+    </div>
     <div class="cart__sum-rule"></div>
     <div class="cart__sum-row cart__sum-row--total">
       <span>Total</span>
@@ -74,8 +78,13 @@
     removeFromCart,
     type CartItem
   } from '../../stores/cart';
-  import { BRAND } from '../../config/velvet';
+  import { BRAND, CART_EXTRAS } from '../../config/velvet';
   import { shopifyImageUrl } from '../../lib/shopify/image-url';
+
+  // Addon SKUs (gift wrap, future addons) are real Shopify lines but aren't
+  // "products" to a shopper — hide them from the visible row list and show
+  // as their own summary line instead, same treatment as the full cart page.
+  const EXTRA_HANDLES = new Set<string>(CART_EXTRAS.giftWrap.handle ? [CART_EXTRAS.giftWrap.handle] : []);
 
   const cartDrawer = document.getElementById('cartDrawer');
   const overlay = document.querySelector('[data-drawer-overlay]');
@@ -152,14 +161,17 @@
   });
 
   // Render Cart Items
-  function renderItems(items: readonly CartItem[]) {
+  function renderItems(allItems: readonly CartItem[]) {
     if (!itemsList || !emptyState || !footer || !progressBar || !progressText) return;
+
+    const items = allItems.filter((i) => !EXTRA_HANDLES.has(i.description || ''));
+    const giftLine = allItems.find((i) => i.description === CART_EXTRAS.giftWrap.handle);
 
     if (items.length === 0) {
       emptyState.style.display = 'flex';
       itemsList.style.display = 'none';
       footer.style.display = 'none';
-      
+
       // Update shipping bar to 0%
       progressBar.style.width = '0%';
       progressText.innerHTML = `<svg width="14" height="12" viewBox="0 0 14 12" fill="none"><rect x="0.5" y="2.5" width="9" height="6" stroke="currentColor" stroke-width="0.8"/><path d="M9.5 4h2l2 2v2.5h-4z" stroke="currentColor" stroke-width="0.8"/></svg> Spend more to qualify for complimentary shipping`;
@@ -169,6 +181,18 @@
     emptyState.style.display = 'none';
     itemsList.style.display = 'block';
     footer.style.display = 'flex';
+
+    // Gift-wrap summary row (mirrors the full cart page's treatment)
+    const giftRow = document.getElementById('cartGiftRow');
+    const giftVal = document.getElementById('cartGiftValue');
+    if (giftRow && giftVal) {
+      if (giftLine) {
+        giftRow.style.display = 'flex';
+        giftVal.textContent = '+' + money(giftLine.price * giftLine.quantity);
+      } else {
+        giftRow.style.display = 'none';
+      }
+    }
 
     // Populate List
     itemsList.innerHTML = items.map((item) => {
@@ -253,7 +277,12 @@
   function renderTotals(subtotal: number) {
     const subEl = document.getElementById('cartSubtotalValue');
     const totEl = document.getElementById('cartTotalValue');
-    if (subEl) subEl.textContent = money(subtotal);
+    // "Subtotal" excludes addon lines (shown in their own row, e.g. Gift
+    // Wrapping) — "Total" is the real Shopify subtotal, which already
+    // includes them, so the two rows sum correctly instead of double-counting.
+    const giftLine = persistedCartItems.get().find((i) => i.description === CART_EXTRAS.giftWrap.handle);
+    const productSubtotal = giftLine ? subtotal - giftLine.price * giftLine.quantity : subtotal;
+    if (subEl) subEl.textContent = money(productSubtotal);
     if (totEl) totEl.textContent = money(subtotal);
 
     // Compute progress bar

@@ -445,7 +445,11 @@ export async function getShopifyProducts(market?: Market): Promise<LegacyProduct
     return mockProducts;
   }
   try {
-    const res = await getShopifyProductsNew({ pageSize: 250 }, market);
+    // Excludes internal addon SKUs (gift wrap, protection plans, etc. — tag
+    // them `internal` in Shopify admin) from every general catalog listing
+    // this powers (shop grid, cross-sell, homepage sections). Cart-toggle
+    // lookups use getProduct(handle) directly, so they're unaffected.
+    const res = await getShopifyProductsNew({ pageSize: 250, query: '-tag:internal' }, market);
     if (!res.items || res.items.length === 0) return mockProducts;
     return res.items.map(item => mapToLegacyProduct(item));
   } catch (error) {
