@@ -14,7 +14,17 @@ if (!product) {
 }
 
 // Boot data for client-side variant controller
-const bootData = JSON.stringify({ currency, variants: shopifyVariants, singleVariant, productId });
+const bootData = JSON.stringify({
+  currency,
+  variants: shopifyVariants,
+  singleVariant,
+  productId,
+  // Snapshotted onto the wishlist item so quick view (opened from the
+  // wishlist page) has something to show in its description/rating rows —
+  // neither is otherwise readable from the PDP's client script scope.
+  description: product.description || '',
+  rating: product.rating ?? null,
+});
 
 // Parse category and gender for breadcrumb
 const categoryParts = product.category.split(' · ');
@@ -594,8 +604,10 @@ const breadcrumbSchema = {
     variants: VariantData[];
     singleVariant: boolean;
     productId: string | null;
+    description: string;
+    rating: number | null;
   }
-  let bootData: BootData = { currency: 'EUR', variants: [], singleVariant: true, productId: null };
+  let bootData: BootData = { currency: 'EUR', variants: [], singleVariant: true, productId: null, description: '', rating: null };
   try {
     const bootEl = document.getElementById('pdpBootData');
     if (bootEl?.textContent) bootData = JSON.parse(bootEl.textContent);
@@ -879,7 +891,9 @@ const breadcrumbSchema = {
         size: selectedSizeBtn?.getAttribute('data-size') || undefined,
         variants,
         options: [],
-        swatchHex
+        swatchHex,
+        desc: bootData.description || undefined,
+        rating: bootData.rating,
       });
     });
   }

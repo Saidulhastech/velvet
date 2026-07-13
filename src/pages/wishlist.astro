@@ -40,7 +40,7 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  import { persistedWishItems, removeFromWishlist, addToCart, isCartOpen, cartCurrency } from '../stores/cart';
+  import { persistedWishItems, removeFromWishlist, addToCart, isCartOpen, cartCurrency, persistedCompareItems } from '../stores/cart';
 
   const grid = document.getElementById('wlGrid');
   const empty = document.getElementById('wlEmpty');
@@ -69,6 +69,51 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
     return `/src/assets/images/${image}`;
   };
 
+  // JSON embedded in an HTML attribute needs its quotes escaped so it doesn't
+  // break out of the attribute delimiter — unescaped automatically on read via .dataset.
+  const escapeAttr = (s: string) => s.replace(/"/g, '&quot;');
+
+  // Same shape/limit as the server's deriveSwatches() for ProductCard — one
+  // preview dot per distinct colour (first matching variant), max 4. Matches
+  // shop grid's swatch-preview-then-image-swap UX exactly (see the global
+  // `.pc__sw` click handler in BaseLayout.astro).
+  function deriveSwatches(item: any): { color: string; hex: string; img: string | null; variantId: string | null }[] {
+    const variants: any[] = Array.isArray(item.variants) ? item.variants : [];
+    if (!variants.length) return [];
+    const optNames = Object.keys(variants[0].opts || {}).filter((n) => !/^title$/i.test(n));
+    const colorKey = optNames.find((n) => /colou?r/i.test(n));
+    if (!colorKey) return [];
+    const swatchHex: Record<string, string> = item.swatchHex || {};
+    const seen = new Set<string>();
+    const out: { color: string; hex: string; img: string | null; variantId: string | null }[] = [];
+    for (const v of variants) {
+      const name = v.opts[colorKey];
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      out.push({ color: name, hex: swatchHex[name.toLowerCase()] || '#858A76', img: v.img || null, variantId: v.id });
+      if (out.length >= 4) break;
+    }
+    return out;
+  }
+
+  // Distinct option values (all colours / all sizes) from the variant matrix —
+  // feeds the same dataset attributes ProductCard sets (data-color/data-size),
+  // which the global compare-add handler in BaseLayout.astro reads. Without
+  // these the compare page's Colour/Sizes rows render blank for wishlist-added items.
+  function distinctOptionValues(item: any, pattern: RegExp): string[] {
+    const variants: any[] = Array.isArray(item.variants) ? item.variants : [];
+    if (!variants.length) return [];
+    const optNames = Object.keys(variants[0].opts || {}).filter((n) => !/^title$/i.test(n));
+    const key = optNames.find((n) => pattern.test(n));
+    if (!key) return [];
+    const seen: string[] = [];
+    for (const v of variants) {
+      const val = v.opts[key];
+      if (val && !seen.includes(val)) seen.push(val);
+    }
+    return seen;
+  }
+
   function render(items: any[]) {
     if (!grid || !empty) return;
     if (countEl) countEl.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
@@ -81,46 +126,72 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
     }
     empty.classList.remove('is-shown');
 
-    grid.innerHTML = items.map((item) => `
-      <article class="pc" data-id="${item.id}">
+    const compareIds = new Set(persistedCompareItems.get().map((i) => i.id));
+
+    grid.innerHTML = items.map((item) => {
+      const swatches = deriveSwatches(item);
+      const colorList = distinctOptionValues(item, /colou?r/i);
+      const sizeList = distinctOptionValues(item, /size/i);
+      // No live per-item stock feed on the wishlist snapshot — fall back to
+      // the variant matrix's own availability when present, else assume in
+      // stock (matches this page's existing Add to Bag behaviour).
+      const variants: any[] = Array.isArray(item.variants) ? item.variants : [];
+      const inStock = variants.length ? variants.some((v) => v.available) : true;
+      return `
+      <article
+        class="pc"
+        data-id="${item.id}"
+        data-handle="${item.description || ''}"
+        data-name="${item.name}"
+        data-cat="${item.category || 'Maison Arden'}"
+        data-price="${item.formattedPrice || money(item.price ?? 0)}"
+        data-img="${imgSrc(item.image)}"
+        data-needs-picker="${item.needsPicker ? 'true' : 'false'}"
+        data-variants="${item.variants && item.variants.length ? escapeAttr(JSON.stringify(item.variants)) : ''}"
+        data-options="${item.options && item.options.length ? escapeAttr(JSON.stringify(item.options)) : ''}"
+        data-color="${colorList.join('|')}"
+        data-size="${sizeList.join('|')}"
+        data-stock="${inStock ? 'in' : ''}"
+        data-desc="${item.desc ? escapeAttr(item.desc) : ''}"
+        data-rating="${item.rating != null ? item.rating : ''}"
+      >
         <div class="pc__media">
           <div class="pc__actions">
             <button class="pc__act pc__act--wish" data-wl-remove aria-label="Remove from wishlist" aria-pressed="true">
               <svg width="16" height="16" viewBox="0 0 22 22" fill="currentColor"><path d="M11 19S3 14 3 8.3C3 5.5 5.2 3.5 8 3.5c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.8 0 5 2 5 4.8C21 14 13 19 11 19z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
             </button>
+            <button class="pc__act pc__act--compare" data-compare-add aria-label="Add to compare" aria-pressed="${compareIds.has(item.id)}">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 7h9m0 0l-3-3m3 3l-3 3M16 13H7m0 0l3-3m-3 3l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="pc__act pc__act--qv" data-qv aria-label="Quick view">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M1.5 10s3-5.5 8.5-5.5S18.5 10 18.5 10 15.5 15.5 10 15.5 1.5 10 1.5 10z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
           </div>
           <a href="/products/${item.description || item.id}" class="pc__link" aria-label="${item.name}">
             <img src="${imgSrc(item.image)}" alt="${item.name}" width="340" height="450" loading="lazy" style="object-fit:cover;width:100%;height:100%;">
           </a>
-          <button class="pc__add" data-wl-add>Add to Bag</button>
+          <button class="pc__add" data-wl-add aria-label="${item.needsPicker ? `Select options for ${item.name}` : `Add ${item.name} to bag`}">${item.needsPicker ? 'Select Options' : 'Add to Bag'}</button>
         </div>
         <div class="pc__body">
+          ${swatches.length > 0 ? `
+          <div class="pc__swatches">
+            ${swatches.map((sw, idx) => `<span class="pc__sw ${idx === 0 ? 'is-active' : ''}" style="background: ${sw.hex}" title="${sw.color}" data-color="${sw.color}" data-img="${sw.img || ''}" data-variant-id="${sw.variantId || ''}"></span>`).join('')}
+          </div>` : ''}
           <span class="pc__cat">${item.category || 'Maison Arden'}</span>
           <h3 class="pc__name"><a href="/products/${item.description || item.id}">${item.name}</a></h3>
           <div class="pc__meta">
-            <span class="pc__price" data-role="wlprice">${item.formattedPrice || money(item.price ?? 0)}</span>
-            ${Array.isArray(item.variants) && item.variants.length > 1 ? '' : (item.color ? `<span class="pc__rating">${item.color}</span>` : '')}
+            <span class="pc__price">${item.formattedPrice || money(item.price ?? 0)}</span>
           </div>
-          ${Array.isArray(item.variants) && item.variants.length > 1 ? `
-          <p class="witem-optline" data-role="wloptline"></p>
-          <div class="witem-colors" data-role="wlcolors" hidden></div>
-          <div class="witem-sizes" data-role="wlsizes" hidden></div>
-          ` : ''}
         </div>
       </article>
-    `).join('');
-
-    // Resolved-variant state per card (id → currently selected real variant),
-    // same inline picker pattern as the wishlist drawer — rebuilt every render.
-    resolvedByCard = new Map();
+    `;
+    }).join('');
 
     grid.querySelectorAll('.pc').forEach((el) => {
       const card = el as HTMLElement;
       const id = card.dataset.id || '';
       const item = items.find((i) => i.id === id);
       if (!item) return;
-
-      initWishCard(card, item);
 
       card.querySelector('[data-wl-remove]')?.addEventListener('click', () => {
         card.style.transition = 'opacity .25s, transform .25s';
@@ -129,139 +200,28 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
         setTimeout(() => removeFromWishlist(id), 250);
       });
       card.querySelector('[data-wl-add]')?.addEventListener('click', () => {
-        const resolved = resolvedByCard.get(card);
-        // Multi-option product with no resolved (in-stock) variant → PDP to pick one.
-        if (!resolved || !resolved.available) {
-          window.location.href = `/products/${item.description || item.id}`;
+        // Multi-option product (e.g. Colour + Size) → open Quick View to pick a
+        // size and resolve the real variant, same as the shop grid.
+        if (item.needsPicker) {
+          (card.querySelector('[data-qv]') as HTMLElement | null)?.click();
           return;
         }
+        // Colour-only / single-variant: the active preview swatch's variant
+        // (set by BaseLayout's global .pc__sw click handler) is the correct one.
+        const activeSwatch = card.querySelector('.pc__sw.is-active') as HTMLElement | null;
         addToCart({
-          id: resolved.id,
+          id: activeSwatch?.dataset.variantId || item.id,
           name: item.name,
-          price: resolved.price,
-          image: resolved.image || item.image,
-          color: resolved.color,
-          size: resolved.size,
+          price: item.price,
+          image: activeSwatch?.dataset.img || item.image,
+          color: activeSwatch?.dataset.color || item.color,
+          size: item.size,
           category: item.category,
           description: item.description,
         }, 1);
         isCartOpen.set(true);
       });
     });
-  }
-
-  // Build an inline colour/size picker for one wishlist card from its
-  // snapshotted Shopify variant matrix — same pattern (and CSS classes) as
-  // the wishlist drawer, so choosing a variant here works identically.
-  interface WlResolved { id: string; price: number; image: string; available: boolean; color?: string; size?: string; }
-  let resolvedByCard = new Map<HTMLElement, WlResolved>();
-
-  function initWishCard(card: HTMLElement, item: any) {
-    const variants: any[] = Array.isArray(item.variants) ? item.variants : [];
-    const swatchHex: Record<string, string> = item.swatchHex || {};
-    const priceEl = card.querySelector<HTMLElement>('[data-role="wlprice"]');
-    const imgEl = card.querySelector<HTMLImageElement>('.pc__link img');
-
-    if (!variants.length) {
-      resolvedByCard.set(card, {
-        id: item.id,
-        price: item.price,
-        image: item.image,
-        available: true,
-        color: item.color || undefined,
-        size: item.size || undefined,
-      });
-      return;
-    }
-
-    const optLine = card.querySelector<HTMLElement>('[data-role="wloptline"]');
-    const colorsEl = card.querySelector<HTMLElement>('[data-role="wlcolors"]');
-    const sizesEl = card.querySelector<HTMLElement>('[data-role="wlsizes"]');
-
-    const optNames = Object.keys(variants[0].opts || {}).filter((n) => !/^title$/i.test(n));
-    const colorKey = optNames.find((n) => /colou?r/i.test(n)) || '';
-    const sizeKey = optNames.find((n) => /size/i.test(n)) || optNames.find((n) => n !== colorKey) || '';
-
-    const distinct = (key: string) => {
-      const seen: string[] = [];
-      variants.forEach((v) => { const val = v.opts[key]; if (val && !seen.includes(val)) seen.push(val); });
-      return seen;
-    };
-    const colors = colorKey ? distinct(colorKey) : [];
-    const sizes = sizeKey ? distinct(sizeKey) : [];
-
-    const savedMatch = variants.find((v) =>
-      (!colorKey || !item.color || v.opts[colorKey]?.toLowerCase() === String(item.color).toLowerCase()) &&
-      (!sizeKey || !item.size || v.opts[sizeKey]?.toLowerCase() === String(item.size).toLowerCase())
-    );
-    const seed = (savedMatch && savedMatch.available) ? savedMatch : (variants.find((v) => v.available) || variants[0]);
-    const selected: Record<string, string> = { ...seed.opts };
-
-    function currentVariant() {
-      return variants.find((v) => Object.keys(selected).every((k) => v.opts[k] === selected[k])) || null;
-    }
-    function optionAvailable(key: string, value: string) {
-      const trial = { ...selected, [key]: value };
-      return variants.some((v) => v.available && Object.keys(trial).every((k) => v.opts[k] === trial[k]));
-    }
-
-    function resolve() {
-      const v = currentVariant();
-      const resolved: WlResolved = {
-        id: v?.id || seed.id,
-        price: v ? v.price : seed.price,
-        image: v?.img || item.image || '',
-        available: !!(v && v.available),
-        color: colorKey ? selected[colorKey] : undefined,
-        size: sizeKey ? selected[sizeKey] : undefined,
-      };
-      resolvedByCard.set(card, resolved);
-
-      if (priceEl) priceEl.textContent = money(resolved.price);
-      if (imgEl && resolved.image) imgEl.src = resolved.image;
-      if (optLine) optLine.textContent = [resolved.color, resolved.size].filter(Boolean).join(' · ');
-
-      colorsEl?.querySelectorAll<HTMLElement>('.witem-sw').forEach((elm) => {
-        const val = elm.dataset.value || '';
-        elm.classList.toggle('is-active', selected[colorKey] === val);
-        elm.classList.toggle('is-unavailable', !!colorKey && !optionAvailable(colorKey, val));
-      });
-      sizesEl?.querySelectorAll<HTMLButtonElement>('.witem-size').forEach((elm) => {
-        const val = elm.dataset.value || '';
-        const ok = !sizeKey || optionAvailable(sizeKey, val);
-        elm.classList.toggle('is-active', selected[sizeKey] === val);
-        elm.disabled = !ok;
-        elm.classList.toggle('is-oos', !ok);
-      });
-    }
-
-    if (colors.length > 1 && colorsEl) {
-      colorsEl.hidden = false;
-      colorsEl.innerHTML = colors.map((c) =>
-        `<span class="witem-sw" data-value="${c}" style="background:${swatchHex[c.toLowerCase()] || '#858A76'}" title="${c}"></span>`
-      ).join('');
-      colorsEl.querySelectorAll<HTMLElement>('.witem-sw').forEach((sw) => sw.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (sw.classList.contains('is-unavailable')) return;
-        selected[colorKey] = sw.dataset.value || '';
-        resolve();
-      }));
-    }
-
-    if (sizes.length > 1 && sizesEl) {
-      sizesEl.hidden = false;
-      sizesEl.innerHTML = sizes.map((s) =>
-        `<button type="button" class="witem-size" data-value="${s}">${s.toUpperCase()}</button>`
-      ).join('');
-      sizesEl.querySelectorAll<HTMLButtonElement>('.witem-size').forEach((btn) => btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (btn.disabled) return;
-        selected[sizeKey] = btn.dataset.value || '';
-        resolve();
-      }));
-    }
-
-    resolve();
   }
 
   clearBtn?.addEventListener('click', () => {

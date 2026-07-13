@@ -42,6 +42,11 @@ export interface WishItem {
   /** Rendered swatch colour per option value (lowercased), snapshotted from
    *  the card at add-time — this store has no real Shopify swatch metafield. */
   swatchHex?: Record<string, string>;
+  /** Short product description, snapshotted at add-time — feeds the wishlist
+   *  page's quick-view modal (its own script has no live product fetch). */
+  desc?: string;
+  /** Review rating, snapshotted at add-time — same reason as `desc`. */
+  rating?: number | null;
 }
 
 // Persistent Atoms
@@ -466,13 +471,14 @@ export interface CompareItem {
   category?: string;
   rating?: number;
   material?: string;
+  /** Pipe-joined colour names (e.g. "Stone|Olive"), same format as `sizes`. */
+  colors?: string;
   sizes?: string;
   stock?: string;
   /** True when a size/colour must be chosen — add routes to the PDP. */
   needsPicker?: boolean;
 }
 
-export const COMPARE_MAX = 4;
 export const persistedCompareItems = persistentAtom<CompareItem[]>('ma_compare_items', [], {
   encode: JSON.stringify,
   decode: JSON.parse,
@@ -483,7 +489,8 @@ export function updateCompareTotals() {
   compareCount.set(persistedCompareItems.get().length);
 }
 
-/** Add/remove a product from compare. Returns false if the list is full (max 4). */
+/** Add/remove a product from compare. No cap — the compare page scrolls
+ *  horizontally instead of wrapping, so any count stays comparable. */
 export function toggleCompare(item: CompareItem): boolean {
   const current = [...persistedCompareItems.get()];
   const idx = current.findIndex((c) => c.id === item.id);
@@ -491,10 +498,6 @@ export function toggleCompare(item: CompareItem): boolean {
     persistedCompareItems.set(current.filter((c) => c.id !== item.id));
     updateCompareTotals();
     return true;
-  }
-  if (current.length >= COMPARE_MAX) {
-    cartError.set(`You can compare up to ${COMPARE_MAX} items.`);
-    return false;
   }
   current.push(item);
   persistedCompareItems.set(current);

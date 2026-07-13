@@ -261,7 +261,9 @@ const schemas = [...baseSchema, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [j
               needsPicker: dataset.needsPicker === 'true',
               variants,
               options,
-              swatchHex
+              swatchHex,
+              desc: dataset.desc || undefined,
+              rating: parseFloat(dataset.rating || '') || undefined,
             });
           }
         }
@@ -285,6 +287,7 @@ const schemas = [...baseSchema, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [j
               category: dataset.cat || '',
               rating: parseFloat(dataset.rating || '') || undefined,
               material: (dataset.material || '').split(' ')[0] || undefined,
+              colors: dataset.color || undefined,
               sizes: dataset.size || undefined,
               stock: dataset.stock || undefined,
               needsPicker: dataset.needsPicker === 'true',

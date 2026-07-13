@@ -406,7 +406,13 @@
       description: (currentProduct as any).handle || '',
       variants: qvVariants,
       options: qvOptions,
-      swatchHex: qvSwatchHex
+      swatchHex: qvSwatchHex,
+      // Modal already has these rendered (from openQV) — reuse rather than
+      // re-deriving, so wishlisting from inside quick view carries them too.
+      desc: qvDesc?.textContent || undefined,
+      rating: qvRating && (qvRating as HTMLElement).style.display !== 'none'
+        ? parseFloat((qvRating.textContent || '').replace(/[^\d.]/g, '')) || undefined
+        : undefined,
     });
 
     const isSaved = wishlistBtn.getAttribute('aria-pressed') === 'true';

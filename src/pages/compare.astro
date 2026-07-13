@@ -9,14 +9,14 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
     <div class="shop-hero__inner">
       <div class="shop-hero__crumb"><a href="/">Home</a> &nbsp;/&nbsp; <span>Compare</span></div>
       <h1 class="shop-hero__title">Compare <em>Pieces</em></h1>
-      <p class="shop-hero__sub">Line up your considered pieces side by side. Add up to four from any product card.</p>
+      <p class="shop-hero__sub">Line up your considered pieces side by side. Add as many as you'd like from any product card.</p>
     </div>
   </section>
 
   <section class="cmp" aria-label="Product comparison">
     <div class="cmp__inner">
       <div class="cmp__bar">
-        <span class="cmp__count" data-cmp-count>0 of 4</span>
+        <span class="cmp__count" data-cmp-count>0 pieces</span>
         <button class="cmp__clear" data-cmp-clear hidden>Clear all</button>
       </div>
 
@@ -37,12 +37,29 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  import { persistedCompareItems, removeFromCompare, clearCompare, addToCart, isCartOpen } from '../stores/cart';
+  import { persistedCompareItems, removeFromCompare, clearCompare, addToCart, isCartOpen, cartCurrency } from '../stores/cart';
 
   const grid = document.getElementById('cmpGrid');
   const empty = document.getElementById('cmpEmpty');
   const countEl = document.querySelector('[data-cmp-count]');
   const clearBtn = document.querySelector('[data-cmp-clear]') as HTMLButtonElement | null;
+
+  // Same currency formatter as shop/wishlist — synced to the live Shopify cart
+  // currency instead of a hardcoded '$'.
+  let currencyCode = cartCurrency.get();
+  cartCurrency.subscribe((code) => { currencyCode = code || 'EUR'; });
+  function money(n: number) {
+    try {
+      return new Intl.NumberFormat('en', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+        maximumFractionDigits: 2,
+      }).format(n);
+    } catch {
+      return String(n);
+    }
+  }
 
   const imgSrc = (image: string) => {
     if (!image || typeof image !== 'string') return '';
@@ -54,7 +71,7 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
 
   function render(items: any[]) {
     if (!grid || !empty) return;
-    if (countEl) countEl.textContent = `${items.length} of 4`;
+    if (countEl) countEl.textContent = `${items.length} piece${items.length === 1 ? '' : 's'}`;
     if (clearBtn) clearBtn.hidden = items.length === 0;
 
     if (items.length === 0) {
@@ -77,14 +94,15 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
         <h3 class="cmp-col__name"><a href="/products/${item.handle || item.id}">${item.name}</a></h3>
 
         <dl class="cmp-col__specs">
-          <div class="cmp-row"><dt>Price</dt><dd>${item.formattedPrice || ('$' + (item.price ?? 0))}</dd></div>
+          <div class="cmp-row"><dt>Price</dt><dd>${item.formattedPrice || money(item.price ?? 0)}</dd></div>
           <div class="cmp-row"><dt>Rating</dt><dd>${item.rating ? '★ ' + item.rating : '—'}</dd></div>
           <div class="cmp-row"><dt>Material</dt><dd>${cap(item.material)}</dd></div>
-          <div class="cmp-row"><dt>Sizes</dt><dd>${item.sizes ? String(item.sizes).toUpperCase().replace(/ /g, ', ') : '—'}</dd></div>
+          <div class="cmp-row"><dt>Colour</dt><dd>${item.colors ? item.colors.split('|').filter(Boolean).map(cap).join(', ') : '—'}</dd></div>
+          <div class="cmp-row"><dt>Sizes</dt><dd>${item.sizes ? item.sizes.split('|').filter(Boolean).join(', ').toUpperCase() : '—'}</dd></div>
           <div class="cmp-row"><dt>Availability</dt><dd>${item.stock === 'in' ? 'In stock' : item.stock === 'pre' ? 'Pre-order' : '—'}</dd></div>
         </dl>
 
-        <button class="cmp-col__add" data-cmp-add>Add to Bag</button>
+        <button class="cmp-col__add" data-cmp-add aria-label="${item.needsPicker ? `Select options for ${item.name}` : `Add ${item.name} to bag`}">${item.needsPicker ? 'Select Options' : 'Add to Bag'}</button>
       </div>
     `).join('');
 
@@ -133,23 +151,30 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
   .cmp__grid { display: grid; grid-template-columns: repeat(var(--cmp-cols,1), minmax(220px, 1fr)); gap: clamp(14px,1.6vw,26px); }
   .cmp__grid:empty { display: none; }
 
-  .cmp-col { position: relative; border: 1px solid var(--lux-light-border); padding: 16px; display: flex; flex-direction: column; }
-  .cmp-col__remove { position: absolute; top: 10px; right: 10px; z-index: 2; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: rgba(252,252,248,.92); color: var(--lux-on-light); cursor: pointer; box-shadow: 0 4px 14px -6px rgba(48,56,44,.4); }
-  .cmp-col__remove:hover { background: var(--lux-primary-dark); color: var(--lux-accent-lime); }
-  .cmp-col__media { display: block; aspect-ratio: 3/4; overflow: hidden; background: var(--lux-light-surface); }
-  .cmp-col__media img { width: 100%; height: 100%; object-fit: cover; }
-  .cmp-col__cat { font-size: 11px; font-weight: 500; letter-spacing: .6px; text-transform: uppercase; color: var(--lux-on-light-soft); margin-top: 14px; }
-  .cmp-col__name { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--lux-on-light); margin: 6px 0 14px; }
-  .cmp-col__name a { color: inherit; text-decoration: none; }
-  .cmp-col__name a:hover { color: var(--lux-secondary-olive); }
+  /* .cmp-col and everything inside it are injected via innerHTML at runtime
+     (see the render() script above) — Astro's scoped CSS needs a hashed
+     attribute added at build time, which JS-injected nodes never get. Same
+     fix as the wishlist page: mark these :global so the rules actually reach
+     the dynamic markup instead of silently no-oping. */
+  :global(.cmp-col) { position: relative; border: 1px solid var(--lux-light-border); padding: 16px; display: flex; flex-direction: column; }
+  /* Matches .pc__act (shop card action buttons) — same size, blur, and hover
+     treatment, just always-visible (this isn't a hover grid). */
+  :global(.cmp-col__remove) { position: absolute; top: 12px; right: 12px; z-index: 2; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: rgba(252,252,248,.9); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--lux-on-light); cursor: pointer; box-shadow: 0 4px 14px -6px rgba(48,56,44,.4); transition: background .25s var(--ease), color .25s var(--ease); }
+  :global(.cmp-col__remove:hover) { background: var(--lux-primary-dark); color: var(--lux-text-primary); }
+  :global(.cmp-col__media) { display: block; aspect-ratio: 3/4; overflow: hidden; background: var(--lux-light-surface); }
+  :global(.cmp-col__media img) { width: 100%; height: 100%; object-fit: cover; }
+  :global(.cmp-col__cat) { font-size: 11px; font-weight: 500; letter-spacing: .6px; text-transform: uppercase; color: var(--lux-on-light-soft); margin-top: 14px; }
+  :global(.cmp-col__name) { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--lux-on-light); margin: 6px 0 14px; }
+  :global(.cmp-col__name a) { color: inherit; text-decoration: none; }
+  :global(.cmp-col__name a:hover) { color: var(--lux-secondary-olive); }
 
-  .cmp-col__specs { margin: 0 0 16px; }
-  .cmp-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--lux-light-border); font-size: 13px; }
-  .cmp-row dt { color: var(--lux-on-light-soft); text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
-  .cmp-row dd { margin: 0; color: var(--lux-on-light); font-weight: 500; text-align: right; }
+  :global(.cmp-col__specs) { margin: 0 0 16px; }
+  :global(.cmp-row) { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--lux-light-border); font-size: 13px; }
+  :global(.cmp-row dt) { color: var(--lux-on-light-soft); text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
+  :global(.cmp-row dd) { margin: 0; color: var(--lux-on-light); font-weight: 500; text-align: right; }
 
-  .cmp-col__add { margin-top: auto; padding: 12px; background: var(--lux-primary-dark); color: var(--lux-text-primary); border: none; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; transition: background .25s var(--ease), color .25s var(--ease); }
-  .cmp-col__add:hover { background: var(--lux-accent-lime); color: var(--lux-bg-dark); }
+  :global(.cmp-col__add) { margin-top: auto; padding: 13px; background: var(--lux-primary-dark); color: var(--lux-text-primary); border: none; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; transition: background .25s var(--ease), color .25s var(--ease); }
+  :global(.cmp-col__add:hover) { background: var(--lux-accent-lime); color: var(--lux-bg-dark); }
 
   .cmp-empty { display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: clamp(48px,8vw,110px) 0; color: var(--lux-on-light-soft); }
   .cmp-empty.is-shown { display: flex; }
