@@ -325,6 +325,21 @@ export interface ArticleAuthor {
   name: string;
 }
 
+/**
+ * The `custom.author` metafield on an Article — a Metaobject reference into a
+ * reusable "Author" entry (Content > Metaobjects), so bio/role/avatar are
+ * authored once per person and reused across posts instead of retyped per
+ * article.
+ */
+export interface ArticleAuthorMetafield {
+  reference?: {
+    authorName?: { value: string } | null;
+    authorRole?: { value: string } | null;
+    authorBio?: { value: string } | null;
+    authorImage?: { reference?: { image?: Image | null } | null } | null;
+  } | null;
+}
+
 /** Raw Shopify Article shape, as fetched by ARTICLES_QUERY/ARTICLE_QUERY. */
 export interface Article {
   id: string;
@@ -338,9 +353,7 @@ export interface Article {
   image?: Image | null;
   authorV2: ArticleAuthor;
   seo?: Seo;
-  authorRoleMetafield?: { value: string } | null;
-  authorBioMetafield?: { value: string } | null;
-  authorImageMetafield?: { value: string } | null;
+  author?: ArticleAuthorMetafield | null;
 }
 
 // ── Localization (markets) ──────────────────────────────────

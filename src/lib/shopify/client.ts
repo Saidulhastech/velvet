@@ -658,6 +658,10 @@ export function mapToLegacyArticle(a: Article): LegacyArticle {
   const firstTag = a.tags?.[0];
   const category = firstTag ? firstTag.charAt(0).toUpperCase() + firstTag.slice(1) : 'Journal';
 
+  // The reusable Author metaobject (name/role/bio/avatar) wins over the
+  // Shopify staff account name on authorV2 — it's the actual editorial byline.
+  const authorEntry = a.author?.reference;
+
   return {
     handle: a.handle,
     title: a.title,
@@ -668,10 +672,10 @@ export function mapToLegacyArticle(a: Article): LegacyArticle {
     image: a.image?.url ?? null,
     excerpt: a.excerpt ?? '',
     contentHtml: a.contentHtml ?? '',
-    author: a.authorV2?.name ?? 'Maison Arden',
-    authorRole: a.authorRoleMetafield?.value ?? 'Contributor',
-    authorBio: a.authorBioMetafield?.value ?? '',
-    authorImage: a.authorImageMetafield?.value ?? null,
+    author: authorEntry?.authorName?.value ?? a.authorV2?.name ?? 'Maison Arden',
+    authorRole: authorEntry?.authorRole?.value ?? 'Contributor',
+    authorBio: authorEntry?.authorBio?.value ?? '',
+    authorImage: authorEntry?.authorImage?.reference?.image?.url ?? null,
   };
 }
 

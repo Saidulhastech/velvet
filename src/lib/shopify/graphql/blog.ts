@@ -1,19 +1,40 @@
 // ============================================================
 //  Blog GraphQL operations — Shopify Blog/Article (2026-04)
 // ============================================================
-// Custom author fields (role/bio/avatar) live as `custom.*` metafields on the
-// Article — set up their definitions in Shopify admin (Settings > Custom
-// data > Articles) with Storefront API access enabled.
+// Author role/bio/avatar come from a reusable "Author" Metaobject (Content >
+// Metaobjects), referenced by a single `custom.author` metafield on the
+// Article (type "Metaobject reference"). Set up in Shopify admin:
+// Settings > Custom data > Articles > Add definition > Metaobject reference
+// > reference type "Author" — key must be `author`. Enable Storefront API
+// access on the definition, then pick an Author entry per article.
 
-const AUTHOR_METAFIELDS = /* GraphQL */ `
-  authorRoleMetafield: metafield(namespace: "custom", key: "author_role") {
-    value
-  }
-  authorBioMetafield: metafield(namespace: "custom", key: "author_bio") {
-    value
-  }
-  authorImageMetafield: metafield(namespace: "custom", key: "author_image") {
-    value
+const AUTHOR_METAFIELD = /* GraphQL */ `
+  author: metafield(namespace: "custom", key: "author") {
+    reference {
+      ... on Metaobject {
+        authorName: field(key: "name") {
+          value
+        }
+        authorRole: field(key: "author_role") {
+          value
+        }
+        authorBio: field(key: "author_bio") {
+          value
+        }
+        authorImage: field(key: "author_image") {
+          reference {
+            ... on MediaImage {
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+        }
+      }
+    }
   }
 `;
 
@@ -47,7 +68,7 @@ export const ARTICLES_QUERY = /* GraphQL */ `
             authorV2 {
               name
             }
-            ${AUTHOR_METAFIELDS}
+            ${AUTHOR_METAFIELD}
           }
         }
         pageInfo {
@@ -89,7 +110,7 @@ export const ARTICLE_QUERY = /* GraphQL */ `
           title
           description
         }
-        ${AUTHOR_METAFIELDS}
+        ${AUTHOR_METAFIELD}
       }
     }
   }
