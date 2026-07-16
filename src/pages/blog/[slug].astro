@@ -1,60 +1,47 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../../components/layout/BaseLayout.astro';
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import { getShopifyArticle, getShopifyArticles } from '~/lib/shopify/client';
+import { shopifyImageUrl, shopifySrcset } from '~/lib/shopify/image-url';
 
 const { slug } = Astro.params;
-const entry = await getEntry('blog', slug || '');
+const market = Astro.locals.market;
+const entry = slug ? await getShopifyArticle(slug, market) : null;
 if (!entry) {
   return Astro.rewrite('/404');
 }
-const { Content } = await render(entry);
 
-// Fetch other posts for related and navigation
-const allPosts = await getCollection('blog');
-const sortedPosts = allPosts.sort((a, b) => (a.data.order || 99) - (b.data.order || 99));
-const currentIndex = sortedPosts.findIndex(p => p.id === entry.id);
+// Fetch other posts for related and prev/next nav
+const sortedPosts = await getShopifyArticles(market);
+const currentIndex = sortedPosts.findIndex(p => p.handle === entry.handle);
 const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
-const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > -1 && currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
 
-const relatedPosts = allPosts
-  .filter(p => p.id !== entry.id)
+const relatedPosts = sortedPosts
+  .filter(p => p.handle !== entry.handle)
   .slice(0, 3);
-
-// Dynamic glob for resolving images
-const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
-
-const isFeaturedArticle = entry.id === 'building-a-wardrobe-that-lasts-a-decade';
-const featureImgPath = isFeaturedArticle
-  ? '/src/assets/images/post-feature image.png'
-  : `/src/assets/images/${entry.data.image}`;
-
-const authorImgPath = `/src/assets/images/${entry.data.authorImage}`;
-const authorImage = images[authorImgPath]?.default;
 ---
 
-<BaseLayout title={entry.data.title} description={entry.data.excerpt}>
+<BaseLayout title={entry.title} description={entry.excerpt}>
   <div class="post-progress" data-progress></div>
 
   <!-- POST HERO -->
   <section class="post-hero">
     <div class="post-hero__inner">
       <div class="post-hero__crumb">
-        <a href="/">Home</a> &nbsp;/&nbsp; 
-        <a href="/blog">Journal</a> &nbsp;/&nbsp; 
-        <span>{entry.data.category}</span>
+        <a href="/">Home</a> &nbsp;/&nbsp;
+        <a href="/blog">Journal</a> &nbsp;/&nbsp;
+        <span>{entry.category}</span>
       </div>
-      <span class="post-hero__tag">{entry.data.category}</span>
-      <h1 class="post-hero__title">{entry.data.title}</h1>
-      <p class="post-hero__sub">{entry.data.excerpt}</p>
+      <span class="post-hero__tag">{entry.category}</span>
+      <h1 class="post-hero__title">{entry.title}</h1>
+      <p class="post-hero__sub">{entry.excerpt}</p>
       <div class="post-hero__meta">
-        {authorImage && (
-          <Image class="post-hero__avatar" src={authorImage} alt={entry.data.author} width={42} height={42} />
+        {entry.authorImage && (
+          <img class="post-hero__avatar" src={shopifyImageUrl(entry.authorImage, 42, 42)} alt={entry.author} width="42" height="42" />
         )}
         <div class="post-hero__byline">
-          <div class="post-hero__author">By {entry.data.author}</div>
-          <div class="post-hero__date">{entry.data.date} · {entry.data.readTime}</div>
+          <div class="post-hero__author">By {entry.author}</div>
+          <div class="post-hero__date">{entry.date} · {entry.readTime}</div>
         </div>
       </div>
     </div>
@@ -62,8 +49,17 @@ const authorImage = images[authorImgPath]?.default;
 
   <!-- FEATURE IMAGE -->
   <div class="post-feature">
-    {images[featureImgPath] && (
-      <Image src={images[featureImgPath].default} alt={entry.data.title} loading="eager" width={1440} height={720} style="aspect-ratio: 16/8; object-fit: cover;" />
+    {entry.image && (
+      <img
+        src={shopifyImageUrl(entry.image, 1440, 720)}
+        srcset={shopifySrcset(entry.image, [900, 1440, 2000])}
+        sizes="100vw"
+        alt={entry.title}
+        loading="eager"
+        width="1440"
+        height="720"
+        style="aspect-ratio: 16/8; object-fit: cover;"
+      />
     )}
   </div>
 
@@ -93,31 +89,30 @@ const authorImage = images[authorImgPath]?.default;
     </div>
 
     <article class="post-body">
-      <Content />
+      <div set:html={entry.contentHtml} />
 
-      <div class="post-tags">
-        <span>Wardrobe</span>
-        <span>Investment Pieces</span>
-        <span>Care</span>
-        <span>Slow Fashion</span>
-      </div>
+      {entry.tags.length > 0 && (
+        <div class="post-tags">
+          {entry.tags.map((tag) => <span>{tag}</span>)}
+        </div>
+      )}
 
       <div class="post-author">
-        {authorImage && (
-          <Image class="post-author__avatar" src={authorImage} alt={entry.data.author} width={64} height={64} />
+        {entry.authorImage && (
+          <img class="post-author__avatar" src={shopifyImageUrl(entry.authorImage, 64, 64)} alt={entry.author} width="64" height="64" />
         )}
         <div>
-          <div class="post-author__name">{entry.data.author}</div>
-          <div class="post-author__role">{entry.data.authorRole}</div>
-          <p class="post-author__bio">{entry.data.authorBio}</p>
+          <div class="post-author__name">{entry.author}</div>
+          <div class="post-author__role">{entry.authorRole}</div>
+          <p class="post-author__bio">{entry.authorBio}</p>
         </div>
       </div>
 
       <nav class="post-nav">
         {prevPost ? (
-          <a href={`/blog/${prevPost.id}`}>
+          <a href={`/blog/${prevPost.handle}`}>
             <div class="post-nav__dir">← Previous</div>
-            <div class="post-nav__t">{prevPost.data.title}</div>
+            <div class="post-nav__t">{prevPost.title}</div>
           </a>
         ) : (
           <a href="/blog" style="visibility: hidden;">
@@ -125,9 +120,9 @@ const authorImage = images[authorImgPath]?.default;
           </a>
         )}
         {nextPost ? (
-          <a href={`/blog/${nextPost.id}`}>
+          <a href={`/blog/${nextPost.handle}`}>
             <div class="post-nav__dir">Next →</div>
-            <div class="post-nav__t">{nextPost.data.title}</div>
+            <div class="post-nav__t">{nextPost.title}</div>
           </a>
         ) : (
           <a href="/blog" style="visibility: hidden;">
@@ -146,30 +141,35 @@ const authorImage = images[authorImgPath]?.default;
         <h2 class="section-title">Related <em>Stories</em></h2>
       </div>
       <div class="post-related__grid">
-        {relatedPosts.map((post, idx) => {
-          const imagePath = `/src/assets/images/${post.data.image}`;
-          return (
-            <article class={`bcard reveal d${idx + 1}`}>
-              <a href={`/blog/${post.id}`} class="bcard__media">
-                <span class="bcard__tag">{post.data.category}</span>
-                {images[imagePath] && (
-                  <Image src={images[imagePath].default} alt={post.data.title} loading="lazy" />
-                )}
+        {relatedPosts.map((post, idx) => (
+          <article class={`bcard reveal d${idx + 1}`}>
+            <a href={`/blog/${post.handle}`} class="bcard__media">
+              <span class="bcard__tag">{post.category}</span>
+              {post.image && (
+                <img
+                  src={shopifyImageUrl(post.image, 480, 384)}
+                  srcset={shopifySrcset(post.image, [480, 960])}
+                  sizes="(min-width: 880px) 33vw, 50vw"
+                  alt={post.title}
+                  width="480"
+                  height="384"
+                  loading="lazy"
+                />
+              )}
+            </a>
+            <div class="bcard__body">
+              <div class="bcard__meta">{post.category} · {post.readTime}</div>
+              <h3 class="bcard__title"><a href={`/blog/${post.handle}`}>{post.title}</a></h3>
+              <p class="bcard__excerpt">{post.excerpt}</p>
+              <a href={`/blog/${post.handle}`} class="bcard__btn">
+                Read Article
+                <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+                  <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
               </a>
-              <div class="bcard__body">
-                <div class="bcard__meta">{post.data.category} · {post.data.readTime}</div>
-                <h3 class="bcard__title"><a href={`/blog/${post.id}`}>{post.data.title}</a></h3>
-                <p class="bcard__excerpt">{post.data.excerpt}</p>
-                <a href={`/blog/${post.id}`} class="bcard__btn">
-                  Read Article 
-                  <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
-                    <path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-                  </svg>
-                </a>
-              </div>
-            </article>
-          );
-        })}
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </section>

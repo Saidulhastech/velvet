@@ -15,26 +15,19 @@ import imgCampaign from '../assets/images/Campaign section image.png';
 
 // Import product catalog from Shopify client
 import { getShopifyProducts, getShopifyCollection } from '../lib/shopify/client';
-import { BEST_SELLERS_HANDLE } from '../config/velvet';
+import { BEST_SELLERS_HANDLE, NEW_ARRIVALS_HANDLE } from '../config/velvet';
 
 const market = Astro.locals.market;
 const productsList = await getShopifyProducts(market);
 
-// Map specific products to homepage sections (matching Luxury Homepage.html)
-const newArrivals = [
-  productsList.find(p => p.handle === 'sand-linen-blazer' || p.id === 'p1'),
-  productsList.find(p => p.handle === 'camel-wool-overcoat' || p.id === 'p2'),
-  productsList.find(p => p.handle === 'pleated-wide-trouser' || p.id === 'p3'),
-  productsList.find(p => p.handle === 'ribbed-wool-knit' || p.id === 'p4'),
-  productsList.find(p => p.handle === 'relaxed-denim-jacket' || p.id === 'p5'),
-  productsList.find(p => p.handle === 'silk-slip-dress' || p.id === 'p15'),
-  productsList.find(p => p.handle === 'two-piece-tailored-suit' || p.id === 'p7'),
-  productsList.find(p => p.handle === 'cropped-wool-cardigan' || p.id === 'p8')
-].filter(Boolean);
-
-if (newArrivals.length === 0) {
-  newArrivals.push(...productsList.slice(0, 8));
-}
+// The `new-arrivals` collection decides WHICH products show here + their
+// order (respects manual curation order set in Shopify admin). Falls back to
+// a plain product slice if the collection is missing/empty so the section
+// never blanks.
+const newArrivalsCollection = await getShopifyCollection(NEW_ARRIVALS_HANDLE, market);
+const newArrivals = (
+  newArrivalsCollection?.products?.length ? newArrivalsCollection.products : productsList.slice(0, 8)
+).slice(0, 8);
 
 // The `best-sellers` collection decides WHICH products show here + their
 // order (respects manual curation order set in Shopify admin). Falls back to

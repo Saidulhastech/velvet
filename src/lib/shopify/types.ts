@@ -319,6 +319,30 @@ export interface Shop {
   primaryDomain: { url: string; host: string };
 }
 
+// ── Blog / Article ──────────────────────────────────────────
+
+export interface ArticleAuthor {
+  name: string;
+}
+
+/** Raw Shopify Article shape, as fetched by ARTICLES_QUERY/ARTICLE_QUERY. */
+export interface Article {
+  id: string;
+  title: string;
+  handle: string;
+  /** Body HTML, needed on list queries too — drives the estimated read time shown on cards. */
+  contentHtml: string;
+  excerpt?: string | null;
+  publishedAt: string;
+  tags: string[];
+  image?: Image | null;
+  authorV2: ArticleAuthor;
+  seo?: Seo;
+  authorRoleMetafield?: { value: string } | null;
+  authorBioMetafield?: { value: string } | null;
+  authorImageMetafield?: { value: string } | null;
+}
+
 // ── Localization (markets) ──────────────────────────────────
 
 export interface Currency {
@@ -415,4 +439,30 @@ export interface LegacyProduct {
   materialsCare?: string[];
   /** Shipping/returns policy from the `custom.shipping_returns` metafield. Absent when the store hasn't set it. */
   shippingReturns?: string[];
+}
+
+/**
+ * The `.astro` blog templates were built against this pre-Shopify shape.
+ * `mapToLegacyArticle()` (in client.ts) converts a raw Shopify `Article` into
+ * this. Author role/bio/avatar come from `custom.author_*` metafields on the
+ * article (see Shopify admin > Settings > Custom data > Articles); a merchant
+ * who hasn't filled them in yet gets the fallback defaults below.
+ */
+export interface LegacyArticle {
+  handle: string;
+  title: string;
+  /** First tag, title-cased — this template's single "category" per post. */
+  category: string;
+  tags: string[];
+  /** Human date, e.g. "12 June 2026". */
+  date: string;
+  /** e.g. "6 min read", estimated from contentHtml word count. */
+  readTime: string;
+  image: string | null;
+  excerpt: string;
+  contentHtml: string;
+  author: string;
+  authorRole: string;
+  authorBio: string;
+  authorImage: string | null;
 }

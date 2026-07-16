@@ -10,6 +10,7 @@ export * from './services/collections';
 export * from './services/cart';
 export * from './services/search';
 export * from './services/content';
+export * from './services/blog';
 
 // UI helpers
 export * from './sort-options';

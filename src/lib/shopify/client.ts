@@ -185,7 +185,9 @@ import { demoProducts as mockProducts } from '../demoCatalog';
 import type { LegacyProduct } from './types';
 import { getProducts as getShopifyProductsNew, getProduct as getShopifyProductNew, getProductRecommendations as getShopifyRecommendations } from './services/products';
 import { getCollection as getCollectionNew, getCollectionsWithCounts as getCollectionsWithCountsNew } from './services/collections';
+import { getArticles as getArticlesNew, getArticle as getArticleNew } from './services/blog';
 import type { Market } from '../market';
+import type { Article, LegacyArticle } from './types';
 
 // Curated Maison Arden palette first, then the everyday colour names real
 // Shopify catalogues actually use (merchants rarely configure the native
@@ -630,4 +632,59 @@ export async function getShopifyCollection(
     console.error(`Failed to fetch collection "${handle}":`, error);
     return null;
   }
+}
+
+// ============================================================
+//  Blog legacy bridge — Shopify Article → LegacyArticle
+// ============================================================
+
+const WORDS_PER_MINUTE = 200;
+
+function estimateReadTime(html: string): string {
+  const words = html.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+  return `${minutes} min read`;
+}
+
+function formatArticleDate(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}
+
+export function mapToLegacyArticle(a: Article): LegacyArticle {
+  const firstTag = a.tags?.[0];
+  const category = firstTag ? firstTag.charAt(0).toUpperCase() + firstTag.slice(1) : 'Journal';
+
+  return {
+    handle: a.handle,
+    title: a.title,
+    category,
+    tags: a.tags ?? [],
+    date: formatArticleDate(a.publishedAt),
+    readTime: estimateReadTime(a.contentHtml ?? ''),
+    image: a.image?.url ?? null,
+    excerpt: a.excerpt ?? '',
+    contentHtml: a.contentHtml ?? '',
+    author: a.authorV2?.name ?? 'Maison Arden',
+    authorRole: a.authorRoleMetafield?.value ?? 'Contributor',
+    authorBio: a.authorBioMetafield?.value ?? '',
+    authorImage: a.authorImageMetafield?.value ?? null,
+  };
+}
+
+/** Newest-first articles for the store's blog (legacy-shaped). Empty when unconfigured/failed. */
+export async function getShopifyArticles(market?: Market, first = 24): Promise<LegacyArticle[]> {
+  if (!isShopifyConnected()) return [];
+  const { items } = await getArticlesNew({ first }, market);
+  return items.map(mapToLegacyArticle);
+}
+
+/** A single article by handle (legacy-shaped), or null if missing/unconfigured. */
+export async function getShopifyArticle(handle: string, market?: Market): Promise<LegacyArticle | null> {
+  if (!isShopifyConnected()) return null;
+  const article = await getArticleNew(handle, market);
+  return article ? mapToLegacyArticle(article) : null;
 }

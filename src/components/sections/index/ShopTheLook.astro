@@ -40,6 +40,7 @@ const POSITIONS = [
 // missing/empty, fall back to the first few store (or demo) products so the
 // section never blanks.
 const curated = await getShopifyCollection(SHOP_THE_LOOK_HANDLE, market);
+const stageImageUrl = curated?.image ?? null;
 let handles = (curated?.products ?? []).map((p) => p.handle);
 if (handles.length === 0) {
   const all = await getShopifyProducts(market);
@@ -82,8 +83,21 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
 <section class="look" id="lookbook" aria-label="Shop the look">
   <div class="look__inner">
     <div class="look__stage reveal">
-      <Image src={imgStage} alt="The Riviera Set" width={560} height={560} loading="lazy" />
-      
+      {stageImageUrl ? (
+        <img
+          src={shopifyImageUrl(stageImageUrl, 560, 560)}
+          srcset={shopifySrcset(stageImageUrl, [560, 1120])}
+          alt="The Riviera Set"
+          width="560"
+          height="560"
+          loading="lazy"
+          decoding="async"
+          style="width:100%;height:100%;object-fit:cover;"
+        />
+      ) : (
+        <Image src={imgStage} alt="The Riviera Set" width={560} height={560} loading="lazy" />
+      )}
+
       {lookItems.map((item, idx) => (
         <>
           <button 
@@ -224,6 +238,7 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
     const optLine = row.querySelector<HTMLElement>('[data-role="opt-line"]');
     const priceEl = row.querySelector<HTMLElement>('[data-role="price"]');
     const imgEl = row.querySelector<HTMLImageElement>('.look__row-img');
+    const tipImg = document.querySelector<HTMLImageElement>(`.look__tip[data-index="${row.dataset.index}"] img`);
     const symbol = row.dataset.symbol || '$';
 
     if (!variants.length) {
@@ -267,7 +282,14 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
       resolvedByRow.set(row, resolved);
 
       if (priceEl) priceEl.textContent = money(symbol, resolved.price);
-      if (imgEl && resolved.image) imgEl.src = resolved.image;
+      if (imgEl && resolved.image) {
+        imgEl.removeAttribute('srcset');
+        imgEl.src = resolved.image;
+      }
+      if (tipImg && resolved.image) {
+        tipImg.removeAttribute('srcset');
+        tipImg.src = resolved.image;
+      }
       if (addBtn) addBtn.disabled = !resolved.available;
       if (optLine) optLine.textContent = [resolved.color, resolved.size].filter(Boolean).join(' · ');
 
@@ -376,7 +398,6 @@ const bundleTotalFormatted = formatMoney(bundleTotal, bundleCurrency);
     position: relative;
     overflow: hidden;
     background: var(--lux-light-bg);
-    aspect-ratio: 1/1;
   }
 
   .look__stage img {
