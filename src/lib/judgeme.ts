@@ -22,6 +22,14 @@ function legacyIdFrom(gid: string | null | undefined): string | null {
   return id && /^\d+$/.test(id) ? id : null;
 }
 
+/** Judge.me returns `created_at` as an ISO timestamp — render it human-readable ("Jul 18, 2026"). */
+function formatReviewDate(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(d);
+}
+
 interface JudgeMeReviewRaw {
   rating?: number;
   title?: string;
@@ -67,7 +75,7 @@ export async function getProductReviews(shopifyProductGid: string | null): Promi
         rating: Number(r.rating ?? 0),
         title: r.title || undefined,
         body: r.body || undefined,
-        date: r.created_at || undefined,
+        date: formatReviewDate(r.created_at),
       }))
       .filter((r) => Number.isFinite(r.rating) && r.rating > 0);
   } catch {
