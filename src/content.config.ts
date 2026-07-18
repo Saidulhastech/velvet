@@ -12,15 +12,4 @@ const ethos = defineCollection({
   }),
 });
 
-const materials = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/materials" }),
-  schema: z.object({
-    title: z.string(),
-    origin: z.string(),
-    weight: z.string().optional(),
-    certification: z.string().optional(),
-    order: z.number().optional(),
-  }),
-});
-
-export const collections = { ethos, materials };
+export const collections = { ethos };
