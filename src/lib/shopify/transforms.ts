@@ -3,9 +3,6 @@
 //  clean domain shapes defined in types.ts.
 // ============================================================
 import type {
-  BundleComponent,
-  BundleConfig,
-  BundleProduct,
   Cart,
   CartLine,
   Collection,
@@ -239,68 +236,6 @@ export function mapProduct(p: Raw): Product {
     highlights: parseStringList(p.highlightsMetafield?.value),
     materialsCare: parseStringList(p.materialsCareMetafield?.value),
     shippingReturns: parseStringList(p.shippingReturnsMetafield?.value),
-  };
-}
-
-/**
- * Map a fixed-price bundle product (Shopify-standard, no app). The single
- * variant is the bundle SKU; its contents come from the `custom.bundle_items`
- * `list.product_reference` metafield. When the merchant set no compare-at,
- * fall back to the summed component prices so the card shows real savings.
- */
-export function mapBundleProduct(p: Raw): BundleProduct {
-  const variant = nodes(p.variants)[0] as Raw | undefined;
-  const refs = nodes(p.bundleItems?.references) as Raw[];
-  const components: BundleComponent[] = refs
-    .filter((r) => r?.id) // skip non-Product references the union may include
-    .map((r) => ({
-      productId: r.id,
-      title: r.title ?? '',
-      vendor: r.vendor ?? '',
-      image: r.featuredImage ?? null,
-      price: r.priceRange?.minVariantPrice ?? null,
-    }));
-
-  const price: Money = variant?.price ?? p.priceRange?.minVariantPrice ?? ZERO_MONEY;
-  const currencyCode = price?.currencyCode ?? 'USD';
-
-  // Summed component value — the "was" when no explicit compare-at exists.
-  const summed = components.reduce((sum, c) => {
-    const amt = Number(c.price?.amount ?? 0);
-    return sum + (Number.isFinite(amt) ? amt : 0);
-  }, 0);
-
-  let compareAtPrice: Money | null = variant?.compareAtPrice ?? p.compareAtPriceRange?.minVariantPrice ?? null;
-  if (!compareAtPrice && summed > Number(price?.amount ?? 0)) {
-    compareAtPrice = { amount: String(summed), currencyCode };
-  }
-
-  return {
-    id: p.id,
-    title: p.title,
-    handle: p.handle,
-    variantId: variant?.id ?? null,
-    availableForSale: (variant?.availableForSale ?? p.availableForSale) ?? false,
-    featuredImage: p.featuredImage ?? null,
-    price,
-    compareAtPrice,
-    components,
-  };
-}
-
-/**
- * Map a build-your-own bundle: container product + its component products
- * (from the `custom.bundle_items` metafield) as full cards for the picker.
- */
-export function mapBundleConfig(p: Raw): BundleConfig {
-  const refs = nodes(p.bundleItems?.references) as Raw[];
-  return {
-    id: p.id,
-    title: p.title,
-    handle: p.handle,
-    description: p.description ?? '',
-    featuredImage: p.featuredImage ?? null,
-    components: refs.filter((r) => r?.id).map(mapProductCard),
   };
 }
 

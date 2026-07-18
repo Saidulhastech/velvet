@@ -156,51 +156,6 @@ export interface ProductCard {
   stockGoal?: number | null;
 }
 
-/** One item listed inside a fixed-price bundle (a referenced product). */
-export interface BundleComponent {
-  /** The referenced product's gid. */
-  productId: string;
-  title: string;
-  vendor?: string;
-  image?: Image | null;
-  /** Per-component price (the product's min variant price) — sums to the "was". */
-  price?: Money | null;
-}
-
-/**
- * A fixed-price bundle product (Shopify-standard, no app). One variant (the
- * bundle SKU) is what we drop into the cart; `components` are the products
- * listed in the `custom.bundle_items` metafield. `price` is the bundle price;
- * `compareAtPrice` is the merchant compare-at, or the summed component prices
- * when no compare-at is set (so "Save" reflects real value).
- */
-export interface BundleProduct {
-  id: string;
-  title: string;
-  handle: string;
-  /** The bundle variant gid — added to the cart. Null if the bundle has no variant. */
-  variantId: string | null;
-  availableForSale: boolean;
-  featuredImage?: Image | null;
-  price: Money;
-  compareAtPrice?: Money | null;
-  components: BundleComponent[];
-}
-
-/**
- * A build-your-own bundle: the container product plus each component as a full
- * ProductCard (with variants/options) so the configurator can render a variant
- * picker per item. Chosen variants are added as separate cart lines.
- */
-export interface BundleConfig {
-  id: string;
-  title: string;
-  handle: string;
-  description?: string;
-  featuredImage?: Image | null;
-  components: ProductCard[];
-}
-
 export interface PageInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
