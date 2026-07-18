@@ -70,6 +70,9 @@ export function createCustomerClient(cookies: AstroCookies, origin: string): Cus
           'Content-Type': 'application/json',
           // Customer Account API expects the raw token — NOT "Bearer <token>".
           Authorization: accessToken,
+          // Required — Shopify's edge 403s ("You do not have permission to
+          // access this website") requests with no User-Agent header.
+          'User-Agent': 'Astro Shopify Customer Account',
         },
         body: JSON.stringify({ query, variables }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
