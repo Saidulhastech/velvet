@@ -11,14 +11,14 @@ A production-grade **luxury-fashion storefront** built with **Astro SSR** and th
 ## ✨ Features
 
 - **Astro SSR** (`output: 'server'`), strict TypeScript, `~/*` path alias.
-- **Shopify Storefront API** integration (products, collections, cart, search, content, Customer Account API login).
-- **Multi-market**: country + language resolved per request → localized prices, translations and checkout currency via `@inContext`.
-- **Commerce UX**: cart drawer, wishlist, compare, quick-view modal, product filtering/sorting, PDP with variant selection, reviews, related products.
-- **Blog / Journal** powered by a real Shopify Blog (Storefront API `Article`/`Blog`) — no markdown, no rebuild to publish a post.
-- **Editorial content collections** (ethos, materials) via Markdown with typed Zod schemas.
-- **SEO**: per-page meta, Open Graph + Twitter cards, canonical URLs, JSON-LD (Organization, WebSite, Product, Breadcrumb), sitemap + robots.
-- **Performance**: self-hosted fonts (no render-blocking Google Fonts), optimized images, lazy loading, market-safe edge caching.
-- **Graceful degradation**: with no Shopify credentials the site renders from the demo catalogue (`src/lib/demoCatalog.ts`); live Shopify data is used the moment creds are set.
+- **Shopify Storefront API**: products, collections, cart, search, content, Customer Account API login.
+- **Multi-market**: country + language resolved per request → localized prices, translations, checkout currency via `@inContext`.
+- **Commerce UX**: cart drawer, wishlist, compare, quick-view modal, filtering/sorting, PDP with variant selection, reviews, related products.
+- **Blog / Journal** — a real Shopify Blog (Storefront API), no markdown, no rebuild to publish.
+- **Editorial content collection** (ethos) — Markdown with typed Zod schemas.
+- **SEO** — per-page meta, OG/Twitter cards, canonical URLs, JSON-LD, sitemap + robots.
+- **Performance** — self-hosted fonts, optimized images, lazy loading, market-safe edge caching.
+- **Graceful degradation** — with no Shopify credentials the site renders from a bundled demo catalogue (`src/lib/demoCatalog.ts`); live data kicks in the moment creds are set.
 
 ## 🧱 Tech Stack
 
@@ -29,7 +29,7 @@ Astro · Shopify Storefront API · nanostores · Cloudflare/Vercel/Netlify/Node 
 ```sh
 npm install
 cp .env.example .env      # optional — omit to run in demo-data mode
-npm run dev               # http://localhost:4321
+npm run dev                # http://localhost:4321
 ```
 
 | Command | Action |
@@ -41,185 +41,39 @@ npm run dev               # http://localhost:4321
 
 Node `>=22.12.0`.
 
-## 🔑 Environment
+## 🔑 Environment & Shopify Setup
 
 Config is read via `astro:env` (schema in [`astro.config.mjs`](astro.config.mjs)), **not** `process.env`. Copy `.env.example` → `.env`.
 
-### Shopify Configuration Guide
-
-1. Log in to (or create) your Shopify store: https://accounts.shopify.com/store-login
-2. In Shopify Admin, go to **Sales channels → add the [Headless channel](https://apps.shopify.com/headless)** to your store.
-3. Open the Headless channel and click **Add Storefront** — this generates an access token pair for that storefront.
-4. This theme only needs the **private (delegate) access token** — copy it into `.env` as `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`. (Unlike public-token themes, the public token isn't used here: every Shopify call happens server-side, so the token never reaches the browser — see `src/lib/shopify/client.ts`.)
-5. Set `SHOPIFY_SHOP_DOMAIN` to your `your-shop.myshopify.com` domain.
-6. Check the Storefront API **access scopes** on that storefront. `unauthenticated_read_product_listings` + `unauthenticated_read_product_inventory` covers products, collections, and search — enough to get started. Cart reads/writes work without any extra scope. Add more scopes only if you extend the theme into areas that need them (e.g. B2B, gift cards).
-7. `SHOPIFY_API_VERSION` is pinned in `.env` (defaults to `2026-04`) — bump it here when you want to move to a newer Storefront API version.
+1. Log in to your Shopify store → **Sales channels → add the [Headless channel](https://apps.shopify.com/headless)**.
+2. Open Headless → **Add Storefront** to generate an access token pair.
+3. Copy the **private (delegate) token** into `.env` as `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`. Every Shopify call happens server-side (`src/lib/shopify/client.ts`), so this token never reaches the browser — the public token isn't used.
+4. Set `SHOPIFY_SHOP_DOMAIN` to `your-shop.myshopify.com`.
+5. Check the storefront's API **access scopes** — `unauthenticated_read_product_listings` + `unauthenticated_read_product_inventory` covers products/collections/search; cart works with no extra scope.
 
 | Variable | Required | Purpose |
 | :-- | :-- | :-- |
 | `SHOPIFY_SHOP_DOMAIN` | ✅ | `your-shop.myshopify.com` |
 | `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | ✅ | Storefront API private token |
 | `SHOPIFY_API_VERSION` | — | Defaults to `2026-04` |
-| `CUSTOMER_ACCOUNT_API_CLIENT_ID` | — | Customer login (OAuth) |
-| `SHOPIFY_SHOP_ID` | — | Customer login |
-| `CUSTOMER_ACCOUNT_API_VERSION` | — | Customer login |
-| `JUDGEME_API_TOKEN` | — | Product reviews (Judge.me → Settings → Integrations → API tokens). Not in `.env.example` yet — add the line yourself. Reviews section just stays empty without it. |
+| `CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_SHOP_ID`, `CUSTOMER_ACCOUNT_API_VERSION` | — | Customer login (OAuth) |
+| `JUDGEME_API_TOKEN` | — | Product reviews via Judge.me; not in `.env.example`, add manually. Empty reviews section without it |
 
-**No credentials?** The theme falls back to the bundled demo catalogue (`src/lib/demoCatalog.ts`) — perfect for previewing. Add your `SHOPIFY_*` vars and every request switches to live data automatically.
+**No credentials?** The theme falls back to the bundled demo catalogue — great for previewing. Add the `SHOPIFY_*` vars and every request switches to live data automatically.
 
 ## 🎨 Customization
 
 - **Brand config**: [`src/config/velvet.ts`](src/config/velvet.ts) — name, tagline, free-shipping threshold, return window, socials, default market.
-- **Design tokens**: [`src/styles/variables.css`](src/styles/variables.css) (colors, fonts, spacing) + `global.css`.
+- **Design tokens**: [`src/styles/variables.css`](src/styles/variables.css) + `global.css` (colors, fonts, spacing).
 - **Fonts**: configured in [`astro.config.mjs`](astro.config.mjs) (`fonts` field) — swap family names there and in `variables.css`.
-- **Content**: Blog posts live in Shopify (see "Blog / Journal" below). Editorial markdown in `src/content/{ethos,materials}` (schemas in `src/content.config.ts`).
-- **`site`**: set your production domain in `astro.config.mjs` (drives canonical URLs + sitemap) and update `public/robots.txt`.
+- **Content**: blog posts live in Shopify; editorial markdown in `src/content/ethos` (schema in `src/content.config.ts`).
+- **`site`**: set your production domain in `astro.config.mjs` (canonical URLs + sitemap) and update `public/robots.txt`.
 
-## 🛍️ Store Features (for the store owner, not the developer)
+## 🛍️ Store Features
 
-A few sections of the site pull from a specific Shopify **collection handle** or **product handle**. None of these are required — every one falls back gracefully if you skip it — but setting them up connects that part of the design to your real merchandising.
+Several homepage sections and the PDP read from specific Shopify **collection handles**, **product handles**, or **metafields** — best-sellers, new-arrivals, shop-the-look, gift wrap, PDP swatches/size guide/reviews, and the blog author byline. None are required to launch (every one falls back gracefully), but wiring them up connects the design to your real merchandising.
 
-### Product Detail Page (`/products/[handle]`)
-
-Nothing below is required to launch — every field falls back to hidden/generic rather than showing fake data if you skip it. This is the full list of what the PDP reads from Shopify.
-
-**Variants — colour & size**
-
-- Options must be named **`Color`/`Colour`** and **`Size`** (case-insensitive) — other names won't be picked up as colour/size pickers.
-- **Colour swatches**: set each option value's swatch in Shopify Admin (Product → Options → Color → click a value → swatch color) for the exact hex. Skip it and the theme falls back to a ~40-name hardcoded colour map (olive, sage, charcoal, navy, rust, …); an unrecognized colour name renders a neutral grey swatch instead.
-- **Per-variant images**: assign a distinct image to each colour variant (Product → Variants → click a variant → Image). This drives the gallery swap when a swatch — or a matching thumbnail — is clicked. No per-variant image means clicking that colour won't change the photo.
-- **Inventory tracking** (Product → Variants → Inventory): turn it on to get the real "Only N left" / "Sold out" state. An untracked variant always shows as available.
-- **Compare-at price**: set it on a variant to show the struck-through original price + "Save X" badge.
-
-**Product-level fields**
-
-- **Product Type** → becomes the breadcrumb/category label ("Women · Dresses"). Leave it blank and the label just drops the sub-part.
-- **Tags** (matched lowercase):
-  - `men` / `mens` or `women` / `womens` → gender (defaults to "unisex" if neither tag is present).
-  - `linen`, `wool`, `cotton`, `denim`, `cashmere`, `silk`, `leather` → the materials line shown under the price (tagging it or just mentioning the fabric in the description both work).
-  - `new` → "New" badge; `atelier` → "Atelier" badge.
-  - `featured`, `new`, `bestseller` → flags this product for the theme's featured/new/bestseller-driven sections elsewhere on the site.
-
-**Metafields** — create these definitions first (Settings → Custom data → Products → Add definition) **with Storefront API access enabled on each** — a value written to a metafield without a definition, or without that access box checked, silently reads back empty:
-
-| Metafield (`namespace.key`) | Type | Powers |
-| :-- | :-- | :-- |
-| `reviews.rating` | Decimal | Star rating shown before a shopper opens the reviews section |
-| `reviews.rating_count` | Integer | Review count next to the rating |
-| `custom.materials_care` | List (single line text) | "Materials & Care" accordion bullets |
-| `custom.shipping_returns` | List (single line text) | "Shipping & Returns" accordion bullets |
-| `custom.specifications` | List (single line text) or JSON | "Specifications" accordion (label/value rows) |
-| `custom.highlights` | List (single line text) | Bullet highlights under the description |
-| `custom.size_guide` | JSON | Size Guide table (format below) |
-
-The `reviews.*` pair is normally written automatically by your reviews app, not typed in by hand — see "Reviews (Judge.me)" below.
-
-`custom.specifications` accepts either an array of `{"label":"...","value":"..."}` objects or plain `"Label: Value"` strings:
-```json
-[{"label":"Fit","value":"Regular"},{"label":"Origin","value":"Made in Italy"}]
-```
-
-`custom.size_guide` is an array of row objects — the **first row's keys become the table's column headers**, so different products can have entirely different columns (Bust/Waist/Length for a dress, Waist/Inseam for trousers, etc.):
-```json
-[
-  {"Size":"XS","Bust":"82","Waist":"64","Length":"96"},
-  {"Size":"S","Bust":"86","Waist":"68","Length":"98"}
-]
-```
-Skip it and the Size Guide shows a generic static XS–XL bust/waist/length table instead of disappearing.
-
-**Reviews (Judge.me)**
-
-1. Install Judge.me on the store and set `JUDGEME_API_TOKEN` in `.env` (Judge.me → Settings → Integrations → API tokens) — review text on the PDP comes live from Judge.me's API at request time, never a Shopify metafield.
-2. In Judge.me's own settings, enable its **metafield sync** (off by default) — this is what actually writes the `reviews.rating` / `reviews.rating_count` metafields listed above.
-3. You still need the metafield **definitions** created with Storefront API access (step above) — an app writing a value to an undefined metafield doesn't make it visible to the Storefront API that this theme queries.
-4. No token / no Judge.me installed → the reviews section shows "No reviews yet" and the rating stays hidden. Never fabricated.
-
-**On the page but intentionally NOT per-product**
-
-- "Complimentary shipping over {amount}" and "{N}-day easy returns" in the trust row pull their numbers from `BRAND.freeShippingThreshold` / `BRAND.returnWindowDays` in [`src/config/velvet.ts`](src/config/velvet.ts) — one store-wide policy, not a per-product setting. "In stock — ships in 48h" only renders when the product is actually in stock.
-- The "Details" accordion's intro paragraph and the "Lifetime Repairs" line are fixed template copy — edit them directly in `src/pages/products/[handle].astro` if you want them to vary per product.
-
-**Fetched but currently unused** — harmless, nothing to fix: local-pickup availability (`storeAvailability`) is queried per variant but isn't rendered on this PDP. Setting up Local Pickup locations in Shopify Admin won't visibly change anything here yet.
-
-**Related products ("You May Also Like")** — pulled from Shopify's own product-recommendation engine first; if it returns fewer than 4 (common for brand-new or low-traffic products), the theme tops up from your catalogue using same-category then same-gender matches. Nothing to configure — accuracy improves as the store accumulates order/view history.
-
-### Gift Wrap (cart add-on)
-
-1. Shopify Admin → create a product with the handle **`gift-wrap`** (the handle is editable in the product's URL settings, under the title field).
-2. Give it one variant with a price. Make sure it's **Active** (not Draft) and **in stock** (or has "Continue selling when out of stock" enabled) — otherwise it stays hidden.
-3. In [`src/config/velvet.ts`](src/config/velvet.ts), set `CART_EXTRAS.giftWrap.enabled = true`.
-
-Once live, the gift-wrap product never appears in your shop grid or search — it only shows as a toggle in the cart, and only if it's real, priced, and purchasable.
-
-### Best Sellers (homepage "Most Loved" section)
-
-Create a collection with the handle **`best-sellers`** (Products → Collections → Create collection). Use type **Manual** so you control the exact products and order. The homepage picks up your list automatically — no code change, no redeploy needed. Falls back to a plain product slice if the collection is missing or empty, so the section never blanks.
-
-### New Arrivals (homepage "New Arrivals" grid)
-
-Create a collection with the handle **`new-arrivals`** (type **Manual**, ordered the way you want products to appear). The homepage grid shows up to the first 8 products in that collection, in that order. Falls back to a plain product slice if the collection is missing or empty.
-
-The **Women / Men / Accessories** filter tabs above the grid are generated automatically from whichever products are actually in the collection — a tab only appears if at least one featured product's category/tags match it, so you never get a clickable-but-empty tab.
-
-### Shop the Look (homepage lookbook)
-
-Same idea, collection handle **`shop-the-look`** (type **Manual**). The first 3 products in that collection map to the 3 hotspots on the homepage lookbook image, in the order you set them.
-
-Two extra things this section pulls straight from the collection in Shopify Admin:
-
-- **Collection image** → becomes the large left-hand stage/backdrop photo. Set it under the collection's own **Image** field (Products → Collections → *Shop the Look* → Image). If you don't set one, the theme falls back to its bundled placeholder photo. The image box isn't locked to a fixed aspect ratio, so pick a photo that already reads well as a tall/portrait stage shot — a very wide or very short image will look stretched or cropped oddly.
-- **Per-variant images drive the inline colour swatches.** Each row's swatch picker swaps that row's thumbnail (and its hotspot preview) to match the selected colour — but only if you've assigned a **separate image per variant** in Shopify Admin (Product → Variants → click a variant → set its image). If a color variant has no image of its own, clicking its swatch won't visibly change the photo — it'll just keep showing the product's default image. This is a per-product Shopify setup step, not a theme setting.
-
-### Showcase (homepage "Worn in Motion" slider)
-
-Same idea, collection handle **`the-edit`** (type **Manual**). The first 3 products in that collection populate the small rotating product slider on the left side of the homepage "Showcase" section (image + name + price, click-through to the product page). Falls back to a plain product slice if the collection is missing or empty.
-
-This section's video, poster image, and right-hand copy ("Crafted to Last") are fixed template content, not pulled from Shopify — edit those directly in `src/components/sections/index/Showcase.astro` if you want to change them.
-
-### Multi-Market Pricing
-
-Localized pricing/currency is automatic once you configure **Settings → Markets** in Shopify Admin — the site detects the visitor's country and shows that market's real Shopify prices, no extra setup here.
-
-### Discount Codes (cart coupon box)
-
-The "Coupon or gift card code" field on the cart page checks real codes against your store — it will only accept something you've actually created in Shopify Admin → **Discounts**. There's nothing to configure in the theme itself.
-
-### Newsletter Signup Form — not connected yet
-
-The email signup form (footer/homepage/blog) validates the email and shows a "✓ Subscribed" confirmation, but **does not send the email anywhere** — no mailing list, no Shopify customer record, no API call. It's a front-end-only placeholder. Before launch, wire it to your actual email provider (Klaviyo, Mailchimp, Shopify's own customer email marketing consent, etc.) — the submit handler lives in `src/components/layout/BaseLayout.astro`.
-
-### Before You Launch: Store Password
-
-New/unlaunched Shopify stores are password-protected by default, which also blocks checkout (not just the storefront). If test purchases redirect to a password page instead of checkout, go to **Online Store → Preferences** and remove the password once you're ready to accept real orders.
-
-### Blog / Journal (Shopify Blog posts)
-
-`/blog` and the homepage "Journal" section pull live from a **Shopify Blog** — not markdown. Publishing is entirely in Shopify Admin, no code change or redeploy needed.
-
-**1. The blog itself.** Every Shopify store auto-creates a blog with handle `news` — the theme reads that one by default (`BLOG_HANDLE` in [`src/config/velvet.ts`](src/config/velvet.ts)). You can rename its *display title* to "The Journal" (Online Store → Blog posts → your blog → Manage → Title) without touching the handle. If you use a different blog, update `BLOG_HANDLE` to match its handle.
-
-**2. Writing a post.** Online Store → Blog posts → Add blog post:
-- **Title**, **Content**, **Excerpt**, **Featured image**, **Tags** are all used directly.
-- **Category chip**: the theme uses the **first tag** as the post's category (e.g. tag it `Wardrobe, investment, care` — "Wardrobe" becomes the badge and filter chip). Category filter chips on `/blog` are generated automatically from whatever first-tags exist across your posts — nothing to configure.
-- **Featured post** (the large hero card at the top of `/blog`): always the **most recently published** post. There's no manual "pin as featured" field — control it with the post's publish date/time.
-- **Read time**: auto-estimated from the content's word count (~200 wpm) — not an editable field.
-- Custom rich content classes from the original design (`.post-lead.has-drop` drop-cap intro, `.post-quote` pull-quote, `.post-figure` captioned image, `.post-key` key-takeaways box, `ul.post-list`) still work if you switch the post editor to **Show HTML** and paste markup using those classes — plain paragraphs typed normally render fine too, just without those flourishes.
-
-**3. Author byline (name, role, bio, avatar) — optional but recommended.** Shopify's built-in article "Author" field is just a staff account name, so the theme instead reads a reusable **Author metaobject**, once per real person:
-1. Content → Metaobjects → Add definition → name it **Author** with fields **Name** (single line text), **Author role** (single line text), **Author bio** (single line text), **Author image** (Image/File). Enable **Storefronts API access** on the definition.
-2. Add one entry per author (Content → Metaobjects → Author → Add entry) — fill in all four fields.
-3. Settings → Custom data → Articles → Add definition → type **Metaobject reference** → reference **Author** → the generated **key must be exactly `author`** (hardcoded in `src/lib/shopify/graphql/blog.ts`) → enable **Storefronts API access**.
-4. Open each article → its Metafields section → set **Author** to the right entry.
-
-Skip this and posts still work — the byline falls back to the article's Shopify staff author name, role shows "Contributor", bio is blank, and no avatar shows.
-
-**4. Editorial pages that are still markdown** — `ethos` and `materials` (used elsewhere in the design) still work exactly as before: add a file under `src/content/ethos/` or `src/content/materials/`, no code changes needed.
-
-- **ethos**: `index`, `title`, `tag`
-- **materials**: `title`, `origin`
-
-Both accept an optional `order` field to control display order. A filename starting with `_` (e.g. `_draft.md`) is excluded from the site — handy for drafts.
+**→ Full setup steps: [docs/STORE-SETUP.md](docs/STORE-SETUP.md)**
 
 ## 📁 Structure
 
@@ -227,7 +81,7 @@ Both accept an optional `order` field to control display order. A filename start
 src/
 ├── components/   layout, sections, product, cart
 ├── config/       brand constants
-├── content/      markdown collections (ethos, materials — blog is Shopify now)
+├── content/      markdown collection (ethos — blog is Shopify now)
 ├── lib/          shopify/ (client, services, graphql, transforms), market, cart
 ├── middleware.ts market resolution
 ├── pages/        routes + api/
@@ -237,27 +91,20 @@ src/
 
 ## 🛠️ Troubleshooting
 
-**Products not loading / falls back to demo catalogue** — usually a bad `SHOPIFY_SHOP_DOMAIN` or `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`, or the token's app isn't installed on the store. Double-check both values in `.env` and restart the dev server (env vars are only read at request time, so a running server won't pick up a `.env` edit without a restart).
-
-**Unauthorized / 401 from Shopify** — this project authenticates with the **private/delegate** Storefront token (header `Shopify-Storefront-Private-Token`), not the public unauthenticated storefront token some Shopify guides show. Make sure you copied the *private* token from your app's API credentials, not a public one.
-
-**Checkout redirects to a password page instead of your cart** — see "Before You Launch: Store Password" above.
-
-**A product/variant doesn't show up even though it exists in Shopify** — check it's **Active** (not Draft) and has stock, or "Continue selling when out of stock" enabled. The theme intentionally hides anything not purchasable rather than showing a broken buy button.
-
-**`/blog` is empty / a post 404s** — confirm `BLOG_HANDLE` in `src/config/velvet.ts` matches a real blog handle in Shopify Admin (Online Store → Blog posts), and that the post is **Visible**, not scheduled for the future.
-
-**Author photo/role/bio not showing on a post** — almost always one of: (1) the article's `custom.author` metafield isn't set to an Author metaobject entry yet, (2) the Article-level metafield definition's key isn't exactly `author`, or (3) "Storefronts API access" isn't enabled on either the Article metafield definition or the Author metaobject definition. See "Blog / Journal" above for the exact setup steps — this is a data/admin-config issue, not a code bug.
-
-**Rating/Materials & Care/Specifications/Highlights/Size Guide not showing on the PDP** — check that (1) the metafield has a value on that specific product, and (2) its metafield **definition** has Storefront API access enabled (Settings → Custom data → Products). A value on an app-written or manually-set metafield without that box checked reads back as empty to this theme even though it's visible in Admin. See "Product Detail Page" above for the exact namespace/key/type each field expects.
+- **Products not loading / falls back to demo catalogue** — check `SHOPIFY_SHOP_DOMAIN` / `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` and restart the dev server (env vars are read at request time; a running server won't pick up a `.env` edit).
+- **Unauthorized / 401** — this theme uses the **private/delegate** Storefront token (`Shopify-Storefront-Private-Token` header), not the public unauthenticated token from generic Shopify guides.
+- **Checkout redirects to a password page** — remove the store password in Online Store → Preferences (see setup guide).
+- **A product/variant is missing** — must be **Active** and in stock (or "Continue selling when out of stock"); the theme hides anything not purchasable.
+- **`/blog` is empty / a post 404s** — confirm `BLOG_HANDLE` in `src/config/velvet.ts` matches a real blog handle, and the post is Visible, not scheduled.
+- **PDP fields (rating, materials, size guide…) not showing** — the metafield needs both a value on the product **and** Storefront API access enabled on its definition. See [docs/STORE-SETUP.md](docs/STORE-SETUP.md) for exact namespaces/keys.
 
 ## 🌍 Deployment
 
-Platform-agnostic — the adapter is chosen at build time from `ASTRO_ADAPTER` (or auto-detected on Vercel/Netlify/Cloudflare).
+Adapter is chosen at build time from `ASTRO_ADAPTER` (or auto-detected on Vercel/Netlify/Cloudflare).
 
-- **Cloudflare Workers**: Build `npm run build`, deploy `npx wrangler deploy`. Secrets (`SHOPIFY_SHOP_DOMAIN`, `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`, etc.) must be set with `wrangler secret put <NAME>` or in the dashboard (Workers → Settings → Variables and Secrets) — they're deliberately not in `wrangler.toml`, which is checked into git.
-- **Vercel / Netlify**: connect the repo; adapter auto-detected. Add Shopify env vars in the dashboard. (Vercel note: its Serverless Functions currently run on Node 24 — if your local Node is newer, Vercel just uses 24 at deploy time, nothing to configure.)
-- **Node / VPS**: `ASTRO_ADAPTER=node npm run build` then `node ./dist/server/entry.mjs` (PM2 + Nginx recommended — see below).
+- **Cloudflare Workers**: `npm run build` → `npx wrangler deploy`. Set secrets with `wrangler secret put <NAME>` or in the dashboard (Workers → Settings → Variables and Secrets) — not in `wrangler.toml`, which is checked into git.
+- **Vercel / Netlify**: connect the repo, adapter auto-detected. Add Shopify env vars in the dashboard.
+- **Node / VPS**: `ASTRO_ADAPTER=node npm run build` then `node ./dist/server/entry.mjs` (PM2 + Nginx recommended).
 
 <details>
 <summary>Node / VPS with PM2 + Nginx</summary>
