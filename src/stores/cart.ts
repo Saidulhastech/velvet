@@ -434,10 +434,31 @@ export async function checkout(): Promise<void> {
     /* network — fall back to the cached url below */
   }
   if (url) {
+    // Ownership of this cart passes to Shopify's checkout here. Shopify never
+    // expires/empties a cart just because its checkout completed, so without
+    // this the drawer would keep showing already-ordered items (in whatever
+    // currency that cart was pinned to) indefinitely. Reset now so a shopper
+    // coming back from checkout — whether they bought or abandoned — starts
+    // from an empty bag, same as most headless Shopify storefronts.
+    clearLocalCart();
+    fetch('/api/cart', { method: 'DELETE' }).catch(() => {});
     window.location.href = url;
   } else {
     cartError.set('Your cart has expired. Please add items again.');
   }
+}
+
+/** Reset all client-side cart state (not wishlist/compare/saved-for-later). */
+function clearLocalCart(): void {
+  persistedCartItems.set([]);
+  cartId.set('');
+  cartCount.set(0);
+  cartSubtotal.set(0);
+  cartTotal.set(0);
+  cartDiscount.set(0);
+  appliedDiscounts.set([]);
+  cartNote.set('');
+  window.sessionStorage.removeItem('ma_checkout_url');
 }
 
 export function toggleWishlist(product: WishItem) {
