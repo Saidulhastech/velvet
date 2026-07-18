@@ -1,7 +1,7 @@
 {
   "name": "velvet",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "VelVet — a luxury-fashion Shopify headless storefront theme built with Astro SSR. Multi-market, localized pricing, cart/wishlist/compare, and a graceful mock-data mode.",
   "author": "HasThemes <hello@hasthemes.com>",
   "license": "MIT",
