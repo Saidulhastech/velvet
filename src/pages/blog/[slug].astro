@@ -73,6 +73,7 @@ const relatedPosts = sortedPosts
           <circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.3" />
           <circle cx="14.5" cy="5.5" r="1" fill="currentColor" />
         </svg>
+        <span class="post-share__tip" role="status">Copied</span>
       </a>
       <a href="#" class="js-share-pin" aria-label="Share on Pinterest">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
@@ -80,11 +81,12 @@ const relatedPosts = sortedPosts
           <path d="M8 15l2-7m0 0a2.5 2.5 0 1 1 2.4 1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
         </svg>
       </a>
-      <a href="#" aria-label="Copy link">
+      <a href="#" class="js-share-copy" aria-label="Copy link">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
           <path d="M8 12a3 3 0 0 0 4 0l3-3a3 3 0 0 0-4-4l-1 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M12 8a3 3 0 0 0-4 0l-3 3a3 3 0 0 0 4 4l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
+        <span class="post-share__tip" role="status">Copied</span>
       </a>
     </div>
 
@@ -232,16 +234,20 @@ const relatedPosts = sortedPosts
     update();
   }
 
-  /* Copy link */
-  const copy = document.querySelector('.post-share a[aria-label="Copy link"]');
-  if (copy) {
-    copy.addEventListener('click', e => {
+  /* Copy-to-clipboard buttons (Copy link, Instagram fallback) — briefly show a "Copied" tip */
+  function wireCopyButton(el: Element) {
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    el.addEventListener('click', (e) => {
       e.preventDefault();
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href);
-      }
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        el.classList.add('is-copied');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => el.classList.remove('is-copied'), 1400);
+      });
     });
   }
+  document.querySelectorAll('.js-share-copy, .js-share-ig').forEach(wireCopyButton);
 
   /* Pinterest — official share intent (real network share) */
   const pinBtn = document.querySelector('.js-share-pin');
@@ -255,17 +261,6 @@ const relatedPosts = sortedPosts
         ...(media ? { media: media.src } : {})
       });
       window.open(`https://www.pinterest.com/pin/create/button/?${params}`, '_blank', 'noopener,width=750,height=650');
-    });
-  }
-
-  /* Instagram has no web share-link API — fall back to copying the link */
-  const igBtn = document.querySelector('.js-share-ig');
-  if (igBtn) {
-    igBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href);
-      }
     });
   }
 </script>
@@ -421,6 +416,7 @@ const relatedPosts = sortedPosts
   }
 
   .post-share a {
+    position: relative;
     width: 40px;
     height: 40px;
     border: 1px solid var(--lux-light-border-strong);
@@ -435,6 +431,29 @@ const relatedPosts = sortedPosts
     background: var(--lux-primary-dark);
     color: var(--lux-text-primary);
     border-color: var(--lux-primary-dark);
+  }
+
+  .post-share__tip {
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    background: var(--lux-primary-dark);
+    color: var(--lux-text-primary);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s var(--ease), transform .2s var(--ease);
+  }
+
+  .post-share a.is-copied .post-share__tip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
   }
 
   .post-body {
@@ -872,6 +891,16 @@ const relatedPosts = sortedPosts
       transform: none;
       margin: 0;
       align-self: center;
+    }
+
+    .post-share__tip {
+      left: 50%;
+      top: calc(100% + 8px);
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .post-share a.is-copied .post-share__tip {
+      transform: translateX(-50%) translateY(0);
     }
 
     .post-related__grid {
