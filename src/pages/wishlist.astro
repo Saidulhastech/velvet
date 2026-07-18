@@ -2,6 +2,9 @@
 // Wishlist — full-page view of saved items (persistedWishItems store).
 // Hydrated client-side from localStorage so it mirrors the header/drawer.
 import BaseLayout from '../components/layout/BaseLayout.astro';
+import { currencyForCountry } from '../lib/market';
+
+const marketCurrency = currencyForCountry(Astro.locals.market?.country);
 ---
 
 <BaseLayout title="Wishlist" description="Your saved Maison Arden pieces — kept for when you're ready.">
@@ -15,7 +18,7 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
   </section>
 
   <!-- WISHLIST GRID -->
-  <section class="wl" aria-label="Saved items">
+  <section class="wl" aria-label="Saved items" data-market-currency={marketCurrency}>
     <div class="wl__inner">
       <div class="wl__bar">
         <span class="wl__count" data-wl-count>0 items</span>
@@ -47,8 +50,9 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
   const countEl = document.querySelector('[data-wl-count]');
   const clearBtn = document.querySelector('[data-wl-clear]') as HTMLButtonElement | null;
 
-  let currencyCode = cartCurrency.get();
-  cartCurrency.subscribe((code) => { currencyCode = code || 'EUR'; });
+  const marketCurrency = document.querySelector('.wl')?.getAttribute('data-market-currency') || 'USD';
+  let currencyCode = cartCurrency.get() || marketCurrency;
+  cartCurrency.subscribe((code) => { currencyCode = code || marketCurrency; });
   function money(n: number) {
     try {
       return new Intl.NumberFormat('en', {

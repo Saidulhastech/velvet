@@ -1,8 +1,11 @@
 ---
 // CartDrawer component. Displays the persistent cart contents sliding from right.
+import { currencyForCountry } from '~/lib/market';
+
+const marketCurrency = currencyForCountry(Astro.locals.market?.country);
 ---
 
-<aside class="drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
+<aside class="drawer" id="cartDrawer" data-market-currency={marketCurrency} role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
   <!-- Drawer Header -->
   <div class="drawer__head">
     <div>
@@ -97,10 +100,13 @@
   const progressText = document.getElementById('cartProgressText');
 
   const SHIPPING_THRESHOLD = BRAND.freeShippingThreshold ?? 0;
+  // Best-guess currency for this market, shown until a real Shopify cart syncs
+  // its authoritative currency — avoids a hardcoded € for non-EUR shoppers.
+  const marketCurrency = cartDrawer?.dataset.marketCurrency || 'USD';
 
   // Money is formatted in the cart's authoritative currency (from Shopify), so
   // a US/GBP shopper no longer sees a hardcoded € on localized prices.
-  let currencyCode = cartCurrency.get();
+  let currencyCode = cartCurrency.get() || marketCurrency;
   function money(n: number) {
     try {
       return new Intl.NumberFormat('en', {
@@ -155,7 +161,7 @@
   // so a currency change after mount left stale line-item prices in the old
   // currency symbol).
   cartCurrency.subscribe((code) => {
-    currencyCode = code || 'EUR';
+    currencyCode = code || marketCurrency;
     renderTotals(cartSubtotal.get());
     renderItems(persistedCartItems.get());
   });

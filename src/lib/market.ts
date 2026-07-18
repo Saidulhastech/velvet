@@ -69,6 +69,29 @@ export function resolveMarket(cookies: AstroCookies, request: Request): Market {
   return normalizeMarket(geo, DEFAULT_MARKET.language);
 }
 
+// Static ISO country → currency fallback, used only until a real Shopify cart
+// (or product price) supplies the shop's actual @inContext currency for this
+// market. Not exhaustive — unmapped countries fall back to USD rather than a
+// single hardcoded currency baked in for every shopper.
+const CURRENCY_BY_COUNTRY: Record<string, string> = {
+  US: 'USD', CA: 'CAD', GB: 'GBP', AU: 'AUD', NZ: 'NZD',
+  DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR', NL: 'EUR', BE: 'EUR', AT: 'EUR',
+  IE: 'EUR', PT: 'EUR', FI: 'EUR', GR: 'EUR', LU: 'EUR', SK: 'EUR', SI: 'EUR',
+  EE: 'EUR', LV: 'EUR', LT: 'EUR', CY: 'EUR', MT: 'EUR', HR: 'EUR',
+  CH: 'CHF', NO: 'NOK', SE: 'SEK', DK: 'DKK', PL: 'PLN', CZ: 'CZK', HU: 'HUF',
+  RO: 'RON', BG: 'BGN',
+  JP: 'JPY', CN: 'CNY', HK: 'HKD', SG: 'SGD', IN: 'INR', BD: 'BDT', PK: 'PKR',
+  LK: 'LKR', NP: 'NPR', MY: 'MYR', TH: 'THB', VN: 'VND', PH: 'PHP', ID: 'IDR',
+  KR: 'KRW', TW: 'TWD', AE: 'AED', SA: 'SAR', QA: 'QAR', KW: 'KWD', IL: 'ILS',
+  TR: 'TRY', ZA: 'ZAR', NG: 'NGN', EG: 'EGP', KE: 'KES',
+  BR: 'BRL', MX: 'MXN', AR: 'ARS', CL: 'CLP', CO: 'COP', PE: 'PEN',
+};
+
+/** Best-guess currency for a market, before any real Shopify data is available. */
+export function currencyForCountry(country?: string | null): string {
+  return CURRENCY_BY_COUNTRY[(country ?? '').toUpperCase()] ?? 'USD';
+}
+
 /** Persist the shopper's market choice (1-year cookie). */
 export function setMarketCookie(cookies: AstroCookies, market: Market): void {
   cookies.set(MARKET_COOKIE, `${market.country}|${market.language}`, {

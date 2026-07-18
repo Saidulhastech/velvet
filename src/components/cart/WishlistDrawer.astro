@@ -1,8 +1,11 @@
 ---
 // WishlistDrawer component. Displays the user's saved wishlist items.
+import { currencyForCountry } from '~/lib/market';
+
+const marketCurrency = currencyForCountry(Astro.locals.market?.country);
 ---
 
-<aside class="drawer" id="wishDrawer" role="dialog" aria-modal="true" aria-labelledby="wishTitle" aria-hidden="true">
+<aside class="drawer" id="wishDrawer" data-market-currency={marketCurrency} role="dialog" aria-modal="true" aria-labelledby="wishTitle" aria-hidden="true">
   <!-- Drawer Header -->
   <div class="drawer__head">
     <div>
@@ -61,8 +64,9 @@
   const footer = document.getElementById('wishDrawerFoot');
   const addAllBtn = document.getElementById('addAllToCartBtn') as HTMLButtonElement | null;
 
-  let currencyCode = cartCurrency.get();
-  cartCurrency.subscribe((code) => { currencyCode = code || 'EUR'; });
+  const marketCurrency = wishDrawer?.dataset.marketCurrency || 'USD';
+  let currencyCode = cartCurrency.get() || marketCurrency;
+  cartCurrency.subscribe((code) => { currencyCode = code || marketCurrency; });
   function euro(n: number) {
     try {
       return new Intl.NumberFormat('en', {

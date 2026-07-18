@@ -2,6 +2,9 @@
 // Compare — side-by-side comparison of saved products (persistedCompareItems).
 // Client-hydrated; items are added via the compare icon on any product card.
 import BaseLayout from '../components/layout/BaseLayout.astro';
+import { currencyForCountry } from '../lib/market';
+
+const marketCurrency = currencyForCountry(Astro.locals.market?.country);
 ---
 
 <BaseLayout title="Compare" description="Compare Maison Arden pieces side by side — price, rating, materials and availability.">
@@ -13,7 +16,7 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
     </div>
   </section>
 
-  <section class="cmp" aria-label="Product comparison">
+  <section class="cmp" aria-label="Product comparison" data-market-currency={marketCurrency}>
     <div class="cmp__inner">
       <div class="cmp__bar">
         <span class="cmp__count" data-cmp-count>0 pieces</span>
@@ -46,8 +49,9 @@ import BaseLayout from '../components/layout/BaseLayout.astro';
 
   // Same currency formatter as shop/wishlist — synced to the live Shopify cart
   // currency instead of a hardcoded '$'.
-  let currencyCode = cartCurrency.get();
-  cartCurrency.subscribe((code) => { currencyCode = code || 'EUR'; });
+  const marketCurrency = document.querySelector('.cmp')?.getAttribute('data-market-currency') || 'USD';
+  let currencyCode = cartCurrency.get() || marketCurrency;
+  cartCurrency.subscribe((code) => { currencyCode = code || marketCurrency; });
   function money(n: number) {
     try {
       return new Intl.NumberFormat('en', {

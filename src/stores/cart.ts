@@ -76,8 +76,8 @@ export const cartDiscount = atom<number>(0);
 export const appliedDiscounts = atom<string[]>([]);
 export const cartNote = atom<string>('');
 export const wishCount = atom<number>(0);
-/** Currency code of the authoritative Shopify cart ('EUR' until first sync). */
-export const cartCurrency = atom<string>('EUR');
+/** Currency code of the authoritative Shopify cart ('' until first sync — callers fall back to the market's currency). */
+export const cartCurrency = atom<string>('');
 /** Cart total (incl. tax/discount) from Shopify; mirrors subtotal until synced. */
 export const cartTotal = atom<number>(0);
 /** Last user-facing cart error/warning ('' when none). Bound to existing UI, no new markup. */

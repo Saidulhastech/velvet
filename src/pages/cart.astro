@@ -4,8 +4,10 @@ import ProductCard from '../components/product/ProductCard.astro';
 import { getShopifyProducts } from '../lib/shopify/client';
 import { resolveCartExtras } from '../lib/cart-extras';
 import { formatMoney } from '../lib/money';
+import { currencyForCountry } from '../lib/market';
 
 const market = Astro.locals.market;
+const marketCurrency = currencyForCountry(market?.country);
 const products = await getShopifyProducts(market);
 // Take the first 4 products for cross-sell
 const crossSellProducts = products.slice(0, 4);
@@ -42,7 +44,7 @@ const extrasData = JSON.stringify({
   </section>
 
   <!-- CART LAYOUT -->
-  <section class="cart-layout" aria-label="Shopping bag" data-cart-root data-extras={extrasData}>
+  <section class="cart-layout" aria-label="Shopping bag" data-cart-root data-extras={extrasData} data-market-currency={marketCurrency}>
     <div class="cart-main">
       <!-- Shipping Progress indicator -->
       <div class="cart-ship">
@@ -375,9 +377,11 @@ const extrasData = JSON.stringify({
 
 
   // Active currency, synced from the authoritative Shopify cart (falls back to
-  // EUR until the first sync / in mock mode). Amounts are already localized by
-  // @inContext on the server — only the symbol/format needs to follow the cart.
-  let currentCurrency = 'EUR';
+  // the market's currency until the first sync / in mock mode). Amounts are
+  // already localized by @inContext on the server — only the symbol/format
+  // needs to follow the cart.
+  const marketCurrency = rootEl?.dataset.marketCurrency || 'USD';
+  let currentCurrency = cartCurrency.get() || marketCurrency;
   function formatEur(n: number) {
     const rounded = Math.round(n);
     try {
@@ -802,7 +806,7 @@ const extrasData = JSON.stringify({
   // rows and saved-for-later rows format their own prices too, not just the
   // summary, so both must re-render or they're left showing the stale currency.
   cartCurrency.subscribe(code => {
-    currentCurrency = code || 'EUR';
+    currentCurrency = code || marketCurrency;
     renderCartItems(persistedCartItems.get());
     renderSavedItems(persistedSavedItems.get());
     recomputeSummary(persistedCartItems.get());
