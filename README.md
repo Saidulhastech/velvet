@@ -106,6 +106,12 @@ Two extra things this section pulls straight from the collection in Shopify Admi
 - **Collection image** → becomes the large left-hand stage/backdrop photo. Set it under the collection's own **Image** field (Products → Collections → *Shop the Look* → Image). If you don't set one, the theme falls back to its bundled placeholder photo. The image box isn't locked to a fixed aspect ratio, so pick a photo that already reads well as a tall/portrait stage shot — a very wide or very short image will look stretched or cropped oddly.
 - **Per-variant images drive the inline colour swatches.** Each row's swatch picker swaps that row's thumbnail (and its hotspot preview) to match the selected colour — but only if you've assigned a **separate image per variant** in Shopify Admin (Product → Variants → click a variant → set its image). If a color variant has no image of its own, clicking its swatch won't visibly change the photo — it'll just keep showing the product's default image. This is a per-product Shopify setup step, not a theme setting.
 
+### Showcase (homepage "Worn in Motion" slider)
+
+Same idea, collection handle **`the-edit`** (type **Manual**). The first 3 products in that collection populate the small rotating product slider on the left side of the homepage "Showcase" section (image + name + price, click-through to the product page). Falls back to a plain product slice if the collection is missing or empty.
+
+This section's video, poster image, and right-hand copy ("Crafted to Last") are fixed template content, not pulled from Shopify — edit those directly in `src/components/sections/index/Showcase.astro` if you want to change them.
+
 ### Multi-Market Pricing
 
 Localized pricing/currency is automatic once you configure **Settings → Markets** in Shopify Admin — the site detects the visitor's country and shows that market's real Shopify prices, no extra setup here.

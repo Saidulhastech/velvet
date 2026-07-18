@@ -92,6 +92,11 @@ export const PRODUCT_BY_HANDLE_QUERY = /* GraphQL */ `
         value
         type
       }
+      # Optional size chart (custom metafield, JSON array of row objects — keys are column headers).
+      sizeGuideMetafield: metafield(namespace: "custom", key: "size_guide") {
+        value
+        type
+      }
       featuredImage {
         ...ImageFields
       }

@@ -23,6 +23,12 @@ export const BEST_SELLERS_HANDLE = "best-sellers";
 // slice if the collection is missing/empty.
 export const NEW_ARRIVALS_HANDLE = "new-arrivals";
 
+// Shopify collection handle powering the homepage "Showcase" slider (left
+// panel, "The Edit"). Create a manual collection with this handle in Shopify
+// admin and order its products the way you want them to appear. Falls back
+// to a plain product slice if the collection is missing/empty.
+export const THE_EDIT_HANDLE = "the-edit";
+
 // Shopify blog handle powering "The Journal" (homepage section + /blog).
 // Shopify auto-creates a blog with handle "news" on every store; reused here
 // as-is (its display title can be renamed to "The Journal" in Shopify admin
@@ -36,6 +42,7 @@ export const BRAND = {
   description:
     "Maison Arden — luxury clothing, tailoring, coats, knitwear and leather accessories.",
   freeShippingThreshold: 1180 as number | null, // Matches Shipping Progress Threshold in CartDrawer
+  returnWindowDays: 30 as number | null,
   social: {
     instagram: "https://instagram.com",
     twitter: "https://twitter.com",

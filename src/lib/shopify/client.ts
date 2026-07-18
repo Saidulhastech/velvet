@@ -416,8 +416,11 @@ export function mapToLegacyProduct(p: any): LegacyProduct {
     // Individual review TEXT comes from Judge.me (see ~/lib/judgeme), not a
     // Shopify metafield — only the aggregate count/rating are metafield-backed.
     ratingCount: p.ratingCount ?? null,
+    specs: p.specs ?? [],
+    highlights: p.highlights ?? [],
     materialsCare: p.materialsCare ?? [],
     shippingReturns: p.shippingReturns ?? [],
+    sizeGuide: p.sizeGuide ?? [],
   };
 }
 

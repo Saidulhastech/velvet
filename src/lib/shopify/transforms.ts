@@ -158,6 +158,28 @@ function parseSpecs(raw?: string | null): { label: string; value: string }[] {
   }
 }
 
+/**
+ * Parse a `custom.size_guide` metafield: a JSON array of row objects whose
+ * keys are the table's column headers (merchant-defined, e.g. "Size"/"Bust"/
+ * "Waist"). Rows with mismatched keys are dropped rather than rendering a
+ * ragged table.
+ */
+function parseSizeGuide(raw?: string | null): Record<string, string>[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const rows = parsed
+      .filter((row) => row && typeof row === 'object' && !Array.isArray(row))
+      .map((row) => Object.fromEntries(Object.entries(row).map(([k, v]) => [k, String(v ?? '')])));
+    if (rows.length === 0) return [];
+    const columns = Object.keys(rows[0]);
+    return rows.filter((row) => Object.keys(row).length === columns.length && columns.every((c) => c in row));
+  } catch {
+    return [];
+  }
+}
+
 export function mapProductCard(p: Raw): ProductCard {
   const variantList = nodes(p.variants).map(mapVariant);
   const firstVariant = variantList[0];
@@ -236,6 +258,7 @@ export function mapProduct(p: Raw): Product {
     highlights: parseStringList(p.highlightsMetafield?.value),
     materialsCare: parseStringList(p.materialsCareMetafield?.value),
     shippingReturns: parseStringList(p.shippingReturnsMetafield?.value),
+    sizeGuide: parseSizeGuide(p.sizeGuideMetafield?.value),
   };
 }
 

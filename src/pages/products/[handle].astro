@@ -3,9 +3,10 @@ import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../components/layout/BaseLayout.astro';
 import ProductCard from '../../components/product/ProductCard.astro';
-import { getShopifyProductWithVariants, getShopifyProducts, getShopifyRelatedProducts } from '../../lib/shopify/client';
+import { getShopifyProductWithVariants, getShopifyProducts, getShopifyRelatedProducts, formatMoney } from '../../lib/shopify/client';
 import { getProductReviews } from '../../lib/judgeme';
 import { shopifyImageUrl, shopifySrcset } from '../../lib/shopify/image-url';
+import { BRAND } from '../../config/velvet';
 
 const { handle } = Astro.params;
 const { product, variants: shopifyVariants, currency, singleVariant, productId } = await getShopifyProductWithVariants(handle || '', Astro.locals.market);
@@ -103,6 +104,13 @@ const initials = (name: string) => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : name.slice(0, 2)).toUpperCase();
 };
+
+const shippingLabel = BRAND.freeShippingThreshold
+  ? `Complimentary shipping over ${formatMoney(BRAND.freeShippingThreshold, currency)}`
+  : 'Complimentary shipping';
+const returnsLabel = BRAND.returnWindowDays
+  ? `${BRAND.returnWindowDays}-day easy returns`
+  : 'Easy returns';
 
 // --- SEO: Product + Breadcrumb structured data -------------------------------
 const productImageUrl = getSrcString(productImages[0]);
@@ -229,7 +237,13 @@ const breadcrumbSchema = {
       <div class="pdp-stock" id="pdpStockBadge" data-stock="in"></div>
       <div class="pdp-rule"></div>
       <p class="pdp-info__desc">{product.description}</p>
-      
+
+      {product.highlights && product.highlights.length > 0 && (
+        <ul class="pdp-highlights">
+          {product.highlights.map((h) => <li>{h}</li>)}
+        </ul>
+      )}
+
       <div class="pdp-info__meta">
         {product.materials.length > 0 && (
           <span>
@@ -292,23 +306,40 @@ const breadcrumbSchema = {
           </div>
           <div class="pdp-sizeguide" id="pdpSizeGuide">
             <div class="pdp-sizeguide__inner">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Size</th>
-                    <th>Bust</th>
-                    <th>Waist</th>
-                    <th>Length</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>XS</td><td>82</td><td>64</td><td>96</td></tr>
-                  <tr><td>S</td><td>86</td><td>68</td><td>98</td></tr>
-                  <tr><td>M</td><td>90</td><td>72</td><td>100</td></tr>
-                  <tr><td>L</td><td>94</td><td>76</td><td>102</td></tr>
-                  <tr><td>XL</td><td>98</td><td>80</td><td>104</td></tr>
-                </tbody>
-              </table>
+              {product.sizeGuide && product.sizeGuide.length > 0 ? (
+                <table>
+                  <thead>
+                    <tr>
+                      {Object.keys(product.sizeGuide[0]).map((col) => <th>{col}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {product.sizeGuide.map((row) => (
+                      <tr>
+                        {Object.values(row).map((val) => <td>{val}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Size</th>
+                      <th>Bust</th>
+                      <th>Waist</th>
+                      <th>Length</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>XS</td><td>82</td><td>64</td><td>96</td></tr>
+                    <tr><td>S</td><td>86</td><td>68</td><td>98</td></tr>
+                    <tr><td>M</td><td>90</td><td>72</td><td>100</td></tr>
+                    <tr><td>L</td><td>94</td><td>76</td><td>102</td></tr>
+                    <tr><td>XL</td><td>98</td><td>80</td><td>104</td></tr>
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
@@ -352,23 +383,25 @@ const breadcrumbSchema = {
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
             <path d="M2 6h12l-1 7H3L2 6z" stroke="currentColor" stroke-linejoin="round" />
             <path d="M5.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-linecap="round" />
-          </svg> 
-          Complimentary shipping
+          </svg>
+          {shippingLabel}
         </span>
         <span class="pdp-trust__item">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
             <path d="M5 9h7a3 3 0 0 0 0-6H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M7 6L5 9l2 3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
-          </svg> 
-          30-day easy returns
+          </svg>
+          {returnsLabel}
         </span>
-        <span class="pdp-trust__item">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="6.5" stroke="currentColor" />
-            <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
-          </svg> 
-          In stock &mdash; ships in 48h
-        </span>
+        {product.stock === 'in' && (
+          <span class="pdp-trust__item">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" />
+              <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            In stock &mdash; ships in 48h
+          </span>
+        )}
       </div>
 
       <!-- Accordion Details -->
@@ -381,6 +414,18 @@ const breadcrumbSchema = {
             </div>
           </div>
         </div>
+        {product.specs && product.specs.length > 0 && (
+          <div class="pdp-acc__item">
+            <button class="pdp-acc__toggle">Specifications <span class="pdp-acc__icon"></span></button>
+            <div class="pdp-acc__body">
+              <div class="pdp-acc__content">
+                <ul>
+                  {product.specs.map((row) => <li>{row.label}: {row.value}</li>)}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
         {product.materialsCare && product.materialsCare.length > 0 && (
           <div class="pdp-acc__item">
             <button class="pdp-acc__toggle">Materials & Care <span class="pdp-acc__icon"></span></button>
@@ -793,11 +838,36 @@ const breadcrumbSchema = {
     if (curEl) curEl.textContent = String(idx + 1);
   }
 
-  thumbs.forEach((t, k) => t.addEventListener('click', () => show(k)));
+  // Reverse-sync: picking a thumbnail whose image belongs to a specific colour
+  // variant should select that colour swatch too (swatch→gallery already worked;
+  // this closes the loop the other way).
+  function syncColorFromThumb(i: number) {
+    const t = thumbs[i];
+    if (!t) return;
+    const bare = (u: string) => (u || '').split('?')[0];
+    const src = bare(t.dataset.src || '');
+    if (!src) return;
+    const match = variants.find(v => v.img && bare(v.img) === src);
+    if (!match) return;
+    const colorKey = Object.keys(match.opts).find(k => /colou?r/i.test(k));
+    if (!colorKey) return;
+    const colorName = match.opts[colorKey];
+    const btn = colorBtns.find(b => sameOptionValue(b.getAttribute('data-color') || '', colorName));
+    if (!btn || btn.classList.contains('is-active')) return;
+    colorBtns.forEach(x => x.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    if (colorVal) colorVal.textContent = btn.getAttribute('data-color') || '';
+    if (selected['Color'] !== undefined) selected['Color'] = colorName;
+    else if (selected['Colour'] !== undefined) selected['Colour'] = colorName;
+    else selected['Color'] = colorName;
+    renderVariantState();
+  }
+
+  thumbs.forEach((t, k) => t.addEventListener('click', () => { show(k); syncColorFromThumb(k); }));
   const prev = $('#pdpPrev');
   const next = $('#pdpNext');
-  if (prev) prev.addEventListener('click', () => show(idx - 1));
-  if (next) next.addEventListener('click', () => show(idx + 1));
+  if (prev) prev.addEventListener('click', () => { show(idx - 1); syncColorFromThumb(idx); });
+  if (next) next.addEventListener('click', () => { show(idx + 1); syncColorFromThumb(idx); });
 
   // Arrow-key gallery navigation — skip while typing or when a drawer/modal is open.
   document.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -806,6 +876,7 @@ const breadcrumbSchema = {
     if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
     if (document.querySelector('#cartDrawer.is-open, #wishDrawer.is-open, #qvOverlay.is-open, .nav--left.is-open')) return;
     show(e.key === 'ArrowLeft' ? idx - 1 : idx + 1);
+    syncColorFromThumb(idx);
   });
 
   // Zoom on hover
@@ -1350,6 +1421,34 @@ const breadcrumbSchema = {
     color: var(--lux-on-light-soft);
     margin: 0;
     max-width: 52ch;
+  }
+
+  .pdp-highlights {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pdp-highlights li {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--lux-on-light-soft);
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .pdp-highlights li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lux-secondary-olive);
   }
 
   .pdp-info__meta {

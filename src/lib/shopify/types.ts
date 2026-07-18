@@ -101,6 +101,8 @@ export interface Product {
   materialsCare?: string[];
   /** Shipping & returns bullets from `custom.shipping_returns` (JSON list); [] when none. */
   shippingReturns?: string[];
+  /** Size chart rows from `custom.size_guide` (JSON array of row objects; keys are column headers); [] when none. */
+  sizeGuide?: Record<string, string>[];
 }
 
 export interface ProductReview {
@@ -403,10 +405,16 @@ export interface LegacyProduct {
   needsPicker?: boolean;
   /** Total review count from the `reviews.rating_count` metafield; null if untracked. */
   ratingCount?: number | null;
+  /** Structured spec rows from the `custom.specifications` metafield. Absent when the store hasn't set it. */
+  specs?: { label: string; value: string }[];
+  /** Highlight bullets from the `custom.highlights` metafield. Absent when the store hasn't set it. */
+  highlights?: string[];
   /** Care instructions from the `custom.materials_care` metafield (one entry per line/bullet). Absent when the store hasn't set it. */
   materialsCare?: string[];
   /** Shipping/returns policy from the `custom.shipping_returns` metafield. Absent when the store hasn't set it. */
   shippingReturns?: string[];
+  /** Size chart rows from the `custom.size_guide` metafield (keys are column headers). Absent when the store hasn't set it. */
+  sizeGuide?: Record<string, string>[];
 }
 
 /**

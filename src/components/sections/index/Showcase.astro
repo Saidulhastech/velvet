@@ -1,32 +1,42 @@
 ---
 import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { getShopifyCollection, getShopifyProducts } from '../../../lib/shopify/client';
+import { shopifyImageUrl, shopifySrcset } from '../../../lib/shopify/image-url';
+import { THE_EDIT_HANDLE } from '../../../config/velvet';
 
-// Import images to resolve them via Astro's asset pipeline
-import imgP17 from '../../../assets/images/Product Image 17.png';
-import imgP18 from '../../../assets/images/Product Image 18.png';
-import imgP19 from '../../../assets/images/Product Image 19.png';
+// Static backdrop (video poster) — not a product image, left as-is.
 import imgP20 from '../../../assets/images/Product Image 20.png';
 
-const slides = [
-  {
-    index: 0,
-    name: 'The Atelier Overshirt',
-    price: '€340',
-    image: imgP17
-  },
-  {
-    index: 1,
-    name: 'Relaxed Denim Jacket',
-    price: '€320',
-    image: imgP18
-  },
-  {
-    index: 2,
-    name: 'Sand Linen Blazer',
-    price: '€520',
-    image: imgP19
-  }
-];
+const market = Astro.locals.market;
+
+// The `the-edit` collection decides WHICH products show in the left slider +
+// their order (respects manual curation order set in Shopify admin). Falls
+// back to a plain product slice if the collection is missing/empty so the
+// section never blanks.
+const curated = await getShopifyCollection(THE_EDIT_HANDLE, market);
+const items = (
+  curated?.products?.length ? curated.products : await getShopifyProducts(market)
+).slice(0, 3);
+
+// Resolve each product's image: Shopify CDN URLs pass through as remote imgs;
+// a bare demo filename resolves via the local assets glob to an optimizable
+// local image (same convention as ProductCard.astro).
+const localImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.{jpeg,jpg,png,gif,webp,WebP}', { eager: true });
+
+const slides = items.map((p, idx) => {
+  const isRemoteImage = !!p.image && /^https?:\/\//.test(p.image);
+  const localImage = !isRemoteImage && p.image ? (localImages[`/src/assets/images/${p.image}`]?.default ?? null) : null;
+  return {
+    index: idx,
+    name: p.name,
+    price: p.formattedPrice,
+    handle: p.handle,
+    image: p.image,
+    isRemoteImage,
+    localImage
+  };
+});
 ---
 
 <section class="showcase" id="showcase" aria-label="Featured film">
@@ -40,9 +50,24 @@ const slides = [
       <div class="showcase__slider">
         <div class="showcase__card">
           {slides.map((slide, idx) => (
-            <div class={`showcase__slide ${idx === 0 ? 'is-active' : ''}`} data-index={slide.index}>
-              <Image src={slide.image} alt={slide.name} width={360} height={360} loading="lazy" />
-            </div>
+            <a href={`/products/${slide.handle}`} class={`showcase__slide ${idx === 0 ? 'is-active' : ''}`} data-index={slide.index} aria-label={slide.name}>
+              {slide.isRemoteImage ? (
+                <img
+                  src={shopifyImageUrl(slide.image, 360, 360)}
+                  srcset={shopifySrcset(slide.image, [360, 720])}
+                  sizes="360px"
+                  alt={slide.name}
+                  width="360"
+                  height="360"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : slide.localImage ? (
+                <Image src={slide.localImage} alt={slide.name} width={360} height={360} loading="lazy" />
+              ) : (
+                <div class="showcase__slide-empty">No Image</div>
+              )}
+            </a>
           ))}
         </div>
         
@@ -65,8 +90,8 @@ const slides = [
       </div>
       
       <div class="showcase__meta">
-        <div class="showcase__name" data-sc-name>The Atelier Overshirt</div>
-        <div class="showcase__price" data-sc-price>€340</div>
+        <div class="showcase__name" data-sc-name>{slides[0]?.name}</div>
+        <div class="showcase__price" data-sc-price>{slides[0]?.price}</div>
       </div>
     </div>
     
@@ -81,23 +106,19 @@ const slides = [
   </div>
 </section>
 
-<script>
-  const slides = Array.from(document.querySelectorAll('.showcase__slide')) as HTMLElement[];
-  const dots = Array.from(document.querySelectorAll('.showcase__dot')) as HTMLElement[];
-  const nameEl = document.querySelector('[data-sc-name]') as HTMLElement;
-  const priceEl = document.querySelector('[data-sc-price]') as HTMLElement;
-  
-  const data = [
-    { n: 'The Atelier Overshirt', p: '€340' },
-    { n: 'Relaxed Denim Jacket', p: '€320' },
-    { n: 'Sand Linen Blazer', p: '€520' }
-  ];
-  
+<script define:vars={{ slideData: slides.map((s) => ({ n: s.name, p: s.price })) }}>
+  const slides = Array.from(document.querySelectorAll('.showcase__slide'));
+  const dots = Array.from(document.querySelectorAll('.showcase__dot'));
+  const nameEl = document.querySelector('[data-sc-name]');
+  const priceEl = document.querySelector('[data-sc-price]');
+
+  const data = slideData;
+
   if (slides.length > 0) {
     let i = 0;
     const max = slides.length;
     
-    function go(n: number) {
+    function go(n) {
       i = (n + max) % max;
       slides.forEach((s, k) => s.classList.toggle('is-active', k === i));
       dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
@@ -202,6 +223,7 @@ const slides = [
   .showcase__slide {
     position: absolute;
     inset: 0;
+    display: block;
     opacity: 0;
     transition: opacity .5s var(--ease);
   }
@@ -215,6 +237,17 @@ const slides = [
     height: 100%;
     object-fit: cover;
     border-radius: 0;
+  }
+
+  .showcase__slide-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--lux-light-border);
+    font-size: 12px;
+    color: var(--lux-on-light-soft);
   }
 
   .showcase__nav {
