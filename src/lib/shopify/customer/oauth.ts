@@ -61,6 +61,11 @@ async function postToken(origin: string, body: Record<string, string>): Promise<
     // Don't let a slow/unreachable token endpoint hang the SSR render.
     signal: AbortSignal.timeout(10_000),
   });
+  const contentType = res.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Customer token endpoint returned non-JSON response (HTTP ${res.status}).`);
+  }
+
   const json = (await res.json()) as TokenResponse;
   if (!res.ok || json.error) {
     throw new Error(

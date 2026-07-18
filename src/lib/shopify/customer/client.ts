@@ -80,6 +80,17 @@ export function createCustomerClient(cookies: AstroCookies, origin: string): Cus
         throw new NotAuthenticatedError('Customer Account API returned 401');
       }
 
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) {
+        // A non-JSON body (usually an HTML error page) means the endpoint itself is
+        // wrong — most often a sunset CUSTOMER_ACCOUNT_API_VERSION. Surface that
+        // instead of letting res.json() throw an opaque "Unexpected token '<'".
+        throw new Error(
+          `Customer Account API returned non-JSON response (HTTP ${res.status}). ` +
+            `Check that CUSTOMER_ACCOUNT_API_VERSION is a currently supported version.`,
+        );
+      }
+
       const json = (await res.json()) as GraphQLResponse<T>;
       if (!res.ok) {
         throw new Error(`Customer Account API HTTP ${res.status} ${res.statusText}`);

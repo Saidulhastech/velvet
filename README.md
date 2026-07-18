@@ -69,7 +69,7 @@ Config is read via `astro:env` (schema in [`astro.config.mjs`](astro.config.mjs)
 
 ## 🎨 Customization
 
-- **Brand config**: [`src/config/velvet.ts`](src/config/velvet.ts) — name, tagline, free-shipping threshold, socials, default market.
+- **Brand config**: [`src/config/velvet.ts`](src/config/velvet.ts) — name, tagline, free-shipping threshold, return window, socials, default market.
 - **Design tokens**: [`src/styles/variables.css`](src/styles/variables.css) (colors, fonts, spacing) + `global.css`.
 - **Fonts**: configured in [`astro.config.mjs`](astro.config.mjs) (`fonts` field) — swap family names there and in `variables.css`.
 - **Content**: Blog posts live in Shopify (see "Blog / Journal" below). Editorial markdown in `src/content/{ethos,materials}` (schemas in `src/content.config.ts`).
@@ -78,6 +78,71 @@ Config is read via `astro:env` (schema in [`astro.config.mjs`](astro.config.mjs)
 ## 🛍️ Store Features (for the store owner, not the developer)
 
 A few sections of the site pull from a specific Shopify **collection handle** or **product handle**. None of these are required — every one falls back gracefully if you skip it — but setting them up connects that part of the design to your real merchandising.
+
+### Product Detail Page (`/products/[handle]`)
+
+Nothing below is required to launch — every field falls back to hidden/generic rather than showing fake data if you skip it. This is the full list of what the PDP reads from Shopify.
+
+**Variants — colour & size**
+
+- Options must be named **`Color`/`Colour`** and **`Size`** (case-insensitive) — other names won't be picked up as colour/size pickers.
+- **Colour swatches**: set each option value's swatch in Shopify Admin (Product → Options → Color → click a value → swatch color) for the exact hex. Skip it and the theme falls back to a ~40-name hardcoded colour map (olive, sage, charcoal, navy, rust, …); an unrecognized colour name renders a neutral grey swatch instead.
+- **Per-variant images**: assign a distinct image to each colour variant (Product → Variants → click a variant → Image). This drives the gallery swap when a swatch — or a matching thumbnail — is clicked. No per-variant image means clicking that colour won't change the photo.
+- **Inventory tracking** (Product → Variants → Inventory): turn it on to get the real "Only N left" / "Sold out" state. An untracked variant always shows as available.
+- **Compare-at price**: set it on a variant to show the struck-through original price + "Save X" badge.
+
+**Product-level fields**
+
+- **Product Type** → becomes the breadcrumb/category label ("Women · Dresses"). Leave it blank and the label just drops the sub-part.
+- **Tags** (matched lowercase):
+  - `men` / `mens` or `women` / `womens` → gender (defaults to "unisex" if neither tag is present).
+  - `linen`, `wool`, `cotton`, `denim`, `cashmere`, `silk`, `leather` → the materials line shown under the price (tagging it or just mentioning the fabric in the description both work).
+  - `new` → "New" badge; `atelier` → "Atelier" badge.
+  - `featured`, `new`, `bestseller` → flags this product for the theme's featured/new/bestseller-driven sections elsewhere on the site.
+
+**Metafields** — create these definitions first (Settings → Custom data → Products → Add definition) **with Storefront API access enabled on each** — a value written to a metafield without a definition, or without that access box checked, silently reads back empty:
+
+| Metafield (`namespace.key`) | Type | Powers |
+| :-- | :-- | :-- |
+| `reviews.rating` | Decimal | Star rating shown before a shopper opens the reviews section |
+| `reviews.rating_count` | Integer | Review count next to the rating |
+| `custom.materials_care` | List (single line text) | "Materials & Care" accordion bullets |
+| `custom.shipping_returns` | List (single line text) | "Shipping & Returns" accordion bullets |
+| `custom.specifications` | List (single line text) or JSON | "Specifications" accordion (label/value rows) |
+| `custom.highlights` | List (single line text) | Bullet highlights under the description |
+| `custom.size_guide` | JSON | Size Guide table (format below) |
+
+The `reviews.*` pair is normally written automatically by your reviews app, not typed in by hand — see "Reviews (Judge.me)" below.
+
+`custom.specifications` accepts either an array of `{"label":"...","value":"..."}` objects or plain `"Label: Value"` strings:
+```json
+[{"label":"Fit","value":"Regular"},{"label":"Origin","value":"Made in Italy"}]
+```
+
+`custom.size_guide` is an array of row objects — the **first row's keys become the table's column headers**, so different products can have entirely different columns (Bust/Waist/Length for a dress, Waist/Inseam for trousers, etc.):
+```json
+[
+  {"Size":"XS","Bust":"82","Waist":"64","Length":"96"},
+  {"Size":"S","Bust":"86","Waist":"68","Length":"98"}
+]
+```
+Skip it and the Size Guide shows a generic static XS–XL bust/waist/length table instead of disappearing.
+
+**Reviews (Judge.me)**
+
+1. Install Judge.me on the store and set `JUDGEME_API_TOKEN` in `.env` (Judge.me → Settings → Integrations → API tokens) — review text on the PDP comes live from Judge.me's API at request time, never a Shopify metafield.
+2. In Judge.me's own settings, enable its **metafield sync** (off by default) — this is what actually writes the `reviews.rating` / `reviews.rating_count` metafields listed above.
+3. You still need the metafield **definitions** created with Storefront API access (step above) — an app writing a value to an undefined metafield doesn't make it visible to the Storefront API that this theme queries.
+4. No token / no Judge.me installed → the reviews section shows "No reviews yet" and the rating stays hidden. Never fabricated.
+
+**On the page but intentionally NOT per-product**
+
+- "Complimentary shipping over {amount}" and "{N}-day easy returns" in the trust row pull their numbers from `BRAND.freeShippingThreshold` / `BRAND.returnWindowDays` in [`src/config/velvet.ts`](src/config/velvet.ts) — one store-wide policy, not a per-product setting. "In stock — ships in 48h" only renders when the product is actually in stock.
+- The "Details" accordion's intro paragraph and the "Lifetime Repairs" line are fixed template copy — edit them directly in `src/pages/products/[handle].astro` if you want them to vary per product.
+
+**Fetched but currently unused** — harmless, nothing to fix: local-pickup availability (`storeAvailability`) is queried per variant but isn't rendered on this PDP. Setting up Local Pickup locations in Shopify Admin won't visibly change anything here yet.
+
+**Related products ("You May Also Like")** — pulled from Shopify's own product-recommendation engine first; if it returns fewer than 4 (common for brand-new or low-traffic products), the theme tops up from your catalogue using same-category then same-gender matches. Nothing to configure — accuracy improves as the store accumulates order/view history.
 
 ### Gift Wrap (cart add-on)
 
@@ -183,6 +248,8 @@ src/
 **`/blog` is empty / a post 404s** — confirm `BLOG_HANDLE` in `src/config/velvet.ts` matches a real blog handle in Shopify Admin (Online Store → Blog posts), and that the post is **Visible**, not scheduled for the future.
 
 **Author photo/role/bio not showing on a post** — almost always one of: (1) the article's `custom.author` metafield isn't set to an Author metaobject entry yet, (2) the Article-level metafield definition's key isn't exactly `author`, or (3) "Storefronts API access" isn't enabled on either the Article metafield definition or the Author metaobject definition. See "Blog / Journal" above for the exact setup steps — this is a data/admin-config issue, not a code bug.
+
+**Rating/Materials & Care/Specifications/Highlights/Size Guide not showing on the PDP** — check that (1) the metafield has a value on that specific product, and (2) its metafield **definition** has Storefront API access enabled (Settings → Custom data → Products). A value on an app-written or manually-set metafield without that box checked reads back as empty to this theme even though it's visible in Admin. See "Product Detail Page" above for the exact namespace/key/type each field expects.
 
 ## 🌍 Deployment
 

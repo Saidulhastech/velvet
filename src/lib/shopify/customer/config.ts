@@ -19,7 +19,7 @@ import { getSecret } from 'astro:env/server';
 
 export const getClientId = () => getSecret('CUSTOMER_ACCOUNT_API_CLIENT_ID');
 export const getShopId = () => getSecret('SHOPIFY_SHOP_ID');
-export const getApiVersion = () => getSecret('CUSTOMER_ACCOUNT_API_VERSION') ?? '2025-01';
+export const getApiVersion = () => getSecret('CUSTOMER_ACCOUNT_API_VERSION') ?? '2026-04';
 
 /** True only when the customer-account env vars are present. */
 export const isCustomerAccountConfigured = () => Boolean(getClientId() && getShopId());
